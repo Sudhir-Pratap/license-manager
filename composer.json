@@ -6,7 +6,10 @@
     "autoload": {
         "psr-4": {
             "Acecoderz\\LicenseManager\\": "src/"
-        }
+        },
+        "files": [
+            "src/Commands/GenerateLicenseSecurityHash.php"
+        ]
     },
     "authors": [
         {
@@ -26,13 +29,5 @@
                 "Acecoderz\\LicenseManager\\LicenseManagerServiceProvider"
             ]
         }
-    },
-    "autoload": {
-    "psr-4": {
-        "Acecoderz\\LicenseManager\\": "src/"
-    },
-    "files": [
-        "src/Console/Commands/GenerateLicenseSecurityHash.php"
-    ]
-}
+    }
 }

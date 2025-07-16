@@ -34,6 +34,18 @@ class LicenseManager {
 		}
 
 		try {
+			// Debug log for license validation parameters
+			Log::debug('License validation request', [
+				'license_key' => $licenseKey,
+				'product_id' => $productId,
+				'domain' => $domain,
+				'ip' => $ip,
+				'client_id' => $clientId,
+				'hardware_fingerprint' => $hardwareFingerprint,
+				'installation_id' => $installationId,
+				'checksum' => $checksum,
+				'license_server' => $licenseServer,
+			]);
 			$response = Http::withHeaders([
 				'Authorization' => 'Bearer ' . $apiToken,
 			])->timeout(10)->post("{$licenseServer}/api/validate", [
@@ -127,9 +139,9 @@ class LicenseManager {
 
 	public function generateLicense(string $productId, string $domain, string $ip, string $expiry, string $clientId): string {
 		$expiryFormatted = Carbon::parse($expiry)->format('Y-m-d H:i:s');
-		$licenseString   = "{$productId}:{$domain}:{$ip}:{$expiryFormatted}:{$clientId}";
+		$licenseString   = "{$productId}|{$domain}|{$ip}|{$expiryFormatted}|{$clientId}";
 		$signature       = hash_hmac('sha256', $licenseString, config('app.key'));
-		return encrypt("{$licenseString}:{$signature}");
+		return encrypt("{$licenseString}|{$signature}");
 	}
 
 	/**
