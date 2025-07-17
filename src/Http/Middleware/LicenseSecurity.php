@@ -18,7 +18,7 @@ class LicenseSecurity {
 		$productId     = config('license-manager.product_id');
 		$clientId      = config('license-manager.client_id');
 		$currentDomain = $request->getHost();
-		$currentIp     = $request->server('SERVER_ADDR') ?? $request->ip();
+		$currentIp     = $request->ip();
 
 		if (! $this->licenseManager->validateLicense($licenseKey, $productId, $currentDomain, $currentIp, $clientId)) {
 			Log::error('License check failed, aborting request', [

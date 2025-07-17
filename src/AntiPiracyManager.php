@@ -20,7 +20,7 @@ class AntiPiracyManager
     public function __construct(LicenseManager $licenseManager)
     {
         $this->licenseManager = $licenseManager;
-        $this->hardwareFingerprint = $this->generateHardwareFingerprint();
+        $this->hardwareFingerprint = $this->licenseManager->generateHardwareFingerprint();
         $this->installationId = $this->getOrCreateInstallationId();
     }
 
@@ -43,8 +43,36 @@ class AntiPiracyManager
         // Log validation results
         Log::info('Anti-piracy validation results', $validations);
 
-        // All validations must pass
-        return !in_array(false, $validations, true);
+        // More lenient validation - allow some failures but require critical ones to pass
+        $criticalValidations = [
+            'license' => $validations['license'],
+            'installation' => $validations['installation'],
+            'tampering' => $validations['tampering'],
+        ];
+
+        // All critical validations must pass
+        if (in_array(false, $criticalValidations, true)) {
+            return false;
+        }
+
+        // For non-critical validations, allow some failures but log them
+        $nonCriticalFailures = 0;
+        foreach ($validations as $key => $result) {
+            if (!in_array($key, ['license', 'installation', 'tampering']) && !$result) {
+                $nonCriticalFailures++;
+            }
+        }
+
+        // Allow up to 2 non-critical failures
+        if ($nonCriticalFailures > 2) {
+            Log::warning('Too many non-critical validation failures', [
+                'failures' => $nonCriticalFailures,
+                'validations' => $validations
+            ]);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -52,32 +80,8 @@ class AntiPiracyManager
      */
     private function generateHardwareFingerprint(): string
     {
-        $components = [
-            'server_name' => $_SERVER['SERVER_NAME'] ?? '',
-            'server_addr' => $_SERVER['SERVER_ADDR'] ?? '',
-            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? '',
-            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? '',
-            'php_version' => PHP_VERSION,
-            'os' => PHP_OS,
-            'disk_free_space' => disk_free_space('/'),
-            'memory_limit' => ini_get('memory_limit'),
-            'max_execution_time' => ini_get('max_execution_time'),
-        ];
-
-        // Add file system characteristics
-        $components['app_path_hash'] = hash('sha256', base_path());
-        $components['storage_path_hash'] = hash('sha256', storage_path());
-        
-        // Add database characteristics
-        try {
-            $components['db_name'] = config('database.connections.mysql.database') ?? '';
-            $components['db_host'] = config('database.connections.mysql.host') ?? '';
-        } catch (\Exception $e) {
-            $components['db_name'] = '';
-            $components['db_host'] = '';
-        }
-
-        return hash('sha256', serialize($components));
+        // Use the persisted hardware fingerprint from LicenseManager
+        return $this->licenseManager->generateHardwareFingerprint();
     }
 
     /**
@@ -109,18 +113,18 @@ class AntiPiracyManager
         $productId = config('license-manager.product_id');
         $clientId = config('license-manager.client_id');
         $currentDomain = request()->getHost();
-        $currentIp = request()->server('SERVER_ADDR') ?? request()->ip();
+        $currentIp = request()->ip();
 
-        // Add hardware fingerprint to validation
-        $enhancedClientId = $clientId . '_' . $this->hardwareFingerprint;
-        
-        return $this->licenseManager->validateLicense(
-            $licenseKey, 
-            $productId, 
-            $currentDomain, 
-            $currentIp, 
-            $enhancedClientId
-        );
+        		// Use the original client ID for validation (not enhanced with hardware fingerprint)
+		// The hardware fingerprint is sent separately to the license server
+		
+		return $this->licenseManager->validateLicense(
+			$licenseKey, 
+			$productId, 
+			$currentDomain, 
+			$currentIp, 
+			$clientId
+		);
     }
 
     /**
@@ -138,12 +142,25 @@ class AntiPiracyManager
         // Allow small variations (up to 20% difference)
         $similarity = similar_text($storedFingerprint, $this->hardwareFingerprint, $percent);
         
-        if ($percent < 80) {
+        // More lenient threshold - allow up to 30% difference instead of 80%
+        if ($percent < 70) {
             Log::warning('Hardware fingerprint changed significantly', [
                 'stored' => $storedFingerprint,
                 'current' => $this->hardwareFingerprint,
                 'similarity' => $percent
             ]);
+            
+            // If this is a significant change, update the stored fingerprint
+            // This allows for legitimate hardware changes (server migration, etc.)
+            if ($percent > 50) { // Still reasonable similarity
+                Log::info('Updating hardware fingerprint due to significant but acceptable change', [
+                    'old_similarity' => $percent,
+                    'new_fingerprint' => $this->hardwareFingerprint
+                ]);
+                Cache::put('hardware_fingerprint', $this->hardwareFingerprint, now()->addDays(30));
+                return true;
+            }
+            
             return false;
         }
 
@@ -325,7 +342,7 @@ class AntiPiracyManager
             'client_id' => config('license-manager.client_id'),
             'server_info' => [
                 'domain' => request()->getHost(),
-                'ip' => request()->server('SERVER_ADDR') ?? request()->ip(),
+                'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ],
             'validation_time' => now()->toISOString(),

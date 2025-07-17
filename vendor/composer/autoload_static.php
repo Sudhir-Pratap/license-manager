@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit1e42c0c8150769b32f4375fd888c3ef6
 {
+    public static $files = array (
+        'cebb68e65d9a2937b8b5771d2ab915f8' => __DIR__ . '/../..' . '/src/Console/Commands/GenerateLicenseSecurityHash.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'A' => 
         array (
