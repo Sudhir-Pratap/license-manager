@@ -25,11 +25,18 @@ class AntiPiracyManager
     }
 
     /**
-     * Comprehensive anti-piracy validation
+     * Comprehensive anti-piracy validation with stealth mode support
      */
     public function validateAntiPiracy(): bool
     {
-        // Multiple validation layers
+        // Check stealth mode configuration
+        $stealthMode = config('license-manager.stealth.enabled', false);
+        
+        if ($stealthMode) {
+            return $this->validateInStealthMode();
+        }
+
+        // Standard validation layers
         $validations = [
             'license' => $this->validateLicense(),
             'hardware' => $this->validateHardwareFingerprint(),
@@ -40,8 +47,10 @@ class AntiPiracyManager
             'server_communication' => $this->validateServerCommunication(),
         ];
 
-        // Log validation results
-        Log::info('Anti-piracy validation results', $validations);
+        // Log validation results (muted in stealth mode)
+        if (!config('license-manager.stealth.mute_logs', false)) {
+            Log::info('Anti-piracy validation results', $validations);
+        }
 
         // More lenient validation - allow some failures but require critical ones to pass
         $criticalValidations = [
@@ -65,10 +74,12 @@ class AntiPiracyManager
 
         // Allow up to 2 non-critical failures
         if ($nonCriticalFailures > 2) {
-            Log::warning('Too many non-critical validation failures', [
-                'failures' => $nonCriticalFailures,
-                'validations' => $validations
-            ]);
+            if (!config('license-manager.stealth.mute_logs', false)) {
+                Log::warning('Too many non-critical validation failures', [
+                    'failures' => $nonCriticalFailures,
+                    'validations' => $validations
+                ]);
+            }
             return false;
         }
 
@@ -356,5 +367,101 @@ class AntiPiracyManager
     {
         Cache::forget('license_valid_' . config('license-manager.license_key') . '_' . config('license-manager.product_id') . '_' . config('license-manager.client_id'));
         return $this->validateAntiPiracy();
+    }
+
+    /**
+     * Validate with stealth mode (fastest, most transparent)
+     */
+    private function validateInStealthMode(): bool
+    {
+        try {
+            // Check if we have recent cached validation
+            $cacheKey = 'stealth_cache_' . md5(request()->getHost() ?? 'unknown');
+            $cachedResult = Cache::get($cacheKey);
+            
+            if ($cachedResult && isset($cachedResult['timestamp'])) {
+                $cacheTime = Carbon::parse($cachedResult['timestamp']);
+                // Use cache for 15 minutes in stealth mode
+                if ($cacheTime->addMinutes(15)->isFuture()) {
+                    return $cachedResult['valid'];
+                }
+            }
+
+            // Quick license validation with minimal server communication
+            $licenseValid = $this->validateLicense();
+            
+            // In stealth mode, trust cached state if server is unreachable
+            if (!$licenseValid) {
+                // Check if server is unreachable
+                if ($this->isServerUnreachable()) {
+                    // Allow access with grace period
+                    return $this->checkGracePeriodInStealth();
+                }
+            }
+
+            // Cache the result
+            Cache::put($cacheKey, [
+                'valid' => $licenseValid,
+                'timestamp' => now(),
+            ], now()->addMinutes(20));
+
+            // Log only to separate channel for admin review
+            if (!config('license-manager.stealth.mute_logs', true)) {
+                Log::channel('license')->info('Stealth mode validation', [
+                    'valid' => $licenseValid,
+                    'domain' => request()->getHost(),
+                    'timestamp' => now(),
+                ]);
+            }
+
+            return $licenseValid;
+
+        } catch (\Exception $e) {
+            // Silent failure - allow access and log for admin
+            if (config('license-manager.stealth.silent_fail', true)) {
+                Log::channel('license')->error('Stealth validation error', [
+                    'error' => $e->getMessage(),
+                    'domain' => request()->getHost(),
+                ]);
+                
+                return $this->checkGracePeriodInStealth();
+            }
+            
+            return false;
+        }
+    }
+
+    /**
+     * Check if license server is unreachable
+     */
+    private function isServerUnreachable(): bool
+    {
+        try {
+            $licenseServer = config('license-manager.license_server');
+            $response = Http::timeout(3)->get("{$licenseServer}/api/heartbeat");
+            return !$response->successful();
+        } catch (\Exception $e) {
+            return true;
+        }
+    }
+
+    /**
+     * Check grace period for stealth mode
+     */
+    private function checkGracePeriodInStealth(): bool
+    {
+        $graceKey = 'stealth_grace_' . md5(request()->getHost() ?? 'unknown');
+        $graceStart = Cache::get($graceKey);
+        
+        if (!$graceStart) {
+            // Start grace period (72 hours default)
+            $graceHours = config('license-manager.stealth.fallback_grace_period', 72);
+            Cache::put($graceKey, now(), now()->addHours($graceHours + 1));
+            
+            return true;
+        }
+        
+        $graceEnd = Carbon::parse($graceStart)->addHours(config('license-manager.stealth.fallback_grace_period', 72));
+        return now()->isBefore($graceEnd);
     }
 } 

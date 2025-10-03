@@ -39,17 +39,19 @@ class LicenseManager {
 		}
 
 		try {
-			// Debug log for license validation parameters
-			Log::debug('License validation request', [
-				'license_key' => $licenseKey,
+			// Enhanced debug log for deployment debugging
+			Log::info('License validation request', [
+				'license_key' => substr($licenseKey, 0, 20) . '...', // Partial key for security
 				'product_id' => $productId,
 				'domain' => $domain,
 				'ip' => $ip,
 				'client_id' => $originalClientId,
-				'hardware_fingerprint' => $hardwareFingerprint,
+				'hardware_fingerprint' => substr($hardwareFingerprint, 0, 16) . '...',
 				'installation_id' => $installationId,
-				'checksum' => $checksum,
+				'checksum' => substr($checksum, 0, 16) . '...',
 				'license_server' => $licenseServer,
+				'environment' => config('app.env'),
+				'deployment_context' => request()->header('X-Deployment-Context'),
 			]);
 
 			$response = Http::withHeaders([
@@ -110,56 +112,106 @@ class LicenseManager {
 	}
 
 	/**
-	 * Generate hardware fingerprint (persisted)
+	 * Generate hardware fingerprint (deployment-safe)
 	 */
 	public function generateHardwareFingerprint(): string
 	{
 		$fingerprintFile = storage_path('app/hardware_fingerprint.id');
-		if (File::exists($fingerprintFile)) {
+		
+		// Check if fingerprint exists and force regeneration if in deployment mode
+		$forceRegenerate = env('LICENSE_FORCE_REGENERATE_FINGERPRINT', false);
+		
+		if (!$forceRegenerate && File::exists($fingerprintFile)) {
 			$fingerprint = File::get($fingerprintFile);
 			if ($fingerprint && strlen($fingerprint) === 64) {
 				return $fingerprint;
 			}
 		}
+		
+		// Use more stable components for deployment environments
 		$components = [
-			'server_name' => request()->getHost(),
-			'server_addr' => request()->ip(),
-			'document_root' => base_path('public'),
+			// Core server identity (more stable)
+			'app_key_hash' => hash('sha256', config('app.key')), // Laravel app key
+			'app_name' => config('app.name'), // App name
+			'app_env' => config('app.env'), // Environment
+			
+			// System identity (stabilized for deployment)
 			'server_software' => php_sapi_name(),
 			'php_version' => PHP_VERSION,
-			'os' => PHP_OS,
-			'disk_free_space' => null,
-			'memory_limit' => ini_get('memory_limit'),
-			'max_execution_time' => ini_get('max_execution_time'),
+			'os_family' => PHP_OS_FAMILY ?? PHP_OS, // More stable OS identifier
+			
+			// Database identity (stable connection fingerprint)
+			'db_connection_hash' => $this->getDatabaseConnectionFingerprint(),
+			
+			// File system identity (relative paths, not absolute)
+			'app_signature' => $this->getApplicationSignature(),
 		];
-		$components['app_path_hash'] = hash('sha256', base_path());
-		$components['storage_path_hash'] = hash('sha256', storage_path());
-		try {
-			$components['db_name'] = config('database.connections.mysql.database') ?? '';
-			$components['db_host'] = config('database.connections.mysql.host') ?? '';
-		} catch (\Exception $e) {
-			$components['db_name'] = '';
-			$components['db_host'] = '';
+		
+		// Add domain-specific component if available
+		if (config('license-manager.bind_to_domain_only', false)) {
+			$components['domain_bind'] = $this->getStableDomainIdentifier();
 		}
+		
 		$fingerprint = hash('sha256', serialize($components));
+		
+		// Log fingerprint generation for debugging
+		Log::info('Hardware fingerprint generated', [
+			'components' => array_keys($components),
+			'fingerprint' => $fingerprint,
+			'force_regenerate' => $forceRegenerate,
+			'environment' => config('app.env'),
+		]);
+		
 		File::put($fingerprintFile, $fingerprint);
 		return $fingerprint;
 	}
 
 	/**
-	 * Get or create installation ID (persisted)
+	 * Get or create installation ID (database-persisted for deployment safety)
 	 */
 	public function getOrCreateInstallationId(): string
 	{
+		// Try to get from config first (for deployment environments)
+		$configId = config('license-manager.installation_id');
+		if ($configId && Str::isUuid($configId)) {
+			return $configId;
+		}
+		
+		// Try to get from database (more persistent than files)
+		try {
+			$installation = $this->getInstallationFromDatabase();
+			if ($installation) {
+				return $installation;
+			}
+		} catch (\Exception $e) {
+			// Database not available, fall back to file
+		}
+		
+		// Try file-based storage
 		$idFile = storage_path('app/installation.id');
 		if (File::exists($idFile)) {
 			$id = File::get($idFile);
-			if (Str::isUuid($id)) {
-				return $id;
+			if ($id && Str::isUuid(trim($id))) {
+				return trim($id);
 			}
 		}
+		
+		// Generate new installation ID
 		$id = Str::uuid()->toString();
-		File::put($idFile, $id);
+		
+		// Try to save to database first
+		try {
+			$this->saveInstallationToDatabase($id);
+			Log::info('Installation ID saved to database', ['installation_id' => $id]);
+		} catch (\Exception $e) {
+			// If database fails, save to file as backup
+			File::put($idFile, $id);
+			Log::warning('Installation ID saved to file (database unavailable)', [
+				'installation_id' => $id,
+				'error' => $e->getMessage()
+			]);
+		}
+		
 		return $id;
 	}
 
@@ -178,12 +230,173 @@ class LicenseManager {
 	{
 		return [
 			'hardware_fingerprint' => $this->generateHardwareFingerprint(),
-			'installation_id' => $this->getOrCreateInstallationId(),
+			'installation_id' => $this->getOrCreateInstallationId
+
+
+
+
+(),
 			'server_info' => [
 				'domain' => request()->getHost(),
 				'ip' => request()->ip(),
 				'user_agent' => request()->userAgent(),
 			],
 		];
+	}
+
+	/**
+	 * Get stable database connection fingerprint
+	 */
+	private function getDatabaseConnectionFingerprint(): string
+	{
+		try {
+			$connection = config('database.default');
+			$config = config("database.connections.{$connection}");
+			
+			if (!$config) return '';
+			
+			// Use stable database identifiers
+			$dbFingerprint = [
+				'driver' => $config['driver'] ?? '',
+				'host' => $config['host'] ?? '',
+				'port' => $config['port'] ?? '',
+				'database' => $config['database'] ?? '',
+				'charset' => $config['charset'] ?? '',
+			];
+			
+			return hash('sha256', serialize($dbFingerprint));
+		} catch (\Exception $e) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get application signature (file-based fingerprint)
+	 */
+	private function getApplicationSignature(): string
+	{
+		try {
+			// Use composer.json to create app signature
+			$composerPath = base_path('composer.json');
+			if (File::exists($composerPath)) {
+				$composer = json_decode(File::get($composerPath), true);
+				$signature = [
+					'name' => $composer['name'] ?? '',
+					'description' => $composer['description'] ?? '',
+					'version' => $composer['version'] ?? '1.0.0',
+				];
+				return hash('sha256', serialize($signature));
+			}
+			
+			// Fallback to app config
+			return hash('sha256', config('app.name') . config('app.env'));
+		} catch (\Exception $e) {
+			return hash('sha256', 'fallback_app_signature');
+		}
+	}
+
+	/**
+	 * Get stable domain identifier
+	 */
+	private function getStableDomainIdentifier(): string
+	{
+		try {
+			// Try to get the canonical domain
+			$currentDomain = request()->getHost();
+			
+			// For deployment, check if there's a canonical domain configured
+			$canonicalDomain = config('license-manager.canonical_domain');
+			if ($canonicalDomain) {
+				return hash('sha256', $canonicalDomain);
+			}
+			
+			// For wildcards, normalize the domain
+			$normalizedDomain = strtolower($currentDomain);
+			
+			// Remove www. prefix for consistency
+			if (str_starts_with($normalizedDomain, 'www.')) {
+				$normalizedDomain = substr($normalizedDomain, 4);
+			}
+			
+			return hash('sha256', $normalizedDomain);
+		} catch (\Exception $e) {
+			return hash('sha256', 'unknown_domain');
+		}
+	}
+
+	/**
+	 * Get installation ID from database
+	 */
+	private function getInstallationFromDatabase(): ?string
+	{
+		try {
+			// Try to find existing installation in cache table or a dedicated table
+			$installationTable = 'installations';
+			
+			// Check if installations table exists
+			if (!Schema::hasTable($installationTable)) {
+				// Create installations table if it doesn't exist
+				$this->createInstallationsTable();
+			}
+			
+			$installation = DB::table($installationTable)
+				->where('license_key', config('license-manager.license_key'))
+				->value('installation_id');
+			
+			return $installation ? (string)$installation : null;
+		} catch (\Exception $e) {
+			Log::debug('Could not fetch installation ID from database', ['error' => $e->getMessage()]);
+			return null;
+		}
+	}
+
+	/**
+	 * Save installation ID to database
+	 */
+	private function saveInstallationToDatabase(string $installationId): void
+	{
+		try {
+			$installationTable = 'installations';
+			$licenseKey = config('license-manager.license_key');
+			
+			// Insert or update installation record
+			DB::table($installationTable)->updateOrInsert(
+				['license_key' => $licenseKey],
+				[
+					'installation_id' => $installationId,
+					'license_key' => $licenseKey,
+					'hardware_fingerprint' => $this->generateHardwareFingerprint(),
+					'domain' => request()->getHost(),
+					'ip' => request()->ip(),
+					'last_seen' => now(),
+					'created_at' => now(),
+					'updated_at' => now(),
+				]
+			);
+		} catch (\Exception $e) {
+			throw new \Exception('Failed to save installation ID to database: ' . $e->getMessage());
+		}
+	}
+
+	/**
+	 * Create Installations table for local storage
+	 */
+	private function createInstallationsTable(): void
+	{
+		try {
+			Schema::create('installations', function ($table) {
+				$table->id();
+				$table->string('license_key')->index();
+				$table->string('installation_id')->unique();
+				$table->text('hardware_fingerprint');
+				$table->string('domain');
+				$table->string('ip');
+				$table->timestamp('last_seen');
+				$table->timestamps();
+			});
+		} catch (\Exception $e) {
+			// Table might already exist or connection issues
+			Log::debug('Installations table creation skipped', ['error' => $e->getMessage()]);
+		}
 	}
 }

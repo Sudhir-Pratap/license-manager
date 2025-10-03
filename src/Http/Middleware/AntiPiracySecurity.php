@@ -3,6 +3,7 @@
 namespace Acecoderz\LicenseManager\Http\Middleware;
 
 use Acecoderz\LicenseManager\AntiPiracyManager;
+use Acecoderz\LicenseManager\Http\Middleware\MiddlewareHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,9 +13,18 @@ class AntiPiracySecurity
 {
     protected $antiPiracyManager;
 
-    public function __construct(AntiPiracyManager $antiPiracyManager)
+    public function __construct()
     {
-        $this->antiPiracyManager = $antiPiracyManager;
+        // Don't inject dependencies in constructor to avoid circular dependencies
+        // We'll resolve them in the handle method
+    }
+
+    protected function getAntiPiracyManager()
+    {
+        if (!$this->antiPiracyManager) {
+            $this->antiPiracyManager = app(AntiPiracyManager::class);
+        }
+        return $this->antiPiracyManager;
     }
 
     public function handle(Request $request, Closure $next)
@@ -30,7 +40,7 @@ class AntiPiracySecurity
         }
 
         // Perform comprehensive anti-piracy validation
-        if (!$this->antiPiracyManager->validateAntiPiracy()) {
+        if (!$this->getAntiPiracyManager()->validateAntiPiracy()) {
             $this->handleValidationFailure($request);
             return $this->getFailureResponse($request);
         }
@@ -46,32 +56,21 @@ class AntiPiracySecurity
      */
     private function shouldSkipValidation(Request $request): bool
     {
-        $skipRoutes = [
-            '/health',
-            '/api/health',
-            '/license/status',
-            '/admin/license',
-        ];
-
-        $skipPatterns = [
-            '/vendor/',
-            '/storage/',
-            '/public/',
-            '/assets/',
-        ];
-
+        $skipRoutes = config('license-manager.skip_routes', []);
         $path = $request->path();
 
         // Skip specific routes
         foreach ($skipRoutes as $route) {
-            if (str_starts_with($path, trim($route, '/'))) {
+            $cleanRoute = trim($route, '/');
+            if (str_starts_with($path, $cleanRoute)) {
                 return true;
             }
         }
 
-        // Skip asset and vendor routes
-        foreach ($skipPatterns as $pattern) {
-            if (str_contains($path, $pattern)) {
+        // Skip file extensions (assets, images, etc.)
+        $skipExtensions = ['.css', '.js', '.png', '.jpg', '.gif', '.ico', '.svg', '.woff', '.woff2'];
+        foreach ($skipExtensions as $ext) {
+            if (str_ends_with($path, $ext)) {
                 return true;
             }
         }
@@ -107,7 +106,7 @@ class AntiPiracySecurity
      */
     private function handleValidationFailure(Request $request): void
     {
-        $report = $this->antiPiracyManager->getValidationReport();
+        $report = $this->getAntiPiracyManager()->getValidationReport();
         
         Log::error('Anti-piracy validation failed', [
             'ip' => $request->ip(),
@@ -123,8 +122,10 @@ class AntiPiracySecurity
         Cache::put($failureKey, $failures, now()->addHours(1));
 
         // If too many failures, blacklist the IP temporarily
-        if ($failures > 10) {
-            Cache::put('blacklisted_ip_' . $request->ip(), true, now()->addHours(24));
+        $maxFailures = config('license-manager.validation.max_failures', 10);
+        if ($failures > $maxFailures) {
+            $blacklistDuration = config('license-manager.validation.blacklist_duration', 24);
+            Cache::put('blacklisted_ip_' . $request->ip(), true, now()->addHours($blacklistDuration));
             Log::error('IP blacklisted due to repeated license failures', [
                 'ip' => $request->ip(),
                 'failures' => $failures,
@@ -173,8 +174,9 @@ class AntiPiracySecurity
         $successCount = Cache::get($logKey, 0) + 1;
         Cache::put($logKey, $successCount, now()->addHour());
 
-        // Log every 100th successful validation
-        if ($successCount % 100 === 0) {
+        // Log every Nth successful validation (configurable)
+        $logInterval = config('license-manager.validation.success_log_interval', 100);
+        if ($successCount % $logInterval === 0) {
             Log::info('License validation successful', [
                 'success_count' => $successCount,
                 'ip' => $request->ip(),

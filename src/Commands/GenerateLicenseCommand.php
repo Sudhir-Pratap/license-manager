@@ -37,19 +37,3 @@ class GenerateLicenseCommand extends Command {
     }
 }
 
-class LicenseInfoCommand extends Command
-{
-    protected $signature = 'license:info';
-    protected $description = 'Show the current hardware fingerprint and installation ID for license generation.';
-
-    public function handle()
-    {
-        $manager = app(LicenseManager::class);
-        $fingerprint = $manager->generateHardwareFingerprint();
-        $currentIp = request()->ip();
-        $installationId = $manager->getOrCreateInstallationId();
-        $this->info('Hardware Fingerprint: ' . $fingerprint);
-        $this->info('Installation ID: ' . $installationId);
-        $this->info('Current IP: ' . $currentIp);
-    }
-}
