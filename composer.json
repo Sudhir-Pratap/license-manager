@@ -1,27 +1,36 @@
 {
     "name": "acecoderz/license-manager",
-    "description": "A PHP package for centralized license validation",
+    "description": "Enterprise-grade license validation package for Laravel applications",
     "type": "library",
     "license": "MIT",
+    "keywords": ["laravel", "license", "validation", "anti-piracy", "security"],
+    "homepage": "https://github.com/acecoderz/laravel-license-manager",
     "autoload": {
         "psr-4": {
             "Acecoderz\\LicenseManager\\": "src/"
-        },
-        "files": [
-            "src/Commands/GenerateLicenseSecurityHash.php"
-        ]
+        }
     },
     "authors": [
         {
-            "name": "sudhir",
-            "email": "sudhir@acecoderz.com"
+            "name": "Acecoderz Team",
+            "email": "support@acecoderz.com",
+            "homepage": "https://acecoderz.com"
         }
     ],
     "require": {
         "php": "^8.1",
         "illuminate/support": "^9.0|^10.0|^11.0",
-        "illuminate/http": "^9.0|^10.0|^11.0",
-        "illuminate/cache": "^9.0|^10.0|^11.0"
+        "illuminate/http": "^9.0|^10.0|^11.0", 
+        "illuminate/cache": "^9.0|^10.0|^11.0",
+        "illuminate/config": "^9.0|^10.0|^11.0",
+        "illuminate/console": "^9.0|^10.0|^11.0",
+        "illuminate/pipeline": "^9.0|^10.0|^11.0",
+        "symfony/http-foundation": "^6.0",
+        "guzzlehttp/guzzle": "^7.0|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0|^10.0",
+        "orchestra/testbench": "^7.0|^8.0"
     },
     "extra": {
         "laravel": {
@@ -29,5 +38,7 @@
                 "Acecoderz\\LicenseManager\\LicenseManagerServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

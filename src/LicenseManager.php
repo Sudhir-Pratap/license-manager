@@ -177,17 +177,7 @@ class LicenseManager {
 			return $configId;
 		}
 		
-		// Try to get from database (more persistent than files)
-		try {
-			$installation = $this->getInstallationFromDatabase();
-			if ($installation) {
-				return $installation;
-			}
-		} catch (\Exception $e) {
-			// Database not available, fall back to file
-		}
-		
-		// Try file-based storage
+		// Try file-based storage (no database dependency)
 		$idFile = storage_path('app/installation.id');
 		if (File::exists($idFile)) {
 			$id = File::get($idFile);
@@ -199,18 +189,9 @@ class LicenseManager {
 		// Generate new installation ID
 		$id = Str::uuid()->toString();
 		
-		// Try to save to database first
-		try {
-			$this->saveInstallationToDatabase($id);
-			Log::info('Installation ID saved to database', ['installation_id' => $id]);
-		} catch (\Exception $e) {
-			// If database fails, save to file as backup
-			File::put($idFile, $id);
-			Log::warning('Installation ID saved to file (database unavailable)', [
-				'installation_id' => $id,
-				'error' => $e->getMessage()
-			]);
-		}
+		// Save to file
+		File::put($idFile, $id);
+		Log::info('Installation ID saved to file', ['installation_id' => $id]);
 		
 		return $id;
 	}
@@ -324,79 +305,4 @@ class LicenseManager {
 		}
 	}
 
-	/**
-	 * Get installation ID from database
-	 */
-	private function getInstallationFromDatabase(): ?string
-	{
-		try {
-			// Try to find existing installation in cache table or a dedicated table
-			$installationTable = 'installations';
-			
-			// Check if installations table exists
-			if (!Schema::hasTable($installationTable)) {
-				// Create installations table if it doesn't exist
-				$this->createInstallationsTable();
-			}
-			
-			$installation = DB::table($installationTable)
-				->where('license_key', config('license-manager.license_key'))
-				->value('installation_id');
-			
-			return $installation ? (string)$installation : null;
-		} catch (\Exception $e) {
-			Log::debug('Could not fetch installation ID from database', ['error' => $e->getMessage()]);
-			return null;
-		}
-	}
-
-	/**
-	 * Save installation ID to database
-	 */
-	private function saveInstallationToDatabase(string $installationId): void
-	{
-		try {
-			$installationTable = 'installations';
-			$licenseKey = config('license-manager.license_key');
-			
-			// Insert or update installation record
-			DB::table($installationTable)->updateOrInsert(
-				['license_key' => $licenseKey],
-				[
-					'installation_id' => $installationId,
-					'license_key' => $licenseKey,
-					'hardware_fingerprint' => $this->generateHardwareFingerprint(),
-					'domain' => request()->getHost(),
-					'ip' => request()->ip(),
-					'last_seen' => now(),
-					'created_at' => now(),
-					'updated_at' => now(),
-				]
-			);
-		} catch (\Exception $e) {
-			throw new \Exception('Failed to save installation ID to database: ' . $e->getMessage());
-		}
-	}
-
-	/**
-	 * Create Installations table for local storage
-	 */
-	private function createInstallationsTable(): void
-	{
-		try {
-			Schema::create('installations', function ($table) {
-				$table->id();
-				$table->string('license_key')->index();
-				$table->string('installation_id')->unique();
-				$table->text('hardware_fingerprint');
-				$table->string('domain');
-				$table->string('ip');
-				$table->timestamp('last_seen');
-				$table->timestamps();
-			});
-		} catch (\Exception $e) {
-			// Table might already exist or connection issues
-			Log::debug('Installations table creation skipped', ['error' => $e->getMessage()]);
-		}
-	}
 }
