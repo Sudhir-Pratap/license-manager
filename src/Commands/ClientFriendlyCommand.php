@@ -59,6 +59,7 @@ class ClientFriendlyCommand extends Command
         }
         
         // Check suspicion status
+        $suspicious = false; // Default to false
         try {
             $copyProtectionService = app(CopyProtectionService::class);
             $suspicious = $copyProtectionService->detectResellingBehavior();
@@ -76,6 +77,7 @@ class ClientFriendlyCommand extends Command
             }
         } catch (\Exception $e) {
             $this->line('❌ Security check failed: ' . $e->getMessage());
+            $suspicious = false; // Set to false on error
         }
         
         // Overall status
