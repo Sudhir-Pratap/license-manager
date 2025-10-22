@@ -23,6 +23,11 @@ class LicenseManagerServiceProvider extends ServiceProvider {
 		// Merge configuration
 		$this->mergeConfigFrom(__DIR__ . '/config/license-manager.php', 'license-manager');
 
+		// Register LicenseManager first (required by other services)
+		$this->app->singleton(LicenseManager::class, function ($app) {
+			return new LicenseManager();
+		});
+
 		// Register AntiPiracyManager
 		$this->app->singleton(AntiPiracyManager::class, function ($app) {
 			return new AntiPiracyManager($app->make(LicenseManager::class));

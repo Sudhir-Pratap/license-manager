@@ -50,11 +50,12 @@ class CopyProtectionCommand extends Command
             !$this->option('config') && !$this->option('client-examples')) {
             $this->showCopyProtectionHelp();
         }
+    }
 
     /**
      * Show client-specific usage examples
      */
-    private function showClientUsageExamples()
+    public function showClientUsageExamples()
     {
         $this->info('=== Client Usage Examples ===');
         $this->line('');
@@ -81,7 +82,7 @@ class CopyProtectionCommand extends Command
     }
     }
 
-    private function checkCopyProtectionStatus()
+    public function checkCopyProtectionStatus()
     {
         $this->info('=== Copy Protection Status ===');
         $this->line('');
@@ -126,7 +127,7 @@ class CopyProtectionCommand extends Command
         }
     }
 
-    private function runSuspicionDetection()
+    public function runSuspicionDetection()
     {
         $this->info('=== Running Suspicion Detection Test ===');
         
@@ -159,7 +160,7 @@ class CopyProtectionCommand extends Command
         }
     }
 
-    private function testWatermarking()
+    public function testWatermarking()
     {
         $this->info('=== Testing Watermarking Functionality ===');
         
@@ -200,7 +201,7 @@ class CopyProtectionCommand extends Command
         }
     }
 
-    private function generateCopyProtectionReport()
+    public function generateCopyProtectionReport()
     {
         $this->info('=== Copy Protection Report ===');
         $this->line('');
@@ -244,7 +245,7 @@ class CopyProtectionCommand extends Command
         $this->line('• Suspicion threshold: ' . config('license-manager.anti_reselling.threshold_score', 75));
     }
 
-    private function generateCopyProtectionConfig()
+    public function generateCopyProtectionConfig()
     {
         $this->info('=== Copy Protection Configuration ===');
         $this->line('');
@@ -298,7 +299,7 @@ class CopyProtectionCommand extends Command
         $this->line('• Regular integrity checks with php artisan license:copy-protection --check');
     }
 
-    private function showCopyProtectionHelp()
+    public function showCopyProtectionHelp()
     {
         $this->info('Copy Protection and Anti-Reselling System');
         $this->line('');
