@@ -47,7 +47,7 @@ class DiagnoseLicenseCommand extends Command
         return empty($issues) ? 0 : 1;
     }
 
-    private function checkConfiguration(&$issues, &$fixes)
+    public function checkConfiguration(&$issues, &$fixes)
     {
         $this->info('📋 Checking Configuration...');
 
@@ -69,7 +69,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function checkCacheStatus(&$issues, &$fixes)
+    public function checkCacheStatus(&$issues, &$fixes)
     {
         $this->info('💾 Checking Cache Status...');
 
@@ -97,7 +97,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function checkHardwareFingerprint(&$issues, &$fixes)
+    public function checkHardwareFingerprint(&$issues, &$fixes)
     {
         $this->info('🖥️  Checking Hardware Fingerprint...');
 
@@ -119,7 +119,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function checkLicenseValidation(&$issues, &$fixes)
+    public function checkLicenseValidation(&$issues, &$fixes)
     {
         $this->info('🔐 Checking License Validation...');
 
@@ -145,7 +145,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function checkAntiPiracyValidation(&$issues, &$fixes)
+    public function checkAntiPiracyValidation(&$issues, &$fixes)
     {
         $this->info('🛡️  Checking Anti-Piracy Validation...');
 
@@ -164,7 +164,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function displayResults($issues, $fixes)
+    public function displayResults($issues, $fixes)
     {
         $this->newLine();
         $this->info('📊 Diagnosis Results:');
@@ -188,7 +188,7 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    private function applyFixes($fixes)
+    public function applyFixes($fixes)
     {
         $this->newLine();
         $this->info('🔧 Applying fixes...');

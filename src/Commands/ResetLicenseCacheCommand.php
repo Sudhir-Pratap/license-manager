@@ -77,7 +77,7 @@ class ResetLicenseCacheCommand extends Command
         return 0;
     }
 
-    private function clearIpBlacklist()
+    public function clearIpBlacklist()
     {
         // Clear IP blacklist cache
         $blacklistPattern = 'blacklisted_ip_*';
@@ -92,7 +92,7 @@ class ResetLicenseCacheCommand extends Command
         }
     }
 
-    private function getUserInfo()
+    public function getUserInfo()
     {
         return [
             'ip' => request()->ip() ?? 'CLI',

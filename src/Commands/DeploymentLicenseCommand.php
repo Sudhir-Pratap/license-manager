@@ -48,7 +48,7 @@ class DeploymentLicenseCommand extends Command
         }
     }
 
-    private function checkDeploymentStatus(LicenseManager $licenseManager)
+    public function checkDeploymentStatus(LicenseManager $licenseManager)
     {
         $this->info('=== License Deployment Status ===');
         
@@ -82,7 +82,7 @@ class DeploymentLicenseCommand extends Command
         $this->line('IP: ' . ($details['server_info']['ip'] ?? 'Unknown'));
     }
 
-    private function attemptFixDeploymentIssues(LicenseManager $licenseManager)
+    public function attemptFixDeploymentIssues(LicenseManager $licenseManager)
     {
         // Clear license cache
         Cache::flush();
@@ -101,7 +101,7 @@ class DeploymentLicenseCommand extends Command
          $this->info('You should now regenerate your license with new hardware fingerprint');
      }
 
-    private function regenerateHardwareFingerprint(LicenseManager $licenseManager)
+    public function regenerateHardwareFingerprint(LicenseManager $licenseManager)
     {
         // Set environment variable to force regeneration
         putenv('LICENSE_FORCE_REGENERATE_FINGERPRINT=true');
@@ -117,7 +117,7 @@ class DeploymentLicenseCommand extends Command
          $this->info('Run: php artisan license:info');
      }
 
-     private function testLicenseValidation(LicenseManager $licenseManager)
+     public function testLicenseValidation(LicenseManager $licenseManager)
      {
          $this->info('Testing License Validation...');
          
@@ -155,7 +155,7 @@ class DeploymentLicenseCommand extends Command
          }
      }
 
-    private function testDatabaseConnection(): bool
+    public function testDatabaseConnection(): bool
     {
         try {
             \DB::connection()->getPdo();

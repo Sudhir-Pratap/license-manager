@@ -38,7 +38,7 @@ class StealthInstallCommand extends Command
         }
     }
 
-    private function generateStealthConfig()
+    public function generateStealthConfig()
     {
         $this->info('=== Stealth License Installation Configuration ===');
         $this->line('');
@@ -79,7 +79,7 @@ class StealthInstallCommand extends Command
         $this->line("],");
     }
 
-    private function checkStealthSetup()
+    public function checkStealthSetup()
     {
         $this->info('=== Stealth Mode Status Check ===');
         $this->line('');
@@ -133,7 +133,7 @@ class StealthInstallCommand extends Command
         }
     }
 
-    private function enableStealthMode()
+    public function enableStealthMode()
     {
         $this->info('Enabling Stealth Mode...');
         
@@ -161,7 +161,7 @@ class StealthInstallCommand extends Command
         $this->line('LICENSE_GRACE_PERIOD=72');
     }
 
-    private function disableStealthMode()
+    public function disableStealthMode()
     {
         $this->info('Disabling Stealth Mode...');
         
@@ -179,7 +179,7 @@ class StealthInstallCommand extends Command
         $this->line('LICENSE_STEALTH_MODE=false');
     }
 
-    private function showStealthHelp()
+    public function showStealthHelp()
     {
         $this->info('Stealth License Installation Helper');
         $this->line('');

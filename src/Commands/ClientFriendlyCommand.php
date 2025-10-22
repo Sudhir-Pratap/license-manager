@@ -28,7 +28,7 @@ class ClientFriendlyCommand extends Command
         }
     }
 
-    private function checkClientStatus()
+    public function checkClientStatus()
     {
         $this->info('=== System Status Check ===');
         $this->line('');
@@ -94,7 +94,7 @@ class ClientFriendlyCommand extends Command
         }
     }
 
-    private function testClientSystem()
+    public function testClientSystem()
     {
         $this->info('=== System Functionality Test ===');
         $this->line('');
@@ -148,7 +148,7 @@ class ClientFriendlyCommand extends Command
         }
     }
 
-    private function testDatabaseConnection(): bool
+    public function testDatabaseConnection(): bool
     {
         try {
             \DB::connection()->getPdo();
@@ -158,7 +158,7 @@ class ClientFriendlyCommand extends Command
         }
     }
 
-    private function testCacheSystem(): bool
+    public function testCacheSystem(): bool
     {
         try {
             cache()->put('test_key', 'test_value', 1);
@@ -168,7 +168,7 @@ class ClientFriendlyCommand extends Command
         }
     }
 
-    private function showClientHelp()
+    public function showClientHelp()
     {
         $this->info('License System Status Tool');
         $this->line('');
