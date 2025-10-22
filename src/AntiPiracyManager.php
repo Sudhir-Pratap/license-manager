@@ -209,15 +209,29 @@ class AntiPiracyManager
 
         foreach ($criticalFiles as $file) {
             $filePath = base_path($file);
-            if (File::exists($filePath)) {
-                $currentHash = hash_file('sha256', $filePath);
-                $storedHash = Cache::get("file_hash_{$file}");
-                
-                if (!$storedHash) {
-                    Cache::put("file_hash_{$file}", $currentHash, now()->addDays(30));
-                } elseif ($storedHash !== $currentHash) {
-                    Log::error('File tampering detected', ['file' => $file]);
-                    return false;
+            if (File::exists($filePath) && is_file($filePath)) {
+                try {
+                    $currentHash = hash_file('sha256', $filePath);
+                    if ($currentHash === false) {
+                        // Skip files that can't be hashed (permission issues, etc.)
+                        continue;
+                    }
+                    
+                    $storedHash = Cache::get("file_hash_{$file}");
+                    
+                    if (!$storedHash) {
+                        Cache::put("file_hash_{$file}", $currentHash, now()->addDays(30));
+                    } elseif ($storedHash !== $currentHash) {
+                        Log::error('File tampering detected', ['file' => $file]);
+                        return false;
+                    }
+                } catch (\Exception $e) {
+                    // Skip files that can't be accessed due to permissions
+                    Log::debug('Skipping file hash check due to access issue', [
+                        'file' => $file,
+                        'error' => $e->getMessage()
+                    ]);
+                    continue;
                 }
             }
         }

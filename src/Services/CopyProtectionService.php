@@ -158,28 +158,43 @@ class CopyProtectionService
         
         // List of critical files that shouldn't be modified
         $criticalFiles = [
-            'app/Http/Middleware',
             'app/Http/Kernel.php',
             'config/license-manager.php',
-            'vendor/acecoderz/license-manager',
+            'config/app.php',
+            'routes/web.php',
         ];
 
         foreach ($criticalFiles as $filePath) {
             $fullPath = base_path($filePath);
-            if (file_exists($fullPath)) {
-                $currentHash = hash_file('sha256', $fullPath);
-                $storedHash = Cache::get("file_hash_{$filePath}");
-                
-                if (!$storedHash) {
-                    // Store initial hash
-                    Cache::put("file_hash_{$filePath}", $currentHash, now()->addYears(1));
-                } elseif ($storedHash !== $currentHash) {
-                    $score += 25; // High suspicion - file modification
+            if (file_exists($fullPath) && is_file($fullPath)) {
+                try {
+                    $currentHash = hash_file('sha256', $fullPath);
+                    if ($currentHash === false) {
+                        // Skip files that can't be hashed (permission issues, etc.)
+                        continue;
+                    }
                     
-                    Log::channel('security')->critical('Unauthorized file modification detected', [
+                    $storedHash = Cache::get("file_hash_{$filePath}");
+                    
+                    if (!$storedHash) {
+                        // Store initial hash
+                        Cache::put("file_hash_{$filePath}", $currentHash, now()->addYears(1));
+                    } elseif ($storedHash !== $currentHash) {
+                        $score += 25; // High suspicion - file modification
+                        
+                        Log::channel('security')->critical('Unauthorized file modification detected', [
+                            'file' => $filePath,
+                            'old_hash' => $storedHash,
+                            'new_hash' => $currentHash
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    // Skip files that can't be accessed due to permissions
+                    Log::debug('Skipping file hash check due to access issue', [
                         'file' => $filePath,
-                        'path' => $fullPath,
+                        'error' => $e->getMessage()
                     ]);
+                    continue;
                 }
             }
         }
