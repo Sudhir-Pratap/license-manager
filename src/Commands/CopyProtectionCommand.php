@@ -80,7 +80,6 @@ class CopyProtectionCommand extends Command
         $this->line('LICENSE_MAX_PER_GEO=1          # No clustering');
         $this->line('LICENSE_DETECT_VPN=true        # Block VPN');
     }
-    }
 
     public function checkCopyProtectionStatus()
     {
