@@ -39,7 +39,7 @@ class CopyProtectionService
      */
     private function checkMultipleDomainUsage(): int
     {
-        $domainKey = 'license_domains_' . config('license-manager.license_key');
+        $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
         $domains = Cache::get($domainKey, []);
         
         $currentDomain = request()->getHost();
@@ -126,11 +126,11 @@ class CopyProtectionService
         
         // Check if application has been downloaded/moved recently
         $installFingerprint = app(\Acecoderz\LicenseManager\LicenseManager::class)->generateHardwareFingerprint();
-        $storedFingerprint = Cache::get('original_fingerprint_' . config('license-manager.license_key'));
+        $storedFingerprint = Cache::get('original_fingerprint_' . md5(config('license-manager.license_key')));
         
         if (!$storedFingerprint) {
             // First time, store current fingerprint
-            Cache::put('original_fingerprint_' . config('license-manager.license_key'), $installFingerprint, now()->addYears(1));
+            Cache::put('original_fingerprint_' . md5(config('license-manager.license_key')), $installFingerprint, now()->addYears(1));
             $score += 0; // Not suspicious on first run
         } else {
             // Check if fingerprint changed significantly
@@ -318,14 +318,14 @@ class CopyProtectionService
         // Higher scores trigger more aggressive measures
         if ($score >= 90) {
             // Immediate cache block for this installation
-            Cache::put('security_block_' . config('license-manager.license_key'), true, now()->addHours(24));
+            Cache::put('security_block_' . md5(config('license-manager.license_key')), true, now()->addHours(24));
             
             // Force license server validation
-            Cache::forget('license_valid_' . config('license-manager.license_key'));
+            Cache::forget('license_valid_' . md5(config('license-manager.license_key')));
             
         } elseif ($score >= 75) {
             // Reduce cache duration for frequent validation
-            Cache::put('high_attention_' . config('license-manager.license_key'), true, now()->addHours(12));
+            Cache::put('high_attention_' . md5(config('license-manager.license_key')), true, now()->addHours(12));
         }
     }
 

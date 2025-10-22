@@ -46,7 +46,7 @@ class ClientFriendlyCommand extends Command
         $this->line('Operation Mode: ' . ($stealthMode ? 'Silent (Hidden)' : 'Visible'));
         
         // Check domain tracking status
-        $domainKey = 'license_domains_' . config('license-manager.license_key');
+        $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
         $domains = cache()->get($domainKey, []);
         
         $this->line('');
