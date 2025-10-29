@@ -12,8 +12,10 @@ class LicenseManager {
 	public function validateLicense(string $licenseKey, string $productId, string $domain, string $ip, string $clientId): bool {
 		$licenseServer = config('license-manager.license_server');
 		$apiToken      = config('license-manager.api_token');
-		$cacheKey      = "license_valid_{$licenseKey}_{$productId}_{$clientId}";
-		$lastCheckKey  = "license_last_check_{$licenseKey}_{$productId}_{$clientId}";
+		// Hash the license key in cache keys to avoid database key length limits
+		$licenseKeyHash = md5($licenseKey);
+		$cacheKey      = "license_valid_{$licenseKeyHash}_{$productId}_{$clientId}";
+		$lastCheckKey  = "license_last_check_{$licenseKeyHash}_{$productId}_{$clientId}";
 
 		// Generate hardware fingerprint
 		$hardwareFingerprint = $this->generateHardwareFingerprint();
@@ -24,6 +26,8 @@ class LicenseManager {
 
 		// Use LICENSE_SECRET for cryptography, fallback to APP_KEY for legacy
 		$cryptoKey = env('LICENSE_SECRET', env('APP_KEY'));
+		// Ensure hardware_fingerprint is not null (use empty string if null)
+		$hardwareFingerprint = $hardwareFingerprint ?? '';
 		// Generate enhanced checksum
 		$checksum = hash('sha256', $licenseKey . $productId . $originalClientId . $hardwareFingerprint . $cryptoKey);
 
@@ -46,9 +50,12 @@ class LicenseManager {
 				'domain' => $domain,
 				'ip' => $ip,
 				'client_id' => $originalClientId,
-				'hardware_fingerprint' => substr($hardwareFingerprint, 0, 16) . '...',
+				'hardware_fingerprint' => $hardwareFingerprint ? substr($hardwareFingerprint, 0, 16) . '...' : 'NULL',
 				'installation_id' => $installationId,
 				'checksum' => substr($checksum, 0, 16) . '...',
+				'full_checksum' => $checksum, // Full checksum for debugging
+				'crypto_key_set' => !empty($cryptoKey) ? 'YES' : 'NO',
+				'input_string' => substr($licenseKey, 0, 20) . '...' . $productId . $originalClientId . ($hardwareFingerprint ? substr($hardwareFingerprint, 0, 16) . '...' : 'NULL'),
 				'license_server' => $licenseServer,
 				'environment' => config('app.env'),
 				'deployment_context' => request()->header('X-Deployment-Context'),

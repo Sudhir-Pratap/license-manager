@@ -47,8 +47,14 @@ class AntiPiracyManager
             'server_communication' => $this->validateServerCommunication(),
         ];
 
-        // Log validation results (muted in stealth mode)
-        if (!config('license-manager.stealth.mute_logs', false)) {
+        // Log validation results (always log failures, muted in stealth mode for successes)
+        $failedValidations = array_filter($validations, function($result) { return $result === false; });
+        if (!empty($failedValidations)) {
+            Log::error('Anti-piracy validation failures', [
+                'failed' => array_keys($failedValidations),
+                'all_results' => $validations
+            ]);
+        } elseif (!config('license-manager.stealth.mute_logs', false)) {
             Log::info('Anti-piracy validation results', $validations);
         }
 
@@ -60,7 +66,12 @@ class AntiPiracyManager
         ];
 
         // All critical validations must pass
-        if (in_array(false, $criticalValidations, true)) {
+        $failedCritical = array_filter($criticalValidations, function($result) { return $result === false; });
+        if (!empty($failedCritical)) {
+            Log::error('Critical anti-piracy validation failed', [
+                'failed_critical' => array_keys($failedCritical),
+                'all_critical' => $criticalValidations
+            ]);
             return false;
         }
 
@@ -237,10 +248,25 @@ class AntiPiracyManager
         }
 
         // Check for license middleware bypass attempts
-        $middlewareStack = app('router')->getMiddleware();
-        if (!isset($middlewareStack['license'])) {
-            Log::error('License middleware removed from stack');
-            return false;
+        // Verify that license middleware is registered (either as alias or directly)
+        $middlewareAliases = app('router')->getMiddleware();
+        $globalMiddleware = app('Illuminate\Contracts\Http\Kernel')->getMiddleware();
+        
+        $hasLicenseMiddleware = (
+            isset($middlewareAliases['license']) ||
+            isset($middlewareAliases['anti-piracy']) ||
+            in_array(\Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
+            in_array(\Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity::class, $globalMiddleware) ||
+            in_array(\Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware::class, $globalMiddleware)
+        );
+        
+        if (!$hasLicenseMiddleware) {
+            Log::warning('License middleware not found in stack (may be registered differently)', [
+                'aliases' => array_keys($middlewareAliases),
+                'global_middleware_count' => count($globalMiddleware)
+            ]);
+            // Don't fail validation for this - just log it
+            // Some applications may register middleware differently
         }
 
         return true;
