@@ -171,31 +171,21 @@ class StealthInstallCommand extends Command
         $hasLicenseClass = in_array(LicenseSecurity::class, $globalMiddlewareFlat) || 
                           in_array($licenseFullName, $globalMiddlewareFlat);
         
-        // Also check Kernel.php file directly as fallback (most reliable method)
+        // Check Kernel.php file directly (most reliable - doesn't depend on runtime registration)
         $kernelPath = app_path('Http/Kernel.php');
         $hasInKernelFile = false;
         $kernelContent = '';
+        
         if (file_exists($kernelPath)) {
-            $kernelContent = file_get_contents($kernelPath);
-            // Check for class names (with or without namespace prefix, with or without leading backslash)
-            $patterns = [
-                'AntiPiracySecurity',
-                'StealthLicenseMiddleware',
-                'LicenseSecurity',
-                'Acecoderz\\LicenseManager\\Http\\Middleware\\AntiPiracySecurity',
-                'Acecoderz\\LicenseManager\\Http\\Middleware\\StealthLicenseMiddleware',
-                'Acecoderz\\LicenseManager\\Http\\Middleware\\LicenseSecurity',
-                '\\Acecoderz\\LicenseManager\\Http\\Middleware\\AntiPiracySecurity',
-            ];
+            $kernelContent = @file_get_contents($kernelPath);
             
-            foreach ($patterns as $pattern) {
-                // Case-insensitive search and also check both escaped and non-escaped backslashes
-                if (stripos($kernelContent, $pattern) !== false || 
-                    stripos($kernelContent, str_replace('\\', '\\\\', $pattern)) !== false) {
-                    $hasInKernelFile = true;
-                    break;
-                }
-            }
+            // Simple check: look for the middleware class names
+            // This works even if middleware is registered in Kernel.php directly
+            $hasInKernelFile = (
+                stripos($kernelContent, 'AntiPiracySecurity') !== false ||
+                stripos($kernelContent, 'StealthLicenseMiddleware') !== false ||
+                stripos($kernelContent, 'LicenseSecurity') !== false
+            );
         }
         
         $hasMiddleware = $hasStealthAlias || $hasAntiPiracyAlias || $hasLicenseAlias || 
