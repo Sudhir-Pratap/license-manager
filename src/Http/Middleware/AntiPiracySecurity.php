@@ -108,13 +108,33 @@ class AntiPiracySecurity
     {
         $report = $this->getAntiPiracyManager()->getValidationReport();
         
+        // Get detailed validation results from AntiPiracyManager
+        $validationResults = $this->getAntiPiracyManager()->getLastValidationResults();
+        $failedChecks = [];
+        if (is_array($validationResults)) {
+            $failedChecks = array_keys(array_filter($validationResults, function($result) { return $result === false; }));
+        }
+        
         Log::error('Anti-piracy validation failed', [
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'path' => $request->path(),
             'method' => $request->method(),
+            'domain' => $request->getHost(),
+            'failed_checks' => $failedChecks,
+            'validation_results' => $validationResults ?? 'not_available',
             'report' => $report,
         ]);
+        
+        // Also send to remote security logger
+        if (!empty($failedChecks)) {
+            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->error('Anti-piracy validation failed', [
+                'failed_checks' => $failedChecks,
+                'domain' => $request->getHost(),
+                'ip' => $request->ip(),
+                'path' => $request->path(),
+            ]);
+        }
 
         // Increment failure counter
         $failureKey = 'license_failures_' . $request->ip();

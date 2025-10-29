@@ -16,6 +16,7 @@ class AntiPiracyManager
     private $hardwareFingerprint;
     private $installationId;
     private $lastValidationTime;
+    private $lastValidationResults = [];
     
     public function __construct(LicenseManager $licenseManager)
     {
@@ -46,6 +47,9 @@ class AntiPiracyManager
             'usage_patterns' => $this->validateUsagePatterns(),
             'server_communication' => $this->validateServerCommunication(),
         ];
+        
+        // Store results for debugging
+        $this->lastValidationResults = $validations;
 
         // Log validation results (always log failures, muted in stealth mode for successes)
         $failedValidations = array_filter($validations, function($result) { return $result === false; });
@@ -95,6 +99,14 @@ class AntiPiracyManager
         }
 
         return true;
+    }
+
+    /**
+     * Get last validation results for debugging
+     */
+    public function getLastValidationResults(): array
+    {
+        return $this->lastValidationResults;
     }
 
     /**
