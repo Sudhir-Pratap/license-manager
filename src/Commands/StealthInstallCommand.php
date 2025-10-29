@@ -4,6 +4,9 @@ namespace Acecoderz\LicenseManager\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
+use Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware;
+use Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity;
+use Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity;
 
 class StealthInstallCommand extends Command
 {
@@ -114,9 +117,111 @@ class StealthInstallCommand extends Command
         
         // Check middleware registration
         $this->line('');
-        $middlewares = config('route.middleware', []);
-        $hasStealth = in_array('stealth-license', array_keys($middlewares));
-        $this->line('Stealth Middleware Registered: ' . ($hasStealth ? '✅' : '❌'));
+        $middlewareAliases = app('router')->getMiddleware();
+        
+        // Get global middleware from Kernel (Laravel 11+ uses different method)
+        $kernel = app('Illuminate\Contracts\Http\Kernel');
+        $globalMiddleware = [];
+        
+        // Try different methods to get global middleware
+        if (method_exists($kernel, 'getMiddleware')) {
+            $globalMiddleware = $kernel->getMiddleware();
+        } else {
+            // Fallback: Use reflection to access protected $middleware property
+            try {
+                $reflection = new \ReflectionClass($kernel);
+                if ($reflection->hasProperty('middleware')) {
+                    $property = $reflection->getProperty('middleware');
+                    $property->setAccessible(true);
+                    $globalMiddleware = $property->getValue($kernel) ?? [];
+                }
+            } catch (\Exception $e) {
+                // If reflection fails, check via router middleware groups
+                $globalMiddleware = [];
+            }
+        }
+        
+        // Convert to array if needed and flatten
+        if (!is_array($globalMiddleware)) {
+            $globalMiddleware = [];
+        }
+        $globalMiddlewareFlat = [];
+        foreach ($globalMiddleware as $item) {
+            if (is_string($item)) {
+                $globalMiddlewareFlat[] = $item;
+            } elseif (is_array($item)) {
+                $globalMiddlewareFlat = array_merge($globalMiddlewareFlat, $item);
+            }
+        }
+        
+        $hasStealthAlias = isset($middlewareAliases['stealth-license']);
+        $hasAntiPiracyAlias = isset($middlewareAliases['anti-piracy']);
+        $hasLicenseAlias = isset($middlewareAliases['license']);
+        
+        // Check using class names (handle with or without leading backslash)
+        $antiPiracyFullName = '\\' . AntiPiracySecurity::class;
+        $stealthFullName = '\\' . StealthLicenseMiddleware::class;
+        $licenseFullName = '\\' . LicenseSecurity::class;
+        
+        $hasStealthClass = in_array(StealthLicenseMiddleware::class, $globalMiddlewareFlat) || 
+                          in_array($stealthFullName, $globalMiddlewareFlat);
+        $hasAntiPiracyClass = in_array(AntiPiracySecurity::class, $globalMiddlewareFlat) || 
+                             in_array($antiPiracyFullName, $globalMiddlewareFlat) ||
+                             str_contains(json_encode($globalMiddlewareFlat), 'AntiPiracySecurity');
+        $hasLicenseClass = in_array(LicenseSecurity::class, $globalMiddlewareFlat) || 
+                          in_array($licenseFullName, $globalMiddlewareFlat);
+        
+        // Also check Kernel.php file directly as fallback (most reliable method)
+        $kernelPath = app_path('Http/Kernel.php');
+        $hasInKernelFile = false;
+        $kernelContent = '';
+        if (file_exists($kernelPath)) {
+            $kernelContent = file_get_contents($kernelPath);
+            // Check for class names (with or without namespace prefix, with or without leading backslash)
+            $patterns = [
+                'AntiPiracySecurity',
+                'StealthLicenseMiddleware',
+                'LicenseSecurity',
+                'Acecoderz\\LicenseManager\\Http\\Middleware\\AntiPiracySecurity',
+                'Acecoderz\\LicenseManager\\Http\\Middleware\\StealthLicenseMiddleware',
+                'Acecoderz\\LicenseManager\\Http\\Middleware\\LicenseSecurity',
+                '\\Acecoderz\\LicenseManager\\Http\\Middleware\\AntiPiracySecurity',
+            ];
+            
+            foreach ($patterns as $pattern) {
+                // Case-insensitive search and also check both escaped and non-escaped backslashes
+                if (stripos($kernelContent, $pattern) !== false || 
+                    stripos($kernelContent, str_replace('\\', '\\\\', $pattern)) !== false) {
+                    $hasInKernelFile = true;
+                    break;
+                }
+            }
+        }
+        
+        $hasMiddleware = $hasStealthAlias || $hasAntiPiracyAlias || $hasLicenseAlias || 
+                        $hasStealthClass || $hasAntiPiracyClass || $hasLicenseClass ||
+                        $hasInKernelFile;
+        
+        $this->line('Stealth Middleware Registered: ' . ($hasMiddleware ? '✅' : '❌'));
+        if ($hasMiddleware) {
+            $methods = [];
+            if ($hasStealthAlias) $methods[] = 'stealth-license alias';
+            if ($hasAntiPiracyAlias) $methods[] = 'anti-piracy alias';
+            if ($hasLicenseAlias) $methods[] = 'license alias';
+            if ($hasStealthClass) $methods[] = 'StealthLicenseMiddleware class';
+            if ($hasAntiPiracyClass) $methods[] = 'AntiPiracySecurity class';
+            if ($hasLicenseClass) $methods[] = 'LicenseSecurity class';
+            if ($hasInKernelFile) $methods[] = 'detected in Kernel.php file';
+            $this->line('  Method: ' . implode(', ', $methods));
+        } else {
+            $this->warn('  Middleware not detected. Make sure it\'s registered in app/Http/Kernel.php');
+            // Debug info
+            $this->line('  Debug: Kernel.php exists = ' . (file_exists($kernelPath) ? 'Yes' : 'No'));
+            if (file_exists($kernelPath)) {
+                $this->line('  Debug: Kernel.php path = ' . $kernelPath);
+                $this->line('  Debug: Contains AntiPiracySecurity = ' . (str_contains($kernelContent, 'AntiPiracySecurity') ? 'Yes' : 'No'));
+            }
+        }
         
         // Recommendations
         $this->line('');
