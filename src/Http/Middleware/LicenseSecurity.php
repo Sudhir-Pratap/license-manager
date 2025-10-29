@@ -65,8 +65,8 @@ class LicenseSecurity {
 			}
 		}
 
-		// Allow bypass in local environment
-		if (app()->environment('local')) {
+		// Allow bypass in local environment (unless explicitly disabled for testing)
+		if (app()->environment('local') && !config('license-manager.disable_local_bypass', false)) {
 			return true;
 		}
 

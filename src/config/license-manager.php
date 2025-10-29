@@ -11,6 +11,7 @@ return [
 	'bypass_token'   => env('LICENSE_BYPASS_TOKEN'),
 	'support_email'  => env('LICENSE_SUPPORT_EMAIL', 'support@acecoderz.com'),
 	'auto_middleware' => env('LICENSE_AUTO_MIDDLEWARE', false), // Auto-register middleware globally
+	'disable_local_bypass' => env('LICENSE_DISABLE_LOCAL_BYPASS', false), // Force validation even in local environment (for testing)
 	'skip_routes'    => [
 		'health',
 		'api/health',
