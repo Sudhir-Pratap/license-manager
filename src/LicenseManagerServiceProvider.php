@@ -16,6 +16,7 @@ use Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware;
 use Acecoderz\LicenseManager\Services\BackgroundLicenseValidator;
 use Acecoderz\LicenseManager\Services\CopyProtectionService;
 use Acecoderz\LicenseManager\Services\WatermarkingService;
+use Acecoderz\LicenseManager\Services\RemoteSecurityLogger;
 use Illuminate\Support\ServiceProvider;
 
 class LicenseManagerServiceProvider extends ServiceProvider {
@@ -46,6 +47,11 @@ class LicenseManagerServiceProvider extends ServiceProvider {
 		// Register WatermarkingService
 		$this->app->singleton(WatermarkingService::class, function ($app) {
 			return new WatermarkingService();
+		});
+
+		// Register RemoteSecurityLogger
+		$this->app->singleton(RemoteSecurityLogger::class, function ($app) {
+			return new RemoteSecurityLogger();
 		});
 
 		// Register commands

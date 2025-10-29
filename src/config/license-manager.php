@@ -62,4 +62,5 @@ return [
 		'dynamic_validation' => env('LICENSE_DYNAMIC_VALIDATION', true), // Dynamic validation keys
 		'anti_debug' => env('LICENSE_ANTI_DEBUG', true), // Anti-debugging measures
 	],
+	'remote_security_logging' => env('LICENSE_REMOTE_SECURITY_LOGGING', true), // Send security logs to license-server instead of local files
 ];

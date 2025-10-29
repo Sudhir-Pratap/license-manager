@@ -224,8 +224,7 @@ class CopyProtectionCommand extends Command
         $report['usage_entries'] = count($patterns);
         
         // Security events
-        $securityEvents = Log::channel('security')->getLogger();
-        $report['security_logging'] = 'Active';
+        $report['security_logging'] = config('license-manager.remote_security_logging', true) ? 'Remote (License Server)' : 'Local';
         
         $this->info('Report Data:');
         foreach ($report as $key => $value) {

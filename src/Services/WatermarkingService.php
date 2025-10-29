@@ -245,7 +245,7 @@ class WatermarkingService
         $watermarksPresent = $hasHTMLComment && $hasMetaTag && $hasJavaScriptVar;
         
         if (!$watermarksPresent) {
-            Log::channel('security')->warning('Missing watermarks detected', [
+            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('Missing watermarks detected', [
                 'html_comment' => $hasHTMLComment,
                 'meta_tag' => $hasMetaTag,
                 'javascript_var' => $hasJavaScriptVar,

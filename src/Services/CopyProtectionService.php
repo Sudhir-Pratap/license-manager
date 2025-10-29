@@ -51,7 +51,7 @@ class CopyProtectionService
         // Allow max 2 domains per license
         $maxAllowed = config('license-manager.anti_reselling.max_domains', 2);
         if (count($domains) > $maxAllowed) {
-            Log::channel('security')->critical('Multiple domains detected', [
+            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('Multiple domains detected', [
                 'domains' => $domains,
                 'license_key' => config('license-manager.license_key'),
                 'excess_count' => count($domains) - $maxAllowed,
@@ -138,7 +138,7 @@ class CopyProtectionService
             if ($percent < 85) {
                 $score += 40; // High suspicion - significant hardware change
                 
-                Log::channel('security')->warning('Significant hardware fingerprint change', [
+                app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('Significant hardware fingerprint change', [
                     'old_fingerprint' => substr($storedFingerprint, 0, 32) . '...',
                     'new_fingerprint' => substr($installFingerprint, 0, 32) . '...',
                     'similarity' => $percent,
@@ -182,7 +182,7 @@ class CopyProtectionService
                     } elseif ($storedHash !== $currentHash) {
                         $score += 25; // High suspicion - file modification
                         
-                        Log::channel('security')->critical('Unauthorized file modification detected', [
+                        app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('Unauthorized file modification detected', [
                             'file' => $filePath,
                             'old_hash' => $storedHash,
                             'new_hash' => $currentHash
@@ -280,7 +280,7 @@ class CopyProtectionService
     private function handlePotentiallySuspiciousActivity(array $indicators, int $score): void
     {
         // Record incident
-        Log::channel('security')->alert('Potentially suspicious activity detected', [
+        app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->alert('Potentially suspicious activity detected', [
             'license_key' => config('license-manager.license_key'),
             'client_id' => config('license-manager.client_id'),
             'domain' => request()->getHost(),
@@ -319,7 +319,7 @@ class CopyProtectionService
             ]);
 
         } catch (\Exception $e) {
-            Log::channel('security')->error('Failed to report suspicious activity', [
+            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->error('Failed to report suspicious activity', [
                 'error' => $e->getMessage(),
             ]);
         }
