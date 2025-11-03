@@ -235,7 +235,7 @@ class LicenseManager {
 	/**
 	 * Get stable database connection fingerprint
 	 */
-	private function getDatabaseConnectionFingerprint(): string
+	public function getDatabaseConnectionFingerprint(): string
 	{
 		try {
 			$connection = config('database.default');
@@ -261,7 +261,7 @@ class LicenseManager {
 	/**
 	 * Get application signature (file-based fingerprint)
 	 */
-	private function getApplicationSignature(): string
+	public function getApplicationSignature(): string
 	{
 		try {
 			// Use composer.json to create app signature
@@ -286,7 +286,7 @@ class LicenseManager {
 	/**
 	 * Get stable domain identifier
 	 */
-	private function getStableDomainIdentifier(): string
+	public function getStableDomainIdentifier(): string
 	{
 		try {
 			// Try to get the canonical domain

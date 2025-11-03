@@ -25,7 +25,7 @@ class SecurityMonitoringService
     /**
      * Monitor license violations
      */
-    private function monitorLicenseViolations(): void
+    public function monitorLicenseViolations(): void
     {
         $violations = Cache::get('license_violations', []);
 
@@ -51,7 +51,7 @@ class SecurityMonitoringService
     /**
      * Monitor system integrity
      */
-    private function monitorSystemIntegrity(): void
+    public function monitorSystemIntegrity(): void
     {
         $integrityChecks = [
             'file_integrity' => $this->checkFileIntegrity(),
@@ -74,7 +74,7 @@ class SecurityMonitoringService
     /**
      * Monitor suspicious activity
      */
-    private function monitorSuspiciousActivity(): void
+    public function monitorSuspiciousActivity(): void
     {
         $suspiciousPatterns = [
             'multiple_ip_failures' => $this->checkMultipleIPFailures(),
@@ -96,7 +96,7 @@ class SecurityMonitoringService
     /**
      * Send scheduled security reports
      */
-    private function sendScheduledAlerts(): void
+    public function sendScheduledAlerts(): void
     {
         $lastReport = Cache::get('last_security_report');
         $reportInterval = config('license-manager.monitoring.report_interval', 24); // hours
@@ -110,7 +110,7 @@ class SecurityMonitoringService
     /**
      * Send an alert through configured channels
      */
-    private function sendAlert(string $title, array $data, string $severity = 'warning'): void
+    public function sendAlert(string $title, array $data, string $severity = 'warning'): void
     {
         $alertKey = 'alert_' . md5($title . serialize($data));
         $lastSent = Cache::get($alertKey);
@@ -151,7 +151,7 @@ class SecurityMonitoringService
     /**
      * Send email alert
      */
-    private function sendEmailAlert(array $alertData): void
+    public function sendEmailAlert(array $alertData): void
     {
         try {
             $alertEmail = config('license-manager.monitoring.alert_email', 'security@acecoderz.com');
@@ -174,7 +174,7 @@ class SecurityMonitoringService
     /**
      * Log alert to security log
      */
-    private function logAlert(array $alertData): void
+    public function logAlert(array $alertData): void
     {
         $logChannel = Log::channel('security');
 
@@ -194,7 +194,7 @@ class SecurityMonitoringService
     /**
      * Send alert to remote security service
      */
-    private function sendRemoteAlert(array $alertData): void
+    public function sendRemoteAlert(array $alertData): void
     {
         try {
             $licenseServer = config('license-manager.license_server');
@@ -219,7 +219,7 @@ class SecurityMonitoringService
     /**
      * Send comprehensive security report
      */
-    private function sendSecurityReport(): void
+    public function sendSecurityReport(): void
     {
         $report = $this->generateSecurityReport();
 
@@ -234,7 +234,7 @@ class SecurityMonitoringService
     /**
      * Generate comprehensive security report
      */
-    private function generateSecurityReport(): array
+    public function generateSecurityReport(): array
     {
         return [
             'period' => 'last_24_hours',
@@ -251,7 +251,7 @@ class SecurityMonitoringService
     /**
      * Check file integrity
      */
-    private function checkFileIntegrity(): bool
+    public function checkFileIntegrity(): bool
     {
         $criticalFiles = [
             'composer.json',
@@ -281,7 +281,7 @@ class SecurityMonitoringService
     /**
      * Check configuration integrity
      */
-    private function checkConfigIntegrity(): bool
+    public function checkConfigIntegrity(): bool
     {
         // Check if sensitive config values are properly encrypted
         $sensitiveConfigs = [
@@ -303,7 +303,7 @@ class SecurityMonitoringService
     /**
      * Check environment security
      */
-    private function checkEnvironmentSecurity(): bool
+    public function checkEnvironmentSecurity(): bool
     {
         return app(EnvironmentHardeningService::class)->validateEnvironmentSecurity();
     }
@@ -311,7 +311,7 @@ class SecurityMonitoringService
     /**
      * Check for multiple IP failures
      */
-    private function checkMultipleIPFailures(): ?array
+    public function checkMultipleIPFailures(): ?array
     {
         $ipFailures = Cache::get('ip_failure_counts', []);
         $suspiciousIPs = array_filter($ipFailures, function($count) {
@@ -324,7 +324,7 @@ class SecurityMonitoringService
     /**
      * Check for rapid requests
      */
-    private function checkRapidRequests(): ?array
+    public function checkRapidRequests(): ?array
     {
         $requestCount = Cache::get('request_count_last_hour', 0);
         if ($requestCount > 1000) { // More than 1000 requests per hour
@@ -337,7 +337,7 @@ class SecurityMonitoringService
     /**
      * Check for unusual access times
      */
-    private function checkUnusualAccessTimes(): ?array
+    public function checkUnusualAccessTimes(): ?array
     {
         $accessTimes = Cache::get('access_times_today', []);
         $unusualHours = array_filter($accessTimes, function($count, $hour) {
@@ -350,7 +350,7 @@ class SecurityMonitoringService
     /**
      * Check for tampering attempts
      */
-    private function checkTamperingAttempts(): ?array
+    public function checkTamperingAttempts(): ?array
     {
         $tamperingAttempts = Cache::get('tampering_attempts', 0);
         if ($tamperingAttempts > 0) {
@@ -363,7 +363,7 @@ class SecurityMonitoringService
     /**
      * Count critical issues
      */
-    private function countCriticalIssues(): int
+    public function countCriticalIssues(): int
     {
         $criticalEvents = Cache::get('critical_security_events', []);
         return count(array_filter($criticalEvents, function($event) {
@@ -374,7 +374,7 @@ class SecurityMonitoringService
     /**
      * Count warnings
      */
-    private function countWarnings(): int
+    public function countWarnings(): int
     {
         $warningEvents = Cache::get('warning_security_events', []);
         return count(array_filter($warningEvents, function($event) {
@@ -385,7 +385,7 @@ class SecurityMonitoringService
     /**
      * Count suspicious activities
      */
-    private function countSuspiciousActivities(): int
+    public function countSuspiciousActivities(): int
     {
         return app(CopyProtectionService::class)->detectResellingBehavior() ? 1 : 0;
     }
@@ -393,7 +393,7 @@ class SecurityMonitoringService
     /**
      * Get integrity status
      */
-    private function getIntegrityStatus(): array
+    public function getIntegrityStatus(): array
     {
         return [
             'file_integrity' => $this->checkFileIntegrity(),
@@ -405,7 +405,7 @@ class SecurityMonitoringService
     /**
      * Get system health
      */
-    private function getSystemHealth(): array
+    public function getSystemHealth(): array
     {
         return [
             'php_version' => PHP_VERSION,
@@ -419,7 +419,7 @@ class SecurityMonitoringService
     /**
      * Generate security recommendations
      */
-    private function generateRecommendations(): array
+    public function generateRecommendations(): array
     {
         $recommendations = [];
 
@@ -445,7 +445,7 @@ class SecurityMonitoringService
     /**
      * Get system uptime (simplified)
      */
-    private function getSystemUptime(): string
+    public function getSystemUptime(): string
     {
         // This is a simplified implementation
         // In production, you'd use system-specific methods
@@ -455,7 +455,7 @@ class SecurityMonitoringService
     /**
      * Cleanup old alerts and logs
      */
-    private function cleanupOldAlerts(): void
+    public function cleanupOldAlerts(): void
     {
         // Clean up old alert caches (older than 7 days)
         $oldKeys = Cache::store('file')->getStore()->many(['alert_*']);

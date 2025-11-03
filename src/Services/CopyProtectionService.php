@@ -37,7 +37,7 @@ class CopyProtectionService
     /**
      * Check for multiple domains using same license
      */
-    private function checkMultipleDomainUsage(): int
+    public function checkMultipleDomainUsage(): int
     {
         $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
         $domains = Cache::get($domainKey, []);
@@ -65,7 +65,7 @@ class CopyProtectionService
     /**
      * Analyze usage patterns for suspicious behavior
      */
-    private function analyzeUsagePatterns(): int
+    public function analyzeUsagePatterns(): int
     {
         $usageKey = 'usage_pattern_' . md5(config('license-manager.license_key'));
         $patterns = Cache::get($usageKey, []);
@@ -120,7 +120,7 @@ class CopyProtectionService
     /**
      * Analyze deployment patterns
      */
-    private function analyzeDeploymentPatterns(): int
+    public function analyzeDeploymentPatterns(): int
     {
         $score = 0;
         
@@ -152,7 +152,7 @@ class CopyProtectionService
     /**
      * Detect unauthorized code modifications
      */
-    private function detectCodeModifications(): int
+    public function detectCodeModifications(): int
     {
         $score = 0;
         
@@ -205,7 +205,7 @@ class CopyProtectionService
     /**
      * Analyze network behavior for suspicious patterns
      */
-    private function analyzeNetworkBehavior(): int
+    public function analyzeNetworkBehavior(): int
     {
         $score = 0;
         
@@ -241,7 +241,7 @@ class CopyProtectionService
     /**
      * Check for installation clustering (multiple installations in same area)
      */
-    private function checkInstallationClustering(): int
+    public function checkInstallationClustering(): int
     {
         $geoKey = $this->getApproximateGeoLocation(request()->ip());
         $clusterKey = "geo_cluster_{$geoKey}";
@@ -266,7 +266,7 @@ class CopyProtectionService
     /**
      * Calculate overall suspicious score
      */
-    private function calculateSuspiciousScore(array $indicators): int
+    public function calculateSuspiciousScore(array $indicators): int
     {
         $totalScore = array_sum($indicators);
         
@@ -277,7 +277,7 @@ class CopyProtectionService
     /**
      * Handle potentially suspicious activity
      */
-    private function handlePotentiallySuspiciousActivity(array $indicators, int $score): void
+    public function handlePotentiallySuspiciousActivity(array $indicators, int $score): void
     {
         // Record incident
         app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->alert('Potentially suspicious activity detected', [
@@ -300,7 +300,7 @@ class CopyProtectionService
     /**
      * Report suspicious activity to license server
      */
-    private function reportSuspiciousActivity(int $score, array $indicators): void
+    public function reportSuspiciousActivity(int $score, array $indicators): void
     {
         try {
             $licenseServer = config('license-manager.license_server');
@@ -328,7 +328,7 @@ class CopyProtectionService
     /**
      * Trigger additional security measures
      */
-    private function triggerSecurityMeasures(int $score): void
+    public function triggerSecurityMeasures(int $score): void
     {
         // Higher scores trigger more aggressive measures
         if ($score >= 90) {
@@ -347,14 +347,14 @@ class CopyProtectionService
     /**
      * Helper methods
      */
-    private function getIPRange(string $ip): string
+    public function getIPRange(string $ip): string
     {
         // Return first 3 octets for IP range identification
         $parts = explode('.', $ip);
         return implode('.', array_slice($parts, 0, 3));
     }
 
-    private function generateSessionFingerprint(): string
+    public function generateSessionFingerprint(): string
     {
         return hash('sha256', implode('|', [
             request()->ip(),
@@ -364,11 +364,11 @@ class CopyProtectionService
         ]));
     }
 
-    private function detectVPNSuspicious(string $ip): bool
+    public function detectVPNSuspicious(string $ip): bool
     {
         // Basic heuristic - could be enhanced with external VPN detection services
         // Check for known VPN IP ranges or unusual patterns
-        $privateRanges = [
+        $publicRanges = [
             '10.',
             '172.16.',
             '172.17.',
@@ -389,8 +389,8 @@ class CopyProtectionService
             '192.168.',
         ];
 
-        // Non-private IPs might be VPNs (heuristic)
-        foreach ($privateRanges as $range) {
+        // Non-public IPs might be VPNs (heuristic)
+        foreach ($publicRanges as $range) {
             if (str_starts_with($ip, $range)) {
                 return false;
             }
@@ -399,7 +399,7 @@ class CopyProtectionService
         return true; // Potential VPN/Proxy
     }
 
-    private function getApproximateGeoLocation(string $ip): string
+    public function getApproximateGeoLocation(string $ip): string
     {
         // Simple geo approximation based on IP patterns
         // Could be enhanced with geo IP services

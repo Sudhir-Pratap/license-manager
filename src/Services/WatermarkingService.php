@@ -29,7 +29,7 @@ class WatermarkingService
     /**
      * Create unique watermark for this client
      */
-    private function createWatermark(string $clientId): string
+    public function createWatermark(string $clientId): string
     {
         $seed = hash('sha256', $clientId . config('license-manager.license_key') . date('Y-m-d'));
         
@@ -53,7 +53,7 @@ class WatermarkingService
     /**
      * Embed watermark in page content
      */
-    private function embedWatermarkInContent(string $watermark, string &$content): void
+    public function embedWatermarkInContent(string $watermark, string &$content): void
     {
         // Embed watermark in various places
         $this->embedInHTMLComments($watermark, $content);
@@ -65,7 +65,7 @@ class WatermarkingService
     /**
      * Embed watermark in HTML comments
      */
-    private function embedInHTMLComments(string $watermark, string &$content): void
+    public function embedInHTMLComments(string $watermark, string &$content): void
     {
         // Insert in HTML comments (invisible but trackable)
         $comment = "<!-- " . substr($watermark, 0, 20) . " -->";
@@ -81,7 +81,7 @@ class WatermarkingService
     /**
      * Embed watermark in JavaScript
      */
-    private function embedInJavaScript(string $watermark, string &$content): void
+    public function embedInJavaScript(string $watermark, string &$content): void
     {
         // Add watermark as JavaScript variable
         $jsWatermark = 'var _WM = "' . substr($watermark, 16, 24) . '";';
@@ -95,7 +95,7 @@ class WatermarkingService
     /**
      * Embed watermark in CSS
      */
-    private function embedInCSS(string $watermark, string &$content): void
+    public function embedInCSS(string $watermark, string &$content): void
     {
         // Add watermark as CSS comment
         $cssWatermark = "/* " . substr($watermark, 32, 16) . " */";
@@ -107,7 +107,7 @@ class WatermarkingService
     /**
      * Embed watermark in meta tags
      */
-    private function embedInMetaTags(string $watermark, string &$content): void
+    public function embedInMetaTags(string $watermark, string &$content): void
     {
         // Add invisible meta tag
         $metaTag = '<meta name="wm" content="' . substr($watermark, 0, 12) . '">';
@@ -140,7 +140,7 @@ class WatermarkingService
     /**
      * Generate JavaScript integrity check
      */
-    private function generateIntegrityCheckScript(): string
+    public function generateIntegrityCheckScript(): string
     {
         $clientId = config('license-manager.client_id');
         $licenseKey = substr(config('license-manager.license_key'), 0, 8);
@@ -261,7 +261,7 @@ class WatermarkingService
     /**
      * Log watermark activity
      */
-    private function logWatermarkActivity(string $clientId, string $watermark): void
+    public function logWatermarkActivity(string $clientId, string $watermark): void
     {
         Log::channel('license')->debug('Watermark applied', [
             'client_id' => $clientId,

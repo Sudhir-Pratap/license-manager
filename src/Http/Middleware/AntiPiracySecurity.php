@@ -54,7 +54,7 @@ class AntiPiracySecurity
     /**
      * Check if validation should be skipped for this request
      */
-    private function shouldSkipValidation(Request $request): bool
+    public function shouldSkipValidation(Request $request): bool
     {
         $skipRoutes = config('license-manager.skip_routes', []);
         $path = $request->path();
@@ -81,7 +81,7 @@ class AntiPiracySecurity
     /**
      * Check for bypass conditions (development, testing, etc.)
      */
-    private function hasBypass(Request $request): bool
+    public function hasBypass(Request $request): bool
     {
         // Allow bypass in local environment (unless explicitly disabled for testing)
         if (app()->environment('local') && !config('license-manager.disable_local_bypass', false)) {
@@ -104,7 +104,7 @@ class AntiPiracySecurity
     /**
      * Handle validation failure
      */
-    private function handleValidationFailure(Request $request): void
+    public function handleValidationFailure(Request $request): void
     {
         $report = $this->getAntiPiracyManager()->getValidationReport();
         
@@ -156,7 +156,7 @@ class AntiPiracySecurity
     /**
      * Get appropriate failure response
      */
-    private function getFailureResponse(Request $request)
+    public function getFailureResponse(Request $request)
     {
         // Check if IP is blacklisted
         if (Cache::get('blacklisted_ip_' . $request->ip())) {
@@ -187,7 +187,7 @@ class AntiPiracySecurity
     /**
      * Log successful validation for monitoring
      */
-    private function logSuccessfulValidation(Request $request): void
+    public function logSuccessfulValidation(Request $request): void
     {
         // Only log occasionally to avoid spam
         $logKey = 'license_success_log_' . date('Y-m-d-H');

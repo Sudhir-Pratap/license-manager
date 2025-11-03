@@ -23,7 +23,7 @@ class VendorProtectionService
     /**
      * Create initial integrity baseline for vendor files
      */
-    private function createVendorIntegrityBaseline(): void
+    public function createVendorIntegrityBaseline(): void
     {
         $vendorPath = base_path('vendor/acecoderz/license-manager');
 
@@ -47,7 +47,7 @@ class VendorProtectionService
     /**
      * Generate comprehensive baseline for vendor directory
      */
-    private function generateVendorBaseline(string $vendorPath): array
+    public function generateVendorBaseline(string $vendorPath): array
     {
         $baseline = [
             'files' => [],
@@ -104,7 +104,7 @@ class VendorProtectionService
     /**
      * Setup real-time vendor modification detection
      */
-    private function setupVendorModificationDetection(): void
+    public function setupVendorModificationDetection(): void
     {
         // This would be called during license validation
         $this->verifyVendorIntegrity();
@@ -198,7 +198,7 @@ class VendorProtectionService
     /**
      * Compare current state with a specific baseline
      */
-    private function compareWithBaseline(array $currentState, array $baseline): array
+    public function compareWithBaseline(array $currentState, array $baseline): array
     {
         $violations = [];
 
@@ -220,7 +220,7 @@ class VendorProtectionService
     /**
      * Handle detected vendor tampering
      */
-    private function handleVendorTampering(array $violations, string $baselineType = 'primary'): void
+    public function handleVendorTampering(array $violations, string $baselineType = 'primary'): void
     {
         $criticalViolations = array_filter($violations, function($v) {
             return in_array($v['severity'], ['critical', 'high']);
@@ -275,7 +275,7 @@ class VendorProtectionService
     /**
      * Implement critical countermeasures for severe tampering
      */
-    private function implementCriticalCountermeasures(array $violations): void
+    public function implementCriticalCountermeasures(array $violations): void
     {
         // Immediate license suspension
         Cache::put('license_force_invalid', true, now()->addHours(24));
@@ -306,7 +306,7 @@ class VendorProtectionService
     /**
      * Implement warning countermeasures for minor tampering
      */
-    private function implementWarningCountermeasures(array $violations): void
+    public function implementWarningCountermeasures(array $violations): void
     {
         // Reduce license cache duration
         Cache::put('license_cache_reduced', true, now()->addHours(1));
@@ -323,7 +323,7 @@ class VendorProtectionService
     /**
      * Implement vendor file locking mechanisms
      */
-    private function implementVendorFileLocking(): void
+    public function implementVendorFileLocking(): void
     {
         $vendorPath = base_path('vendor/acecoderz/license-manager');
 
@@ -372,7 +372,7 @@ class VendorProtectionService
     /**
      * Add additional vendor tampering countermeasures
      */
-    private function addVendorTamperingCountermeasures(): void
+    public function addVendorTamperingCountermeasures(): void
     {
         // Setup file system monitoring (if available)
         $this->setupFilesystemMonitoring();
@@ -387,7 +387,7 @@ class VendorProtectionService
     /**
      * Setup file system monitoring
      */
-    private function setupFilesystemMonitoring(): void
+    public function setupFilesystemMonitoring(): void
     {
         // This would integrate with system file monitoring tools
         // For now, we'll implement periodic checks
@@ -404,7 +404,7 @@ class VendorProtectionService
     /**
      * Create decoy files to detect tampering
      */
-    private function createDecoyFiles(): void
+    public function createDecoyFiles(): void
     {
         $vendorPath = base_path('vendor/acecoderz/license-manager');
 
@@ -430,7 +430,7 @@ class VendorProtectionService
     /**
      * Setup self-healing mechanisms
      */
-    private function setupSelfHealing(): void
+    public function setupSelfHealing(): void
     {
         // In a real implementation, this could restore files from backups
         // For now, we'll implement detection and alerting

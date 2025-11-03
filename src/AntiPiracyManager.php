@@ -12,11 +12,11 @@ use Illuminate\Support\Str;
 
 class AntiPiracyManager
 {
-    private $licenseManager;
-    private $hardwareFingerprint;
-    private $installationId;
-    private $lastValidationTime;
-    private $lastValidationResults = [];
+    public $licenseManager;
+    public $hardwareFingerprint;
+    public $installationId;
+    public $lastValidationTime;
+    public $lastValidationResults = [];
     
     public function __construct(LicenseManager $licenseManager)
     {
@@ -114,7 +114,7 @@ class AntiPiracyManager
     /**
      * Generate unique hardware fingerprint
      */
-    private function generateHardwareFingerprint(): string
+    public function generateHardwareFingerprint(): string
     {
         // Use the persisted hardware fingerprint from LicenseManager
         return $this->licenseManager->generateHardwareFingerprint();
@@ -123,7 +123,7 @@ class AntiPiracyManager
     /**
      * Get or create unique installation ID
      */
-    private function getOrCreateInstallationId(): string
+    public function getOrCreateInstallationId(): string
     {
         $idFile = storage_path('app/installation.id');
         
@@ -143,7 +143,7 @@ class AntiPiracyManager
     /**
      * Validate license with enhanced security
      */
-    private function validateLicense(): bool
+    public function validateLicense(): bool
     {
         $licenseKey = config('license-manager.license_key');
         $productId = config('license-manager.product_id');
@@ -166,7 +166,7 @@ class AntiPiracyManager
     /**
      * Validate hardware fingerprint hasn't changed
      */
-    private function validateHardwareFingerprint(): bool
+    public function validateHardwareFingerprint(): bool
     {
         $storedFingerprint = Cache::get('hardware_fingerprint');
         
@@ -206,7 +206,7 @@ class AntiPiracyManager
     /**
      * Validate installation ID
      */
-    private function validateInstallationId(): bool
+    public function validateInstallationId(): bool
     {
         $storedId = Cache::get('installation_id');
         
@@ -221,7 +221,7 @@ class AntiPiracyManager
     /**
      * Validate vendor directory integrity
      */
-    private function validateVendorIntegrity(): bool
+    public function validateVendorIntegrity(): bool
     {
         if (!config('license-manager.vendor_protection.enabled', true)) {
             return true; // Skip if disabled
@@ -248,7 +248,7 @@ class AntiPiracyManager
     /**
      * Detect code tampering
      */
-    private function detectTampering(): bool
+    public function detectTampering(): bool
     {
         // Check for modified core files
         $criticalFiles = [
@@ -354,7 +354,7 @@ class AntiPiracyManager
     /**
      * Validate environment consistency
      */
-    private function validateEnvironment(): bool
+    public function validateEnvironment(): bool
     {
         $checks = [
             'app_key_exists' => !empty(config('app.key')),
@@ -370,7 +370,7 @@ class AntiPiracyManager
     /**
      * Validate usage patterns for suspicious activity
      */
-    private function validateUsagePatterns(): bool
+    public function validateUsagePatterns(): bool
     {
         $currentTime = now();
         $lastValidation = Cache::get('last_validation_time');
@@ -407,7 +407,7 @@ class AntiPiracyManager
     /**
      * Validate server communication
      */
-    private function validateServerCommunication(): bool
+    public function validateServerCommunication(): bool
     {
         $licenseServer = config('license-manager.license_server');
         $apiToken = config('license-manager.api_token');
@@ -435,7 +435,7 @@ class AntiPiracyManager
     /**
      * Test database connection
      */
-    private function testDatabaseConnection(): bool
+    public function testDatabaseConnection(): bool
     {
         try {
             DB::connection()->getPdo();
@@ -448,7 +448,7 @@ class AntiPiracyManager
     /**
      * Test cache connection
      */
-    private function testCacheConnection(): bool
+    public function testCacheConnection(): bool
     {
         try {
             Cache::put('test_key', 'test_value', 1);
@@ -491,7 +491,7 @@ class AntiPiracyManager
     /**
      * Validate with stealth mode (fastest, most transparent)
      */
-    private function validateInStealthMode(): bool
+    public function validateInStealthMode(): bool
     {
         try {
             // Check if we have recent cached validation
@@ -553,7 +553,7 @@ class AntiPiracyManager
     /**
      * Check if license server is unreachable
      */
-    private function isServerUnreachable(): bool
+    public function isServerUnreachable(): bool
     {
         try {
             $licenseServer = config('license-manager.license_server');
@@ -567,7 +567,7 @@ class AntiPiracyManager
     /**
      * Check grace period for stealth mode
      */
-    private function checkGracePeriodInStealth(): bool
+    public function checkGracePeriodInStealth(): bool
     {
         $graceKey = 'stealth_grace_' . md5(request()->getHost() ?? 'unknown');
         $graceStart = Cache::get($graceKey);

@@ -24,7 +24,7 @@ class EnvironmentHardeningService
     /**
      * Apply production-specific hardening
      */
-    private function applyProductionHardening(): void
+    public function applyProductionHardening(): void
     {
         if (!config('license-manager.environment_hardening.production_only_features', true)) {
             return;
@@ -43,7 +43,7 @@ class EnvironmentHardeningService
     /**
      * Configure secure sessions
      */
-    private function configureSecureSessions(): void
+    public function configureSecureSessions(): void
     {
         if (!config('license-manager.environment_hardening.secure_session_config', true)) {
             return;
@@ -67,7 +67,7 @@ class EnvironmentHardeningService
     /**
      * Enforce HTTPS connections
      */
-    private function enforceHTTPS(): void
+    public function enforceHTTPS(): void
     {
         if (!config('license-manager.environment_hardening.enforce_https', true)) {
             return;
@@ -91,7 +91,7 @@ class EnvironmentHardeningService
     /**
      * Disable debug features in production
      */
-    private function disableDebugFeatures(): void
+    public function disableDebugFeatures(): void
     {
         if (!config('license-manager.environment_hardening.disable_debug_tools', true)) {
             return;
@@ -116,7 +116,7 @@ class EnvironmentHardeningService
     /**
      * Restrict function access
      */
-    private function restrictFunctionAccess(): void
+    public function restrictFunctionAccess(): void
     {
         if (!config('license-manager.environment_hardening.restrict_function_access', true)) {
             return;
@@ -144,7 +144,7 @@ class EnvironmentHardeningService
     /**
      * Harden application configuration
      */
-    private function hardenAppConfiguration(): void
+    public function hardenAppConfiguration(): void
     {
         // Set secure defaults
         Config::set('app.key', env('APP_KEY')); // Ensure key is loaded
@@ -163,7 +163,7 @@ class EnvironmentHardeningService
                 if ($root && str_contains($root, 'config') ||
                     str_contains($root, 'storage/app') ||
                     str_contains($root, 'bootstrap')) {
-                    Config::set("filesystems.disks.{$disk}.visibility", 'private');
+                    Config::set("filesystems.disks.{$disk}.visibility", 'public');
                 }
             }
         }
@@ -172,7 +172,7 @@ class EnvironmentHardeningService
     /**
      * Secure logging configuration
      */
-    private function secureLoggingConfiguration(): void
+    public function secureLoggingConfiguration(): void
     {
         // Use secure log channels
         Config::set('logging.default', 'daily');
@@ -195,7 +195,7 @@ class EnvironmentHardeningService
     /**
      * Configure secure error handling
      */
-    private function configureErrorHandling(): void
+    public function configureErrorHandling(): void
     {
         if (!config('license-manager.environment_hardening.disable_error_display', true)) {
             return;
@@ -261,7 +261,7 @@ class EnvironmentHardeningService
     /**
      * Check HTTPS enforcement
      */
-    private function checkHTTPSEnforcement(): bool
+    public function checkHTTPSEnforcement(): bool
     {
         return request()->secure() || app()->environment('local');
     }
@@ -269,7 +269,7 @@ class EnvironmentHardeningService
     /**
      * Check dangerous functions are disabled
      */
-    private function checkDangerousFunctions(): bool
+    public function checkDangerousFunctions(): bool
     {
         $disabled = ini_get('disable_functions');
         $dangerous = ['eval', 'exec', 'shell_exec', 'system', 'passthru'];
@@ -286,7 +286,7 @@ class EnvironmentHardeningService
     /**
      * Check file permissions
      */
-    private function checkFilePermissions(): bool
+    public function checkFilePermissions(): bool
     {
         $criticalFiles = [
             base_path('.env') => 0600,

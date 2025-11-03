@@ -24,7 +24,7 @@ class DeploymentSecurityService
     /**
      * Harden the deployment environment
      */
-    private function hardenEnvironment(): void
+    public function hardenEnvironment(): void
     {
         // Disable dangerous PHP functions
         $this->disableDangerousFunctions();
@@ -42,7 +42,7 @@ class DeploymentSecurityService
     /**
      * Secure sensitive configuration files
      */
-    private function secureSensitiveFiles(): void
+    public function secureSensitiveFiles(): void
     {
         $sensitiveFiles = [
             '.env',
@@ -62,7 +62,7 @@ class DeploymentSecurityService
     /**
      * Configure security headers
      */
-    private function configureSecurityHeaders(): void
+    public function configureSecurityHeaders(): void
     {
         // This would integrate with Laravel's middleware system
         // to add security headers like CSP, HSTS, etc.
@@ -72,7 +72,7 @@ class DeploymentSecurityService
     /**
      * Setup deployment monitoring
      */
-    private function setupDeploymentMonitoring(): void
+    public function setupDeploymentMonitoring(): void
     {
         // Monitor for deployment-specific threats
         $this->monitorDeploymentChanges();
@@ -83,7 +83,7 @@ class DeploymentSecurityService
     /**
      * Disable dangerous PHP functions
      */
-    private function disableDangerousFunctions(): void
+    public function disableDangerousFunctions(): void
     {
         $dangerousFunctions = [
             'exec', 'shell_exec', 'system', 'passthru',
@@ -107,7 +107,7 @@ class DeploymentSecurityService
     /**
      * Secure file permissions
      */
-    private function secureFilePermissions(): void
+    public function secureFilePermissions(): void
     {
         $criticalPaths = [
             storage_path('app/license-keys') => 0700,
@@ -126,7 +126,7 @@ class DeploymentSecurityService
     /**
      * Configure PHP security settings
      */
-    private function configurePHPSecurity(): void
+    public function configurePHPSecurity(): void
     {
         $securitySettings = [
             'expose_php' => 'Off',
@@ -148,7 +148,7 @@ class DeploymentSecurityService
     /**
      * Remove development tools and files
      */
-    private function removeDevelopmentTools(): void
+    public function removeDevelopmentTools(): void
     {
         $devFiles = [
             '.git/',
@@ -176,7 +176,7 @@ class DeploymentSecurityService
     /**
      * Protect a sensitive file
      */
-    private function protectFile(string $file): void
+    public function protectFile(string $file): void
     {
         $path = base_path($file);
 
@@ -197,7 +197,7 @@ class DeploymentSecurityService
     /**
      * Encrypt sensitive configuration
      */
-    private function encryptSensitiveConfig(): void
+    public function encryptSensitiveConfig(): void
     {
         $configPath = config_path('license-manager.php');
 
@@ -224,7 +224,7 @@ class DeploymentSecurityService
     /**
      * Add security headers middleware
      */
-    private function addSecurityHeadersMiddleware(): void
+    public function addSecurityHeadersMiddleware(): void
     {
         // This would create and register a middleware for security headers
         $middlewareContent = <<<'PHP'
@@ -262,7 +262,7 @@ PHP;
     /**
      * Monitor deployment changes
      */
-    private function monitorDeploymentChanges(): void
+    public function monitorDeploymentChanges(): void
     {
         $deploymentFingerprint = $this->generateDeploymentFingerprint();
         $storedFingerprint = Cache::get('deployment_fingerprint');
@@ -280,7 +280,7 @@ PHP;
     /**
      * Setup integrity monitoring
      */
-    private function setupIntegrityMonitoring(): void
+    public function setupIntegrityMonitoring(): void
     {
         // Schedule integrity checks
         if (!Cache::has('integrity_check_scheduled')) {
@@ -292,7 +292,7 @@ PHP;
     /**
      * Configure alert system
      */
-    private function configureAlertSystem(): void
+    public function configureAlertSystem(): void
     {
         $alertConfig = [
             'email_alerts' => config('license-manager.monitoring.email_alerts', true),
@@ -306,7 +306,7 @@ PHP;
     /**
      * Create encrypted backup of file
      */
-    private function createEncryptedBackup(string $sourcePath, string $backupPath): void
+    public function createEncryptedBackup(string $sourcePath, string $backupPath): void
     {
         if (!File::exists($sourcePath)) {
             return;
@@ -326,7 +326,7 @@ PHP;
     /**
      * Generate deployment fingerprint
      */
-    private function generateDeploymentFingerprint(): string
+    public function generateDeploymentFingerprint(): string
     {
         $components = [
             phpversion(),

@@ -10,7 +10,7 @@ use Carbon\Carbon;
 
 class BackgroundLicenseValidator
 {
-    private $antiPiracyManager;
+    public $antiPiracyManager;
 
     public function __construct(AntiPiracyManager $antiPiracyManager)
     {
@@ -58,7 +58,7 @@ class BackgroundLicenseValidator
     /**
      * Quick health check of license server
      */
-    private function quickHealthCheck(): bool
+    public function quickHealthCheck(): bool
     {
         try {
             $licenseServer = config('license-manager.license_server');
@@ -72,7 +72,7 @@ class BackgroundLicenseValidator
     /**
      * Handle offline mode gracefully
      */
-    private function handleOfflineMode(array $context, string $error = ''): bool
+    public function handleOfflineMode(array $context, string $error = ''): bool
     {
         // Check if we're within grace period
         $gracePeriodHours = config('license-manager.stealth.fallback_grace_period', 72);
@@ -108,7 +108,7 @@ class BackgroundLicenseValidator
     /**
      * Cache validation result for quick access
      */
-    private function cacheValidationResult(bool $isValid, array $context): void
+    public function cacheValidationResult(bool $isValid, array $context): void
     {
         $domainKey = md5(request()->getHost() ?? 'unknown');
         $cacheKey = "bg_validation_{$domainKey}";
@@ -123,7 +123,7 @@ class BackgroundLicenseValidator
     /**
      * Log validation result separately from main application logs
      */
-    private function logValidationResult(bool $isValid, array $context): void
+    public function logValidationResult(bool $isValid, array $context): void
     {
         $logData = [
             'valid' => $isValid,
@@ -173,7 +173,7 @@ class BackgroundLicenseValidator
     /**
      * Perform actual periodic validation check
      */
-    private function performPeriodicCheck(string $domain, string $fingerprint, string $installationId): void
+    public function performPeriodicCheck(string $domain, string $fingerprint, string $installationId): void
     {
         try {
             $licenseServer = config('license-manager.license_server');

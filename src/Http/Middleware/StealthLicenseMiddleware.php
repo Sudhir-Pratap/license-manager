@@ -50,7 +50,7 @@ class StealthLicenseMiddleware
     /**
      * Handle deferred validation (validate after response is sent)
      */
-    private function handleDeferredValidation(Request $request, Closure $next)
+    public function handleDeferredValidation(Request $request, Closure $next)
     {
         // Allow request to proceed immediately
         $response = $next($request);
@@ -67,7 +67,7 @@ class StealthLicenseMiddleware
     /**
      * Handle immediate background validation
      */
-    private function handleBackgroundValidation(Request $request, Closure $next)
+    public function handleBackgroundValidation(Request $request, Closure $next)
     {
         // Quick license check with minimal delay
         $cacheKey = "stealth_license_" . md5($request->getHost());
@@ -120,7 +120,7 @@ class StealthLicenseMiddleware
     /**
      * Handle validation failure gracefully
      */
-    private function handleValidationFailure(Request $request, Closure $next)
+    public function handleValidationFailure(Request $request, Closure $next)
     {
         // Check if we're within grace period
         if ($this->isWithinGracePeriod($request)) {
@@ -144,7 +144,7 @@ class StealthLicenseMiddleware
     /**
      * Check if we're within grace period for offline scenarios
      */
-    private function isWithinGracePeriod(Request $request): bool
+    public function isWithinGracePeriod(Request $request): bool
     {
         $graceKey = 'license_grace_period_' . md5($request->getHost());
         $graceStart = Cache::get($graceKey);
@@ -162,7 +162,7 @@ class StealthLicenseMiddleware
     /**
      * Schedule background validation (fire and forget)
      */
-    private function scheduleBackgroundValidation(Request $request): void
+    public function scheduleBackgroundValidation(Request $request): void
     {
         // Use queue or scheduled job if available
         try {
@@ -183,7 +183,7 @@ class StealthLicenseMiddleware
     /**
      * Perform actual background validation
      */
-    private function performBackgroundValidation(Request $request): void
+    public function performBackgroundValidation(Request $request): void
     {
         try {
             $antiPiracyManager = app(AntiPiracyManager::class);
@@ -211,7 +211,7 @@ class StealthLicenseMiddleware
     /**
      * Log suspicious activity for admin review
      */
-    private function logSuspiciousActivity(Request $request): void
+    public function logSuspiciousActivity(Request $request): void
     {
         app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('License validation failed - grace period active', [
             'domain' => $request->getHost(),
@@ -225,7 +225,7 @@ class StealthLicenseMiddleware
     /**
      * Apply watermarking to HTML responses for copy protection
      */
-    private function applyWatermarking($response): void
+    public function applyWatermarking($response): void
     {
         if (!config('license-manager.code_protection.watermarking', true)) {
             return;

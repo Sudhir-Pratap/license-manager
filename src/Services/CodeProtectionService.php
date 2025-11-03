@@ -27,7 +27,7 @@ class CodeProtectionService
     /**
      * Obfuscate critical license functions
      */
-    private function obfuscateCriticalFunctions(): void
+    public function obfuscateCriticalFunctions(): void
     {
         // This would integrate with tools like PHP-Parser to modify AST
         // For now, we'll implement string-based obfuscation
@@ -48,7 +48,7 @@ class CodeProtectionService
     /**
      * Add runtime integrity checks
      */
-    private function addRuntimeIntegrityChecks(): void
+    public function addRuntimeIntegrityChecks(): void
     {
         // Add integrity verification at runtime
         $integrityHash = $this->generateIntegrityHash();
@@ -61,7 +61,7 @@ class CodeProtectionService
     /**
      * Implement anti-debugging measures
      */
-    private function implementAntiDebugMeasures(): void
+    public function implementAntiDebugMeasures(): void
     {
         // Detect debugging tools and development environments
         $debugIndicators = [
@@ -79,7 +79,7 @@ class CodeProtectionService
     /**
      * Add invisible watermarking to HTML output
      */
-    private function addWatermarking(): void
+    public function addWatermarking(): void
     {
         if (!config('license-manager.code_protection.watermarking', true)) {
             return;
@@ -92,7 +92,7 @@ class CodeProtectionService
     /**
      * Generate integrity hash for critical files
      */
-    private function generateIntegrityHash(): string
+    public function generateIntegrityHash(): string
     {
         $criticalFiles = [
             'src/LicenseManager.php',
@@ -114,7 +114,7 @@ class CodeProtectionService
     /**
      * Verify code integrity
      */
-    private function verifyIntegrity(string $expectedHash): bool
+    public function verifyIntegrity(string $expectedHash): bool
     {
         $currentHash = $this->generateIntegrityHash();
 
@@ -133,7 +133,7 @@ class CodeProtectionService
     /**
      * Detect eval() usage (security risk)
      */
-    private function detectEvalUsage(): bool
+    public function detectEvalUsage(): bool
     {
         // Check if eval function is disabled
         $disabled = explode(',', ini_get('disable_functions'));
@@ -143,7 +143,7 @@ class CodeProtectionService
     /**
      * Detect development headers that might indicate debugging
      */
-    private function detectDevelopmentHeaders(): bool
+    public function detectDevelopmentHeaders(): bool
     {
         $headers = [
             'X-Debug-Token',
@@ -163,7 +163,7 @@ class CodeProtectionService
     /**
      * Basic file obfuscation (string replacement)
      */
-    private function obfuscateFile(string $filePath): void
+    public function obfuscateFile(string $filePath): void
     {
         $content = File::get($filePath);
 
