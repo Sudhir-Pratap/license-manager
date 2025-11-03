@@ -288,7 +288,7 @@ class AntiPiracyManager
             }
         }
 
-        // Check for license middleware bypass attempts
+        // Check for license middleware bypass attemptssss
         // Verify that license middleware is registered (either as alias or directly)
         $middlewareAliases = [];
         $router = app('router');
