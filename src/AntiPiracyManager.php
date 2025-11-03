@@ -43,6 +43,7 @@ class AntiPiracyManager
             'hardware' => $this->validateHardwareFingerprint(),
             'installation' => $this->validateInstallationId(),
             'tampering' => $this->detectTampering(),
+            'vendor_integrity' => $this->validateVendorIntegrity(),
             'environment' => $this->validateEnvironment(),
             'usage_patterns' => $this->validateUsagePatterns(),
             'server_communication' => $this->validateServerCommunication(),
@@ -67,6 +68,7 @@ class AntiPiracyManager
             'license' => $validations['license'],
             'installation' => $validations['installation'],
             'tampering' => $validations['tampering'],
+            'vendor_integrity' => $validations['vendor_integrity'],
         ];
 
         // All critical validations must pass
@@ -214,6 +216,33 @@ class AntiPiracyManager
         }
 
         return $storedId === $this->installationId;
+    }
+
+    /**
+     * Validate vendor directory integrity
+     */
+    private function validateVendorIntegrity(): bool
+    {
+        if (!config('license-manager.vendor_protection.enabled', true)) {
+            return true; // Skip if disabled
+        }
+
+        try {
+            $vendorProtection = app(\Acecoderz\LicenseManager\Services\VendorProtectionService::class);
+            $integrityResult = $vendorProtection->verifyVendorIntegrity();
+
+            if ($integrityResult['status'] === 'violations_detected') {
+                return false;
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Vendor integrity check failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
 
     /**

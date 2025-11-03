@@ -62,5 +62,48 @@ return [
 		'dynamic_validation' => env('LICENSE_DYNAMIC_VALIDATION', true), // Dynamic validation keys
 		'anti_debug' => env('LICENSE_ANTI_DEBUG', true), // Anti-debugging measures
 	],
+	'remote_security_logging' => env('LICENSE_REMOTE_SECURITY_LOGGING', true),
+	'code_protection' => [
+		'obfuscation_enabled' => env('LICENSE_OBFUSCATE', true),
+		'watermarking' => env('LICENSE_WATERMARK', true),
+		'runtime_checks' => env('LICENSE_RUNTIME_CHECKS', true),
+		'dynamic_validation' => env('LICENSE_DYNAMIC_VALIDATION', true),
+		'anti_debug' => env('LICENSE_ANTI_DEBUG', true),
+		'integrity_check_interval' => env('LICENSE_INTEGRITY_CHECK_INTERVAL', 3600), // seconds
+	],
+	'deployment_security' => [
+		'auto_secure' => env('LICENSE_AUTO_SECURE_DEPLOYMENT', true),
+		'remove_dev_files' => env('LICENSE_REMOVE_DEV_FILES', true),
+		'encrypt_sensitive_config' => env('LICENSE_ENCRYPT_CONFIG', true),
+		'harden_php_settings' => env('LICENSE_HARDEN_PHP', true),
+		'secure_file_permissions' => env('LICENSE_SECURE_PERMISSIONS', true),
+		'monitor_deployment_changes' => env('LICENSE_MONITOR_DEPLOYMENT', true),
+	],
+	'environment_hardening' => [
+		'production_only_features' => env('LICENSE_PRODUCTION_ONLY', true),
+		'disable_debug_tools' => env('LICENSE_DISABLE_DEBUG_TOOLS', true),
+		'restrict_function_access' => env('LICENSE_RESTRICT_FUNCTIONS', true),
+		'enforce_https' => env('LICENSE_ENFORCE_HTTPS', true),
+		'disable_error_display' => env('LICENSE_DISABLE_ERROR_DISPLAY', true),
+		'secure_session_config' => env('LICENSE_SECURE_SESSIONS', true),
+	],
+	'monitoring' => [
+		'email_alerts' => env('LICENSE_EMAIL_ALERTS', true),
+		'log_alerts' => env('LICENSE_LOG_ALERTS', true),
+		'remote_alerts' => env('LICENSE_REMOTE_ALERTS', true),
+		'alert_email' => env('LICENSE_ALERT_EMAIL', 'security@acecoderz.com'),
+		'alert_threshold' => env('LICENSE_ALERT_THRESHOLD', 5), // alerts per hour
+		'critical_alerts_only' => env('LICENSE_CRITICAL_ALERTS_ONLY', false),
+	],
+	'vendor_protection' => [
+		'enabled' => env('LICENSE_VENDOR_PROTECTION', true),
+		'integrity_checks' => env('LICENSE_VENDOR_INTEGRITY_CHECKS', true),
+		'file_locking' => env('LICENSE_VENDOR_FILE_LOCKING', true),
+		'decoy_files' => env('LICENSE_VENDOR_DECOY_FILES', true),
+		'terminate_on_critical' => env('LICENSE_TERMINATE_ON_CRITICAL', false),
+		'self_healing' => env('LICENSE_VENDOR_SELF_HEALING', false),
+		'backup_enabled' => env('LICENSE_VENDOR_BACKUP', true),
+		'monitoring_interval' => env('LICENSE_VENDOR_MONITOR_INTERVAL', 300), // seconds
+	],
 	'remote_security_logging' => env('LICENSE_REMOTE_SECURITY_LOGGING', true), // Send security logs to license-server instead of local files
 ];

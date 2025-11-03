@@ -10,6 +10,8 @@ use Acecoderz\LicenseManager\Commands\DeploymentLicenseCommand;
 use Acecoderz\LicenseManager\Commands\StealthInstallCommand;
 use Acecoderz\LicenseManager\Commands\CopyProtectionCommand;
 use Acecoderz\LicenseManager\Commands\ClientFriendlyCommand;
+use Acecoderz\LicenseManager\Commands\SecurityAuditCommand;
+use Acecoderz\LicenseManager\Commands\VendorProtectionCommand;
 use Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity;
 use Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity;
 use Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware;
@@ -17,6 +19,11 @@ use Acecoderz\LicenseManager\Services\BackgroundLicenseValidator;
 use Acecoderz\LicenseManager\Services\CopyProtectionService;
 use Acecoderz\LicenseManager\Services\WatermarkingService;
 use Acecoderz\LicenseManager\Services\RemoteSecurityLogger;
+use Acecoderz\LicenseManager\Services\CodeProtectionService;
+use Acecoderz\LicenseManager\Services\DeploymentSecurityService;
+use Acecoderz\LicenseManager\Services\EnvironmentHardeningService;
+use Acecoderz\LicenseManager\Services\SecurityMonitoringService;
+use Acecoderz\LicenseManager\Services\VendorProtectionService;
 use Illuminate\Support\ServiceProvider;
 
 class LicenseManagerServiceProvider extends ServiceProvider {
@@ -54,6 +61,31 @@ class LicenseManagerServiceProvider extends ServiceProvider {
 			return new RemoteSecurityLogger();
 		});
 
+		// Register CodeProtectionService
+		$this->app->singleton(CodeProtectionService::class, function ($app) {
+			return new CodeProtectionService();
+		});
+
+		// Register DeploymentSecurityService
+		$this->app->singleton(DeploymentSecurityService::class, function ($app) {
+			return new DeploymentSecurityService();
+		});
+
+		// Register EnvironmentHardeningService
+		$this->app->singleton(EnvironmentHardeningService::class, function ($app) {
+			return new EnvironmentHardeningService();
+		});
+
+		// Register SecurityMonitoringService
+		$this->app->singleton(SecurityMonitoringService::class, function ($app) {
+			return new SecurityMonitoringService();
+		});
+
+		// Register VendorProtectionService
+		$this->app->singleton(VendorProtectionService::class, function ($app) {
+			return new VendorProtectionService();
+		});
+
 		// Register commands
 		if ($this->app->runningInConsole()) {
 			$this->commands([
@@ -66,6 +98,8 @@ class LicenseManagerServiceProvider extends ServiceProvider {
 				StealthInstallCommand::class,
 				CopyProtectionCommand::class,
 				ClientFriendlyCommand::class,
+				SecurityAuditCommand::class,
+				VendorProtectionCommand::class,
 			]);
 		}
 	}
