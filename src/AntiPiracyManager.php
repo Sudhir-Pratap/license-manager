@@ -291,7 +291,28 @@ class AntiPiracyManager
         // Check for license middleware bypass attempts
         // Verify that license middleware is registered (either as alias or directly)
         $middlewareAliases = app('router')->getMiddleware();
-        $globalMiddleware = app('Illuminate\Contracts\Http\Kernel')->getMiddleware();
+        
+        // Get global middleware from Kernel (Laravel 11+ uses different method)
+        $kernel = app('Illuminate\Contracts\Http\Kernel');
+        $globalMiddleware = [];
+        
+        // Try different methods to get global middleware
+        if (method_exists($kernel, 'getMiddleware')) {
+            $globalMiddleware = $kernel->getMiddleware();
+        } else {
+            // Fallback: Use reflection to access protected $middleware property
+            try {
+                $reflection = new \ReflectionClass($kernel);
+                if ($reflection->hasProperty('middleware')) {
+                    $property = $reflection->getProperty('middleware');
+                    $property->setAccessible(true);
+                    $globalMiddleware = $property->getValue($kernel) ?? [];
+                }
+            } catch (\ReflectionException $e) {
+                // If reflection fails, just use empty array
+                $globalMiddleware = [];
+            }
+        }
         
         $hasLicenseMiddleware = (
             isset($middlewareAliases['license']) ||
