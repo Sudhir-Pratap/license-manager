@@ -140,7 +140,8 @@ class VendorProtectionCommand extends Command
         if ($integrityStatus['status'] === 'violations_detected') {
             $this->warn('Violations found:');
             foreach ($integrityStatus['violations'] as $violation) {
-                $this->line("  - {$violation['type']}: {$violation['file'] ?? 'N/A'} ({$violation['severity']})");
+                $file = $violation['file'] ?? 'N/A';
+                $this->line("  - {$violation['type']}: {$file} ({$violation['severity']})");
             }
         }
 

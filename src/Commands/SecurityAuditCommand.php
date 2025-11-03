@@ -199,10 +199,11 @@ class SecurityAuditCommand extends Command
 
             if ($integrityResult['status'] === 'violations_detected') {
                 foreach ($integrityResult['violations'] as $violation) {
+                    $file = $violation['file'] ?? 'N/A';
                     $issues[] = [
                         'type' => 'vendor_protection',
                         'severity' => $violation['severity'],
-                        'message' => "Vendor integrity violation: {$violation['type']} - {$violation['file'] ?? 'N/A'}",
+                        'message' => "Vendor integrity violation: {$violation['type']} - {$file}",
                         'details' => json_encode($violation),
                         'fix' => 'investigate_vendor_tampering'
                     ];
