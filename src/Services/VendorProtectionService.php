@@ -42,9 +42,15 @@ class VendorProtectionService
         $baseline = $this->generateVendorBaseline($vendorPath);
 
         // Store multiple backups of the baseline
-        Cache::put('vendor_baseline_primary', $baseline, now()->addYears(1));
-        Cache::put('vendor_baseline_backup', $baseline, now()->addYears(1));
+        Cache::put('vendor_baseline_primary', $baseline, now()->addYears(1));   
+        Cache::put('vendor_baseline_backup', $baseline, now()->addYears(1));    
         Cache::put('vendor_baseline_timestamp', now()->toISOString(), now()->addYears(1));
+        
+        // Mark if baseline was created for obfuscated files
+        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        if ($isObfuscated) {
+            Cache::put('vendor_baseline_obfuscated', true, now()->addYears(1));
+        }
 
         Log::info('Vendor integrity baseline created', [
             'file_count' => count($baseline['files']),
@@ -176,19 +182,31 @@ class VendorProtectionService
 
     /**
      * Verify vendor directory integrity
+     *
+     * NOTE: Only verifies files within vendor/acecoderz/license-manager directory.                                                                             
+     * Clients can modify their own code, Laravel core, and other vendor packages without triggering violations.                                                
      * 
-     * NOTE: Only verifies files within vendor/acecoderz/license-manager directory.
-     * Clients can modify their own code, Laravel core, and other vendor packages without triggering violations.
+     * IMPORTANT: If files are obfuscated, baseline must be regenerated after obfuscation.
      */
     public function verifyVendorIntegrity(): array
     {
         $baseline = Cache::get('vendor_baseline_primary');
         $backupBaseline = Cache::get('vendor_baseline_backup');
 
+        // Check if files are obfuscated - if so, baseline should already reflect obfuscated state
+        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        
         if (!$baseline) {
-            Log::warning('No vendor integrity baseline found - creating new one');
+            // If obfuscation is expected but no baseline exists, create one
+            if ($isObfuscated) {
+                Log::warning('Obfuscated files detected but no baseline found - creating baseline for obfuscated files');
+                $this->createVendorIntegrityBaseline();
+                return ['status' => 'baseline_created_for_obfuscated', 'violations' => []];
+            }
+            
+            Log::warning('No vendor integrity baseline found - creating new one');                                                                              
             $this->createVendorIntegrityBaseline();
-            return ['status' => 'baseline_created', 'violations' => []];
+            return ['status' => 'baseline_created', 'violations' => []];        
         }
 
         // Only check our package directory - not Laravel core or other packages
@@ -245,6 +263,53 @@ class VendorProtectionService
 
         // Handle violations
         if (!empty($violations)) {
+            // Check if violations are due to obfuscation (expected changes)
+            $obfuscationTimestamp = Cache::get('license_obfuscation_timestamp');
+            $baselineTimestamp = Cache::get('vendor_baseline_timestamp');
+            
+            // If baseline was created after obfuscation, violations are legitimate
+            // If baseline was created before obfuscation but files are obfuscated, 
+            // we need to ignore violations on obfuscated files
+            if ($isObfuscated && $obfuscationTimestamp) {
+                // Filter out violations that match expected obfuscation pattern
+                $legitimateViolations = [];
+                foreach ($violations as $violation) {
+                    // If it's a file modification on a critical file, it might be obfuscation
+                    if ($violation['type'] === 'file_modified' && 
+                        isset($baseline['critical_files'][$violation['file']])) {
+                        // Check if this is expected obfuscation change
+                        // (we can't fully verify without knowing exact mappings, so we'll be lenient)
+                        Log::debug('File modification detected on obfuscated file - may be expected', [
+                            'file' => $violation['file'],
+                            'obfuscation_timestamp' => $obfuscationTimestamp
+                        ]);
+                        // Only flag if baseline was created AFTER obfuscation (meaning it should match)
+                        if ($baselineTimestamp && strtotime($baselineTimestamp) >= strtotime($obfuscationTimestamp)) {
+                            // Baseline was created after obfuscation, so violations are real
+                            $legitimateViolations[] = $violation;
+                        }
+                        // Otherwise, baseline was created before obfuscation, so ignore this violation
+                    } else {
+                        // Non-obfuscation related violations are always legitimate
+                        $legitimateViolations[] = $violation;
+                    }
+                }
+                
+                if (empty($legitimateViolations)) {
+                    Log::info('All violations appear to be from obfuscation - ignoring', [
+                        'obfuscation_timestamp' => $obfuscationTimestamp
+                    ]);
+                    return [
+                        'status' => 'integrity_verified',
+                        'violations' => [],
+                        'obfuscation_aware' => true,
+                        'checked_at' => now()->toISOString()
+                    ];
+                }
+                
+                $violations = $legitimateViolations;
+            }
+            
             $this->handleVendorTampering($violations);
 
             // If primary baseline is compromised, try backup

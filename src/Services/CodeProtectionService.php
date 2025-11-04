@@ -2,9 +2,10 @@
 
 namespace Acecoderz\LicenseManager\Services;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;                                             
+use Illuminate\Support\Facades\Cache;                                           
 use Illuminate\Support\Facades\File;
+use Acecoderz\LicenseManager\Services\RemoteSecurityLogger;
 use Illuminate\Support\Str;
 
 class CodeProtectionService
@@ -24,24 +25,60 @@ class CodeProtectionService
         $this->addWatermarking();
     }
 
-    /**
-     * Obfuscate critical license functions
+        /**
+     * Obfuscate critical license functions in vendor directory
      */
     public function obfuscateCriticalFunctions(): void
     {
-        // This would integrate with tools like PHP-Parser to modify AST
-        // For now, we'll implement string-based obfuscation
+        // This method is called during runtime, but actual obfuscation
+        // should be done via artisan command: php artisan license:obfuscate
+        // This is because vendor files shouldn't be modified at runtime
+        
+        $this->verifyObfuscationApplied();
+    }
 
+    /**
+     * Obfuscate vendor files (called by command)
+     */
+    public function obfuscateVendorFiles(string $vendorPath): int
+    {
         $criticalFiles = [
             'src/LicenseManager.php',
             'src/AntiPiracyManager.php',
+            'src/Services/CodeProtectionService.php',
+            'src/Services/WatermarkingService.php',
         ];
 
+        $obfuscatedCount = 0;
+        $mappings = [];
+
         foreach ($criticalFiles as $file) {
-            $filePath = __DIR__ . '/../' . $file;
+            $filePath = $vendorPath . '/' . $file;
             if (File::exists($filePath)) {
-                $this->obfuscateFile($filePath);
+                $mapping = $this->obfuscateFile($filePath);
+                if ($mapping) {
+                    $mappings[basename($file)] = $mapping;
+                    $obfuscatedCount++;
+                }
             }
+        }
+
+        // Store obfuscation mappings for runtime deobfuscation if needed
+        if (!empty($mappings)) {
+            Cache::put('license_obfuscation_mappings', $mappings, now()->addYears(1));
+        }
+
+        return $obfuscatedCount;
+    }
+
+    /**
+     * Verify if obfuscation is already applied
+     */
+    private function verifyObfuscationApplied(): void
+    {
+        $mappings = Cache::get('license_obfuscation_mappings');
+        if (empty($mappings)) {
+            Log::debug('Code obfuscation not detected. Run: php artisan license:obfuscate');
         }
     }
 
@@ -91,18 +128,32 @@ class CodeProtectionService
 
     /**
      * Generate integrity hash for critical files
+     * NOTE: Checks vendor files if obfuscated, otherwise checks package source files
      */
     public function generateIntegrityHash(): string
     {
-        $criticalFiles = [
-            'src/LicenseManager.php',
-            'src/AntiPiracyManager.php',
-            'src/config/license-manager.php',
-        ];
+        // Check if files are obfuscated - if so, check vendor files
+        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        
+        if ($isObfuscated) {
+            // Check obfuscated vendor files
+            $vendorPath = base_path('vendor/acecoderz/license-manager');
+            $criticalFiles = [
+                'src/LicenseManager.php',
+                'src/AntiPiracyManager.php',
+            ];
+        } else {
+            // Check package source files
+            $vendorPath = __DIR__ . '/..';
+            $criticalFiles = [
+                'LicenseManager.php',
+                'AntiPiracyManager.php',
+            ];
+        }
 
         $hashes = [];
         foreach ($criticalFiles as $file) {
-            $filePath = __DIR__ . '/../' . $file;
+            $filePath = $vendorPath . '/' . $file;
             if (File::exists($filePath)) {
                 $hashes[] = hash_file('sha256', $filePath);
             }
@@ -118,7 +169,7 @@ class CodeProtectionService
     {
         $currentHash = $this->generateIntegrityHash();
 
-        if ($currentHash !== $expectedHash) {
+                if ($currentHash !== $expectedHash) {
             app(RemoteSecurityLogger::class)->critical('Code integrity violation detected', [
                 'expected_hash' => $expectedHash,
                 'current_hash' => $currentHash,
@@ -160,28 +211,79 @@ class CodeProtectionService
         return false;
     }
 
-    /**
-     * Basic file obfuscation (string replacement)
+        /**
+     * Obfuscate a single file using regex-based function name replacement
+     * This is safer than simple string replacement as it targets function definitions
      */
-    public function obfuscateFile(string $filePath): void
+    public function obfuscateFile(string $filePath): ?array
     {
         $content = File::get($filePath);
-
-        // Simple variable name obfuscation for sensitive functions
-        $replacements = [
-            'validateLicense' => 'vl' . Str::random(8),
-            'generateHardwareFingerprint' => 'ghf' . Str::random(8),
-            'validateAntiPiracy' => 'vap' . Str::random(8),
+        $originalContent = $content;
+        
+        // Function names to obfuscate with their contexts
+        $functionsToObfuscate = [
+            'validateLicense',
+            'generateHardwareFingerprint', 
+            'validateAntiPiracy',
+            'checkLicenseStatus',
+            'generateClientWatermark',
+            'createWatermark',
+            'detectContentModification',
+            'addRuntimeChecks',
+            'generateIntegrityCheckScript',
         ];
 
-        foreach ($replacements as $original => $obfuscated) {
-            $content = str_replace($original, $obfuscated, $content);
+        $replacements = [];
+        
+        foreach ($functionsToObfuscate as $original) {
+            // Check if function exists in file first
+            $functionExists = preg_match('/\b' . preg_quote($original, '/') . '\s*\(/', $content);
+            
+            if (!$functionExists) {
+                continue; // Skip if function doesn't exist in this file
+            }
+            
+            // Generate unique obfuscated name
+            $obfuscated = 'v' . Str::random(3) . Str::random(5); // e.g., vA3bX2mK7
+            
+            // Replace function definitions: public/protected/private function functionName(
+            $content = preg_replace(
+                '/(public|protected|private|static)\s+function\s+' . preg_quote($original, '/') . '\s*\(/',
+                '$1 function ' . $obfuscated . '(',
+                $content
+            );
+            
+            // Replace method calls: ->functionName( or ::functionName(
+            $content = preg_replace(
+                '/(->|::)' . preg_quote($original, '/') . '\s*\(/',
+                '$1' . $obfuscated . '(',
+                $content
+            );
+            
+            // Replace standalone function calls: functionName(
+            // But only if it's not part of another word
+            $content = preg_replace(
+                '/(?<![a-zA-Z0-9_$])' . preg_quote($original, '/') . '\s*\(/',
+                $obfuscated . '(',
+                $content
+            );
+            
+            $replacements[$original] = $obfuscated;
         }
 
-        // Store mapping for deobfuscation if needed
-        Cache::put('obfuscation_map_' . basename($filePath), $replacements, now()->addYears(1));
+        // Only write if changes were made
+        if (!empty($replacements)) {
+            File::put($filePath, $content);
+            
+            Log::info('File obfuscated', [
+                'file' => basename($filePath),
+                'functions_obfuscated' => count($replacements),
+            ]);
+            
+            return $replacements;
+        }
 
-        File::put($filePath, $content);
+        return null;
     }
 
     /**

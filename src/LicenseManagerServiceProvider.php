@@ -12,6 +12,7 @@ use Acecoderz\LicenseManager\Commands\CopyProtectionCommand;
 use Acecoderz\LicenseManager\Commands\ClientFriendlyCommand;
 use Acecoderz\LicenseManager\Commands\SecurityAuditCommand;
 use Acecoderz\LicenseManager\Commands\VendorProtectionCommand;
+use Acecoderz\LicenseManager\Commands\ObfuscateCodeCommand;
 use Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity;
 use Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity;
 use Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware;
@@ -88,19 +89,20 @@ class LicenseManagerServiceProvider extends ServiceProvider {
 
 		// Register commands
 		if ($this->app->runningInConsole()) {
-			$this->commands([
-				GenerateLicenseCommand::class,
-				TestAntiPiracyCommand::class,
-				LicenseInfoCommand::class,
-				ResetLicenseCacheCommand::class,
-				DiagnoseLicenseCommand::class,
-				DeploymentLicenseCommand::class,
-				StealthInstallCommand::class,
-				CopyProtectionCommand::class,
-				ClientFriendlyCommand::class,
-				SecurityAuditCommand::class,
-				VendorProtectionCommand::class,
-			]);
+			                        $this->commands([
+                                GenerateLicenseCommand::class,
+                                TestAntiPiracyCommand::class,
+                                LicenseInfoCommand::class,
+                                ResetLicenseCacheCommand::class,
+                                DiagnoseLicenseCommand::class,
+                                DeploymentLicenseCommand::class,
+                                StealthInstallCommand::class,
+                                CopyProtectionCommand::class,
+                                ClientFriendlyCommand::class,
+                                SecurityAuditCommand::class,
+                                VendorProtectionCommand::class,
+                                ObfuscateCodeCommand::class,
+                        ]);
 		}
 	}
 

@@ -28,10 +28,32 @@ public function ghfK7p4Q1(...) { ... }  // generateHardwareFingerprint renamed
 ```
 
 **Process:**
-1. Scans critical files (`LicenseManager.php`, `AntiPiracyManager.php`)
-2. Replaces function names with random strings
-3. Stores mapping in cache for deobfuscation when needed
-4. Makes reverse engineering much harder
+1. Run the obfuscation command: `php artisan license:obfuscate`
+2. Scans critical files in vendor directory (`LicenseManager.php`, `AntiPiracyManager.php`, etc.)
+3. Uses regex-based replacement to rename function names to random strings
+4. Stores mapping in cache for runtime verification
+5. Makes reverse engineering much harder
+
+**How to Use:**
+```bash
+# Basic obfuscation
+php artisan license:obfuscate
+
+# With backup before obfuscation
+php artisan license:obfuscate --backup
+
+# Verify obfuscation was applied
+php artisan license:obfuscate --verify
+
+# Custom vendor path
+php artisan license:obfuscate --vendor-path=/path/to/vendor/acecoderz/license-manager
+```
+
+**Important Notes:**
+- ⚠️ Vendor files will be **modified directly**
+- ⚠️ Changes will be **lost** on next `composer update` or `composer install`
+- 💡 Run obfuscation **after** composer install in your deployment process
+- 💡 Consider adding to your deployment script or CI/CD pipeline
 
 **Configuration:**
 ```env
@@ -306,9 +328,21 @@ Automatically enabled for sensitive data operations.
 ### 1. **Installation Phase:**
 ```
 1. Package installed via Composer
-2. Code obfuscation applied to critical files
-3. Integrity baseline created
-4. Watermarking system initialized
+2. Run: php artisan license:obfuscate (manually or in deployment script)
+3. Code obfuscation applied to vendor files
+4. Integrity baseline created
+5. Watermarking system initialized
+```
+
+**Deployment Script Example:**
+```bash
+#!/bin/bash
+# deploy.sh
+
+composer install --no-dev --optimize-autoloader
+php artisan license:obfuscate --backup --verify
+php artisan config:cache
+php artisan route:cache
 ```
 
 ### 2. **Runtime Phase:**
