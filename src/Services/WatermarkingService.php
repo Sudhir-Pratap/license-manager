@@ -62,19 +62,38 @@ class WatermarkingService
         $this->embedInMetaTags($watermark, $content);
     }
 
-    /**
+        /**
      * Embed watermark in HTML comments
      */
-    public function embedInHTMLComments(string $watermark, string &$content): void
+    public function embedInHTMLComments(string $watermark, string &$content): void                                                                              
     {
         // Insert in HTML comments (invisible but trackable)
         $comment = "<!-- " . substr($watermark, 0, 20) . " -->";
-        
-        // Insert after <head> or before </head>
-        if (strpos($content, '<head>') !== false) {
-            $content = str_replace('<head>', "<head>\n{$comment}", $content);
-        } elseif (strpos($content, '</head>') !== false) {
-            $content = str_replace('</head>', "{$comment}\n</head>", $content);
+
+        // Check if watermark comment already exists
+        if (preg_match('/<!-- [a-zA-Z0-9+\/=]{15,20} -->/', $content)) {
+            // Update existing watermark comment
+            $content = preg_replace(
+                '/<!-- ([a-zA-Z0-9+\/=]{15,20}) -->/',
+                $comment,
+                $content,
+                1
+            );
+            return;
+        }
+
+        // Insert after <head> tag (handles attributes like <head lang="en">)
+        if (preg_match('/(<head[^>]*>)/i', $content)) {
+            $content = preg_replace(
+                '/(<head[^>]*>)/i',
+                '$1' . "\n{$comment}",
+                $content,
+                1
+            );
+        } 
+        // Fallback: insert before </head>
+        elseif (strpos($content, '</head>') !== false) {
+            $content = str_replace('</head>', "{$comment}\n</head>", $content); 
         }
     }
 
@@ -104,19 +123,47 @@ class WatermarkingService
         $content = preg_replace($stylePattern, "$1{$cssWatermark}\n$2\n{$cssWatermark}$3", $content, 1);
     }
 
-    /**
+        /**
      * Embed watermark in meta tags
      */
-    public function embedInMetaTags(string $watermark, string &$content): void
+    public function embedInMetaTags(string $watermark, string &$content): void  
     {
         // Add invisible meta tag
-        $metaTag = '<meta name="wm" content="' . substr($watermark, 0, 12) . '">';
-        
-        // Insert after <head> or before </head>
-        if (strpos($content, '<head>') !== false) {
-            $content = str_replace('<head>', "<head>\n{$metaTag}", $content);
-        } elseif (strpos($content, '</head>') !== false) {
-            $content = str_replace('</head>', "{$metaTag}\n</head>", $content);
+        $metaTag = '<meta name="wm" content="' . substr($watermark, 0, 12) . '">';                                                                              
+
+        // Check if watermark meta tag already exists
+        if (preg_match('/<meta[^>]*name=["\']wm["\'][^>]*>/i', $content)) {
+            // Already has watermark, update it
+            $content = preg_replace(
+                '/(<meta[^>]*name=["\']wm["\'][^>]*content=["\'])[^"\']*(["\'])/i',
+                '$1' . substr($watermark, 0, 12) . '$2',
+                $content,
+                1
+            );
+            return;
+        }
+
+        // Try to insert after <head> tag (handles attributes like <head lang="en">)
+        if (preg_match('/(<head[^>]*>)/i', $content, $matches)) {
+            $content = preg_replace(
+                '/(<head[^>]*>)/i',
+                '$1' . "\n{$metaTag}",
+                $content,
+                1
+            );
+        } 
+        // Fallback: insert before </head>
+        elseif (strpos($content, '</head>') !== false) {
+            $content = str_replace('</head>', "{$metaTag}\n</head>", $content); 
+        }
+        // Last resort: insert at beginning of body or after <html>
+        elseif (preg_match('/(<html[^>]*>)/i', $content, $matches)) {
+            $content = preg_replace(
+                '/(<html[^>]*>)/i',
+                '$1' . "\n{$metaTag}",
+                $content,
+                1
+            );
         }
     }
 

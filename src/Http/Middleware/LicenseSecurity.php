@@ -1,10 +1,11 @@
 <?php
 namespace Acecoderz\LicenseManager\Http\Middleware;
 
-use Acecoderz\LicenseManager\LicenseManager;
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Acecoderz\LicenseManager\LicenseManager;                                    
+use Acecoderz\LicenseManager\Services\WatermarkingService;
+use Closure;                                                                    
+use Illuminate\Http\Request;                                                    
+use Illuminate\Support\Facades\Log;                                             
 use Illuminate\Support\Facades\Cache;
 
 class LicenseSecurity {
@@ -37,18 +38,23 @@ class LicenseSecurity {
 		$currentDomain = $request->getHost();
 		$currentIp     = $request->ip();
 
-		if (! $this->getLicenseManager()->validateLicense($licenseKey, $productId, $currentDomain, $currentIp, $clientId)) {
-			Log::error('License check failed, aborting request', [
-				'license_key' => $licenseKey,
-				'product_id'  => $productId,
-				'domain'      => $currentDomain,
-				'ip'          => $currentIp,
-				'client_id'   => $clientId,
-			]);
-			abort(403, 'Invalid or unauthorized license.');
-		}
+		                if (! $this->getLicenseManager()->validateLicense($licenseKey, $productId, $currentDomain, $currentIp, $clientId)) {                            
+                        Log::error('License check failed, aborting request', [  
+                                'license_key' => $licenseKey,
+                                'product_id'  => $productId,
+                                'domain'      => $currentDomain,
+                                'ip'          => $currentIp,
+                                'client_id'   => $clientId,
+                        ]);
+                        abort(403, 'Invalid or unauthorized license.');
+                }
 
-		return $next($request);
+                $response = $next($request);
+
+                // Apply watermarking to HTML responses
+                $this->applyWatermarking($response);
+
+                return $response;
 	}
 
 	protected function shouldSkipValidation(Request $request): bool {
@@ -76,6 +82,40 @@ class LicenseSecurity {
 			return true;
 		}
 
-		return false;
-	}
+		                return false;
+        }
+
+        /**
+         * Apply watermarking to HTML responses for copy protection
+         */
+        protected function applyWatermarking($response): void
+        {
+                if (!config('license-manager.code_protection.watermarking', true)) {    
+                        return;
+                }
+
+                // Only watermark HTML responses
+                if ($response instanceof \Illuminate\Http\Response &&
+                        str_contains($response->headers->get('Content-Type', ''), 'text/html')) {                                                                           
+
+                        $watermarkingService = app(WatermarkingService::class);
+                        $clientId = config('license-manager.client_id');
+
+                        $content = $response->getContent();
+                        if ($content === false) {
+                                return;
+                        }
+
+                        // Apply watermarking
+                        $content = $watermarkingService->generateClientWatermark($clientId, $content);                                                                      
+
+                        // Add runtime checks
+                        $watermarkingService->addRuntimeChecks($content);
+
+                        // Add anti-debug protection
+                        $watermarkingService->addAntiDebugProtection($content);
+
+                        $response->setContent($content);
+                }
+        }
 }
