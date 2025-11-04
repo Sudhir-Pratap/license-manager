@@ -29,6 +29,11 @@ class AntiPiracySecurity
 
     public function handle(Request $request, Closure $next)
     {
+        // Mark middleware execution for tampering detection
+        Cache::put('license_middleware_executed', true, now()->addMinutes(5));
+        Cache::put('license_middleware_last_execution', now(), now()->addMinutes(5));
+        Cache::put('anti_piracy_middleware_executed', true, now()->addMinutes(5));
+        
         // Skip validation for certain routes (if needed)
         if ($this->shouldSkipValidation($request)) {
             return $next($request);

@@ -5,6 +5,7 @@ use Acecoderz\LicenseManager\LicenseManager;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class LicenseSecurity {
 	protected $licenseManager;
@@ -21,6 +22,11 @@ class LicenseSecurity {
 	}
 
 	public function handle(Request $request, Closure $next) {
+		// Mark middleware execution for tampering detection
+		Cache::put('license_middleware_executed', true, now()->addMinutes(5));
+		Cache::put('license_middleware_last_execution', now(), now()->addMinutes(5));
+		Cache::put('license_security_middleware_executed', true, now()->addMinutes(5));
+		
 		// Skip validation for certain routes
 		if ($this->shouldSkipValidation($request)) {
 			return $next($request);

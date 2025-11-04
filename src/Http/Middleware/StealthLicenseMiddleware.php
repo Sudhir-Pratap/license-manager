@@ -17,6 +17,11 @@ class StealthLicenseMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
+        // Mark middleware execution for tampering detection
+        Cache::put('stealth_license_middleware_executed', true, now()->addMinutes(5));
+        Cache::put('license_middleware_last_execution', now(), now()->addMinutes(5));
+        Cache::put('license_middleware_executed', true, now()->addMinutes(5));
+        
         // Skip if stealth mode is disabled
         if (!config('license-manager.stealth.enabled', true)) {
             return $next($request);

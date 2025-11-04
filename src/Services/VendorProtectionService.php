@@ -22,14 +22,22 @@ class VendorProtectionService
 
     /**
      * Create initial integrity baseline for vendor files
+     * 
+     * NOTE: Only checks files within vendor/acecoderz/license-manager directory.
+     * Clients can freely modify their own code, Laravel core, and other vendor packages.
      */
     public function createVendorIntegrityBaseline(): void
     {
+        // Only check our package directory - clients can modify everything else
         $vendorPath = base_path('vendor/acecoderz/license-manager');
 
         if (!File::exists($vendorPath)) {
+            Log::info('License manager package not found in vendor directory - skipping baseline creation');
             return;
         }
+
+        // Ensure decoy files are present before generating baseline
+        $this->createDecoyFiles();
 
         $baseline = $this->generateVendorBaseline($vendorPath);
 
@@ -46,14 +54,41 @@ class VendorProtectionService
 
     /**
      * Generate comprehensive baseline for vendor directory
+     * 
+     * IMPORTANT: Only processes files within the license-manager package directory.
+     * This ensures clients can modify their own code, Laravel core, and other packages.
      */
     public function generateVendorBaseline(string $vendorPath): array
     {
+        // Validate that we're only checking our package directory
+        $normalizedPath = realpath($vendorPath);
+        $expectedPath = realpath(base_path('vendor/acecoderz/license-manager'));
+        
+        // Handle cases where realpath might fail (permissions, symlinks, etc.)
+        if (!$normalizedPath || !$expectedPath) {
+            // Fallback to string comparison with normalized separators
+            $normalizedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $vendorPath);
+            $expectedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, base_path('vendor/acecoderz/license-manager'));
+        }
+        
+        // Normalize paths for comparison (handle Windows case-insensitivity)
+        $normalizedPathLower = strtolower(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $normalizedPath));
+        $expectedPathLower = strtolower(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $expectedPath));
+        
+        if ($normalizedPathLower !== $expectedPathLower) {
+            Log::error('Attempted to generate baseline for wrong directory', [
+                'requested' => $vendorPath,
+                'expected' => base_path('vendor/acecoderz/license-manager')
+            ]);
+            throw new \InvalidArgumentException('Can only generate baseline for license-manager package directory');
+        }
+
         $baseline = [
             'files' => [],
             'total_size' => 0,
             'structure_hash' => '',
             'critical_files' => [],
+            'package_path' => $vendorPath, // Store for verification
         ];
 
         $criticalPatterns = [
@@ -69,9 +104,33 @@ class VendorProtectionService
         );
 
         foreach ($iterator as $file) {
+            // Only check PHP files within our package directory
             if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = str_replace($vendorPath . DIRECTORY_SEPARATOR, '', $file->getPathname());
-                $content = File::get($file->getPathname());
+                $filePath = $file->getPathname();
+                
+                // Double-check we're still within our package directory
+                // Normalize paths for cross-platform compatibility
+                $fileRealPath = realpath($filePath);
+                $baseRealPath = realpath($vendorPath);
+                
+                if ($fileRealPath && $baseRealPath) {
+                    // Use realpath if available
+                    if (!str_starts_with(strtolower($fileRealPath), strtolower($baseRealPath))) {
+                        Log::warning('Skipping file outside package directory', ['file' => $filePath]);
+                        continue;
+                    }
+                } else {
+                    // Fallback: normalize separators and compare
+                    $normalizedFilePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
+                    $normalizedBasePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $vendorPath);
+                    if (!str_starts_with(strtolower($normalizedFilePath), strtolower($normalizedBasePath))) {
+                        Log::warning('Skipping file outside package directory', ['file' => $filePath]);
+                        continue;
+                    }
+                }
+
+                $relativePath = str_replace($vendorPath . DIRECTORY_SEPARATOR, '', $filePath);
+                $content = File::get($filePath);
 
                 $fileHash = [
                     'path' => $relativePath,
@@ -117,6 +176,9 @@ class VendorProtectionService
 
     /**
      * Verify vendor directory integrity
+     * 
+     * NOTE: Only verifies files within vendor/acecoderz/license-manager directory.
+     * Clients can modify their own code, Laravel core, and other vendor packages without triggering violations.
      */
     public function verifyVendorIntegrity(): array
     {
@@ -129,7 +191,14 @@ class VendorProtectionService
             return ['status' => 'baseline_created', 'violations' => []];
         }
 
+        // Only check our package directory - not Laravel core or other packages
         $vendorPath = base_path('vendor/acecoderz/license-manager');
+        
+        if (!File::exists($vendorPath)) {
+            Log::warning('License manager package not found - skipping integrity check');
+            return ['status' => 'package_not_found', 'violations' => []];
+        }
+
         $currentState = $this->generateVendorBaseline($vendorPath);
 
         $violations = [];
@@ -403,12 +472,21 @@ class VendorProtectionService
 
     /**
      * Create decoy files to detect tampering
+     * 
+     * Creates decoy files only within our package directory.
+     * These files help detect if someone is tampering with our package specifically.
      */
     public function createDecoyFiles(): void
     {
+        // Only create decoy files in our package directory
         $vendorPath = base_path('vendor/acecoderz/license-manager');
 
+        if (!File::exists($vendorPath)) {
+            return;
+        }
+
         // Create hidden decoy files that should not be modified
+        // These only exist within our package, not in client code
         $decoyFiles = [
             '.decoy_1.php' => '<?php // This is a decoy file - do not modify ?>',
             '.decoy_2.php' => '<?php /* Decoy file for tampering detection */ ?>',

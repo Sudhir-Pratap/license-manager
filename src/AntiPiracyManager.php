@@ -250,17 +250,31 @@ class AntiPiracyManager
      */
     public function detectTampering(): bool
     {
-        // Check for modified core files
+        // Only check files within our package directory (vendor/acecoderz/license-manager)
+        // Clients can modify their own app code, Laravel core, and other vendor packages
+        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        
+        if (!File::exists($vendorPath)) {
+            // Package not installed via Composer, skip tampering check
+            return true;
+        }
+
+        // Critical files to check within our package only
         $criticalFiles = [
-            'app/Http/Kernel.php',
-            'config/app.php',
+            'LicenseManager.php',
+            'AntiPiracyManager.php',
+            'LicenseManagerServiceProvider.php',
+            'Services/VendorProtectionService.php',
+            'Services/CopyProtectionService.php',
+            'Services/AntiPiracyService.php',
+            'Http/Middleware/LicenseSecurity.php',
+            'Http/Middleware/AntiPiracySecurity.php',
+            'Http/Middleware/StealthLicenseMiddleware.php',
             'config/license-manager.php',
-            'routes/web.php',
-            'routes/agent.php',
         ];
 
         foreach ($criticalFiles as $file) {
-            $filePath = base_path($file);
+            $filePath = $vendorPath . '/' . $file;
             if (File::exists($filePath) && is_file($filePath)) {
                 try {
                     $currentHash = hash_file('sha256', $filePath);
@@ -269,17 +283,22 @@ class AntiPiracyManager
                         continue;
                     }
                     
-                    $storedHash = Cache::get("file_hash_{$file}");
+                    // Use package-specific cache key
+                    $cacheKey = "license_package_file_hash_{$file}";
+                    $storedHash = Cache::get($cacheKey);
                     
                     if (!$storedHash) {
-                        Cache::put("file_hash_{$file}", $currentHash, now()->addDays(30));
+                        Cache::put($cacheKey, $currentHash, now()->addDays(30));
                     } elseif ($storedHash !== $currentHash) {
-                        Log::error('File tampering detected', ['file' => $file]);
+                        Log::error('License package file tampering detected', [
+                            'file' => $file,
+                            'package_path' => $vendorPath
+                        ]);
                         return false;
                     }
                 } catch (\Exception $e) {
                     // Skip files that can't be accessed due to permissions
-                    Log::debug('Skipping file hash check due to access issue', [
+                    Log::debug('Skipping license package file hash check due to access issue', [
                         'file' => $file,
                         'error' => $e->getMessage()
                     ]);
@@ -334,21 +353,218 @@ class AntiPiracyManager
         $hasLicenseMiddleware = (
             isset($middlewareAliases['license']) ||
             isset($middlewareAliases['anti-piracy']) ||
+            isset($middlewareAliases['stealth-license']) ||
             in_array(\Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
             in_array(\Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity::class, $globalMiddleware) ||
             in_array(\Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware::class, $globalMiddleware)
         );
         
-        if (!$hasLicenseMiddleware) {
-            Log::warning('License middleware not found in stack (may be registered differently)', [
+        // Check if middleware is actually being executed (runtime check)
+        $middlewareExecuted = $this->checkMiddlewareExecution();
+        
+        // Check if middleware is commented out in Kernel.php
+        $middlewareCommented = $this->checkMiddlewareCommentedOut();
+        
+        // CRITICAL: Fail validation if middleware is missing, commented out, or not executing
+        if (!$hasLicenseMiddleware || !$middlewareExecuted || $middlewareCommented) {
+            Log::critical('License middleware bypass detected', [
+                'middleware_registered' => $hasLicenseMiddleware,
+                'middleware_executing' => $middlewareExecuted,
+                'middleware_commented' => $middlewareCommented,
                 'aliases' => array_keys($middlewareAliases),
-                'global_middleware_count' => count($globalMiddleware)
+                'global_middleware_count' => count($globalMiddleware),
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
             ]);
-            // Don't fail validation for this - just log it
-            // Some applications may register middleware differently
+            
+            // Send critical alert to remote logger
+            try {
+                app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('License Middleware Bypass Detected', [
+                    'middleware_registered' => $hasLicenseMiddleware,
+                    'middleware_executing' => $middlewareExecuted,
+                    'middleware_commented' => $middlewareCommented,
+                    'ip' => request()->ip(),
+                    'domain' => request()->getHost(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to send middleware bypass alert', ['error' => $e->getMessage()]);
+            }
+            
+            return false; // Fail tampering detection
         }
 
         return true;
+    }
+
+    /**
+     * Check if middleware is actually being executed (runtime check)
+     * 
+     * This validates that middleware is not just registered but actually running
+     */
+    protected function checkMiddlewareExecution(): bool
+    {
+        // Check for any middleware execution markers
+        // Middleware sets these markers when they execute
+        $generalMarker = Cache::get('license_middleware_executed', false);
+        $lastExecution = Cache::get('license_middleware_last_execution');
+        $stealthMarker = Cache::get('stealth_license_middleware_executed', false);
+        $antiPiracyMarker = Cache::get('anti_piracy_middleware_executed', false);
+        $securityMarker = Cache::get('license_security_middleware_executed', false);
+        
+        // If ANY middleware marker exists, middleware is executing
+        if ($generalMarker || $stealthMarker || $antiPiracyMarker || $securityMarker) {
+            // Check if execution was recent (within last 5 minutes)
+            if ($lastExecution) {
+                $timeSinceExecution = now()->diffInSeconds($lastExecution);
+                // Middleware should execute within the last 5 minutes (allowing for slow requests)
+                return $timeSinceExecution < 300;
+            }
+            // If marker exists but no timestamp, assume it's recent
+            return true;
+        }
+        
+        // If auto_middleware is enabled, we MUST have execution markers
+        if (config('license-manager.auto_middleware', false)) {
+            // With auto_middleware, execution markers should always exist
+            Log::warning('Auto middleware enabled but no execution markers found', [
+                'markers' => [
+                    'general' => $generalMarker,
+                    'stealth' => $stealthMarker,
+                    'anti_piracy' => $antiPiracyMarker,
+                    'security' => $securityMarker,
+                ]
+            ]);
+            return false; // Fail if auto_middleware is enabled but no markers
+        }
+        
+        // If no markers exist and we're checking, assume middleware might not be executing
+        // But be lenient on first check (middleware might not have run yet)
+        $checkCount = Cache::get('middleware_execution_check_count', 0);
+        Cache::put('middleware_execution_check_count', $checkCount + 1, now()->addMinutes(10));
+        
+        // Allow 3 checks before failing (to account for cold start)
+        if ($checkCount < 3) {
+            return true; // Lenient on first few checks
+        }
+        
+        // After 3 checks, require execution markers
+        return false;
+    }
+
+    /**
+     * Check if middleware is commented out in Kernel.php files
+     * 
+     * This detects if clients have commented out middleware registration
+     */
+    protected function checkMiddlewareCommentedOut(): bool
+    {
+        try {
+            // Check Laravel 9/10 Kernel.php
+            $kernelPath = app_path('Http/Kernel.php');
+            if (File::exists($kernelPath)) {
+                $kernelContent = File::get($kernelPath);
+                
+                // Check for commented out license middleware class names
+                $middlewareClasses = [
+                    'AntiPiracySecurity',
+                    'LicenseSecurity',
+                    'StealthLicenseMiddleware',
+                    'Acecoderz\\LicenseManager',
+                ];
+                
+                foreach ($middlewareClasses as $className) {
+                    // Check if class name exists but is commented out
+                    if (str_contains($kernelContent, $className)) {
+                        // Check if it's in a comment block
+                        $lines = explode("\n", $kernelContent);
+                        foreach ($lines as $lineNum => $line) {
+                            if (str_contains($line, $className)) {
+                                $trimmedLine = trim($line);
+                                // Check if line starts with // or is inside /* */ block
+                                if (str_starts_with($trimmedLine, '//') || 
+                                    str_starts_with($trimmedLine, '*') ||
+                                    str_starts_with($trimmedLine, '#')) {
+                                    Log::warning('License middleware appears to be commented out in Kernel.php', [
+                                        'line' => $lineNum + 1,
+                                        'line_content' => substr($trimmedLine, 0, 100)
+                                    ]);
+                                    return true; // Middleware is commented out
+                                }
+                                
+                                // Check if it's inside a multi-line comment
+                                $beforeLine = substr($kernelContent, 0, strpos($kernelContent, $line));
+                                $commentBlocks = substr_count($beforeLine, '/*') - substr_count($beforeLine, '*/');
+                                if ($commentBlocks > 0) {
+                                    Log::warning('License middleware appears to be inside comment block in Kernel.php', [
+                                        'line' => $lineNum + 1
+                                    ]);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Check Laravel 11+ bootstrap/app.php
+            $bootstrapPath = base_path('bootstrap/app.php');
+            if (File::exists($bootstrapPath)) {
+                $bootstrapContent = File::get($bootstrapPath);
+                
+                $middlewareClasses = [
+                    'AntiPiracySecurity',
+                    'LicenseSecurity',
+                    'StealthLicenseMiddleware',
+                ];
+                
+                foreach ($middlewareClasses as $className) {
+                    if (str_contains($bootstrapContent, $className)) {
+                        $lines = explode("\n", $bootstrapContent);
+                        foreach ($lines as $lineNum => $line) {
+                            if (str_contains($line, $className)) {
+                                $trimmedLine = trim($line);
+                                if (str_starts_with($trimmedLine, '//') || 
+                                    str_starts_with($trimmedLine, '*') ||
+                                    str_starts_with($trimmedLine, '#')) {
+                                    Log::warning('License middleware appears to be commented out in bootstrap/app.php', [
+                                        'line' => $lineNum + 1
+                                    ]);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Check routes files for commented middleware
+            $routesFiles = [
+                base_path('routes/web.php'),
+                base_path('routes/api.php'),
+            ];
+            
+            foreach ($routesFiles as $routesFile) {
+                if (File::exists($routesFile)) {
+                    $routesContent = File::get($routesFile);
+                    
+                    // Check for commented middleware groups
+                    if (preg_match('/\/\/\s*.*middleware.*license/i', $routesContent) ||
+                        preg_match('/\/\/\s*.*middleware.*anti-piracy/i', $routesContent) ||
+                        preg_match('/\/\/\s*.*middleware.*stealth/i', $routesContent)) {
+                        Log::warning('License middleware appears to be commented out in routes file', [
+                            'file' => $routesFile
+                        ]);
+                        return true;
+                    }
+                }
+            }
+            
+            return false; // No commented middleware detected
+        } catch (\Exception $e) {
+            Log::error('Error checking for commented middleware', ['error' => $e->getMessage()]);
+            // On error, assume middleware is not commented (lenient)
+            return false;
+        }
     }
 
     /**
