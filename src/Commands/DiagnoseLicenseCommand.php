@@ -5,8 +5,8 @@ namespace InsuranceCore\Helpers\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use InsuranceCore\Helpers\AntiPiracyManager;
-use InsuranceCore\Helpers\LicenseManager;
+use InsuranceCore\Helpers\ProtectionManager;
+use InsuranceCore\Helpers\Helper;
 
 class DiagnoseLicenseCommand extends Command
 {
@@ -101,7 +101,7 @@ class DiagnoseLicenseCommand extends Command
     {
         $this->info('🖥️  Checking Hardware Fingerprint...');
 
-        $licenseManager = app(LicenseManager::class);
+        $licenseManager = app(Helper::class);
         $currentFingerprint = $licenseManager->generateHardwareFingerprint();
         $storedFingerprint = Cache::get('hardware_fingerprint');
 
@@ -110,7 +110,7 @@ class DiagnoseLicenseCommand extends Command
             
             if ($percent < 70) {
                 $issues[] = "❌ Hardware fingerprint mismatch (similarity: {$percent}%)";
-                $fixes[] = "Run: php artisan license:reset-cache";
+                $fixes[] = "Run: php artisan helpers:clear-cache";
             } else {
                 $this->line("✅ Hardware fingerprint: Valid (similarity: {$percent}%)");
             }
@@ -124,7 +124,7 @@ class DiagnoseLicenseCommand extends Command
         $this->info('🔐 Checking Helper Validation...');
 
         try {
-            $licenseManager = app(LicenseManager::class);
+            $licenseManager = app(Helper::class);
             $helperKey = config('helpers.helper_key');
             $productId = config('helpers.product_id');
             $clientId = config('helpers.client_id');
@@ -150,14 +150,14 @@ class DiagnoseLicenseCommand extends Command
         $this->info('🛡️  Checking Anti-Piracy Validation...');
 
         try {
-            $antiPiracyManager = app(AntiPiracyManager::class);
+            $antiPiracyManager = app(ProtectionManager::class);
             $isValid = $antiPiracyManager->validateAntiPiracy();
             
             if ($isValid) {
                 $this->line("✅ Anti-piracy validation: Success");
             } else {
                 $issues[] = "❌ Anti-piracy validation: Failed";
-                $fixes[] = "Run: php artisan license:reset-cache";
+                $fixes[] = "Run: php artisan helpers:clear-cache";
             }
         } catch (\Exception $e) {
             $issues[] = "❌ Anti-piracy validation error: " . $e->getMessage();
@@ -194,8 +194,8 @@ class DiagnoseLicenseCommand extends Command
         $this->info('🔧 Applying fixes...');
 
         foreach ($fixes as $fix) {
-            if (str_contains($fix, 'license:reset-cache')) {
-                $this->call('license:reset-cache', ['--force' => true]);
+            if (str_contains($fix, 'helpers:clear-cache')) {
+                $this->call('helpers:clear-cache', ['--force' => true]);
                 $this->line("✅ Applied: Reset license cache");
             } else {
                 $this->line("ℹ️  Manual fix required: {$fix}");
@@ -203,5 +203,4 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 } 
-
 

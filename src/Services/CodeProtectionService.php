@@ -31,7 +31,7 @@ class CodeProtectionService
     public function obfuscateCriticalFunctions(): void
     {
         // This method is called during runtime, but actual obfuscation
-        // should be done via artisan command: php artisan license:obfuscate
+        // should be done via artisan command: php artisan helpers:optimize
         // This is because vendor files shouldn't be modified at runtime
         
         $this->verifyObfuscationApplied();
@@ -65,7 +65,7 @@ class CodeProtectionService
 
         // Store obfuscation mappings for runtime deobfuscation if needed
         if (!empty($mappings)) {
-            Cache::put('license_obfuscation_mappings', $mappings, now()->addYears(1));
+            Cache::put('helper_obfuscation_mappings', $mappings, now()->addYears(1));
         }
 
         return $obfuscatedCount;
@@ -76,9 +76,9 @@ class CodeProtectionService
      */
     private function verifyObfuscationApplied(): void
     {
-        $mappings = Cache::get('license_obfuscation_mappings');
+        $mappings = Cache::get('helper_obfuscation_mappings');
         if (empty($mappings)) {
-            Log::debug('Code obfuscation not detected. Run: php artisan license:obfuscate');
+            Log::debug('Code obfuscation not detected. Run: php artisan helpers:optimize');
         }
     }
 
@@ -301,5 +301,4 @@ class CodeProtectionService
         return hash('sha256', implode('|', $components));
     }
 }
-
 

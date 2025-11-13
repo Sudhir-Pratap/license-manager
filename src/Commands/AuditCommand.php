@@ -28,7 +28,7 @@ class AuditCommand extends Command
      */
     public function handle()
     {
-        $this->info('🔒 License Manager Security Audit');
+        $this->info('🔒 Helper System Security Audit');
         $this->info('================================');
 
         $issues = [];

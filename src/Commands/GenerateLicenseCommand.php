@@ -1,14 +1,14 @@
 <?php
 namespace InsuranceCore\Helpers\Commands;
 
-use InsuranceCore\Helpers\LicenseManager;
+use InsuranceCore\Helpers\Helper;
 use Illuminate\Console\Command;
 
 class GenerateLicenseCommand extends Command {
     protected $signature   = 'helpers:generate {--product-id=} {--domain=*} {--ip=*} {--expiry=1 year} {--client-id=} {--hardware-fingerprint=} {--installation-id=}';
     protected $description = 'Generate a helper key for the application';
 
-    public function handle(LicenseManager $licenseManager) {
+    public function handle(Helper $licenseManager) {
         $productId = $this->option('product-id');
         $domain    = $this->option('domain');
         $ip        = $this->option('ip');
@@ -18,7 +18,7 @@ class GenerateLicenseCommand extends Command {
         $installationId = $this->option('installation-id');
 
         if (!$hardwareFingerprint || !$installationId) {
-            $this->error('You must provide both --hardware-fingerprint and --installation-id. Run php artisan license:info to get these values.');
+            $this->error('You must provide both --hardware-fingerprint and --installation-id. Run php artisan helpers:info to get these values.');
             return 1;
         }
 
@@ -36,5 +36,4 @@ class GenerateLicenseCommand extends Command {
         $this->info('Store this key in your .env file as HELPER_KEY');
     }
 }
-
 

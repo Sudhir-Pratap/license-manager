@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class CopyProtectionCommand extends Command
 {
-    protected $signature = 'license:copy-protection 
+    protected $signature = 'helpers:copy-protection 
                            {--check : Check current copy protection status}
                            {--test-suspicion : Run suspicion detection test}
                            {--watermark-test : Test watermarking functionality}
@@ -294,7 +294,7 @@ class CopyProtectionCommand extends Command
         $this->line('• Monitor storage/logs/license.log for watermark activity');
         $this->line('• Monitor storage/logs/security.log for violations');
         $this->line('• Set up real-time alerts for 90+ suspicion scores');
-        $this->line('• Regular integrity checks with php artisan license:copy-protection --check');
+        $this->line('• Regular integrity checks with php artisan helpers:copy-protection --check');
     }
 
     public function showCopyProtectionHelp()
