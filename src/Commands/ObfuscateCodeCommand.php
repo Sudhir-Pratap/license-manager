@@ -171,3 +171,4 @@ class OptimizeCommand extends Command
         }
     }
 }
+

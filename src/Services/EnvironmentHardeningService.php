@@ -305,3 +305,4 @@ class EnvironmentHardeningService
         return true;
     }
 }
+

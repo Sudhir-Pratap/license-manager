@@ -82,13 +82,13 @@ class ClientFriendlyCommand extends Command
         
         // Overall status
         $this->line('');
-        $licenseConfigured = config('helpers.helper_key') && 
+        $helperConfigured = config('helpers.helper_key') && 
                            config('helpers.product_id') && 
                            config('helpers.client_id');
         
-        if ($licenseConfigured && !$suspicious) {
+        if ($helperConfigured && !$suspicious) {
             $this->info('🎉 Overall Status: HEALTHY');
-            $this->line('Your system is operating normally with proper license validation.');
+            $this->line('Your system is operating normally with proper helper validation.');
             $this->line('No action required from your end.');
         } else {
             $this->warn('⚠️  Overall Status: ATTENTION REQUIRED');
@@ -121,7 +121,7 @@ class ClientFriendlyCommand extends Command
             $this->info('Testing Watermark System:');
             
             try {
-                $watermarkService = app(\\InsuranceCore\\Helpers\\Services\WatermarkingService::class);
+                $watermarkService = app(\InsuranceCore\Helpers\Services\WatermarkingService::class);
                 $testHtml = '<html><head><title>Test</title></head><body>Test Content</body></html>';
                 $watermarked = $watermarkService->generateClientWatermark('test-client', $testHtml);
                 
@@ -172,7 +172,7 @@ class ClientFriendlyCommand extends Command
 
     public function showClientHelp()
     {
-        $this->info('License System Status Tool');
+        $this->info('Helper System Status Tool');
         $this->line('');
         $this->info('This tool helps you verify that your software installation is working correctly.');
         $this->line('');
@@ -181,7 +181,7 @@ class ClientFriendlyCommand extends Command
         $this->line('--test  : Test system functionality');
         $this->line('');
         $this->info('What this tool checks:');
-        $this->line('• License configuration validity');
+        $this->line('• Helper configuration validity');
         $this->line('• Domain usage tracking');
         $this->line('• Security system status');
         $this->line('• Database and cache connectivity');
@@ -195,5 +195,6 @@ class ClientFriendlyCommand extends Command
         $this->info('For detailed technical information, contact your administrator.');
     }
 }
+
 
 

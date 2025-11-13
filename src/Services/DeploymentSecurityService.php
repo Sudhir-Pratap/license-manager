@@ -338,3 +338,4 @@ PHP;
         return hash('sha256', implode('|', $components));
     }
 }
+

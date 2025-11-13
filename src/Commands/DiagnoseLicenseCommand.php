@@ -204,3 +204,4 @@ class DiagnoseLicenseCommand extends Command
     }
 } 
 
+

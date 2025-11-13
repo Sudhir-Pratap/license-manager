@@ -129,3 +129,4 @@ class HelperServiceProvider extends ServiceProvider {
 		}
 	}
 }
+

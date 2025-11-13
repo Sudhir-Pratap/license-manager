@@ -192,3 +192,4 @@ class ProtectCommand extends Command
         }
     }
 }
+

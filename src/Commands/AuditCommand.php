@@ -429,3 +429,4 @@ class AuditCommand extends Command
         return $recommendations;
     }
 }
+

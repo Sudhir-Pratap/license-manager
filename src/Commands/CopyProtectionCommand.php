@@ -321,3 +321,4 @@ class CopyProtectionCommand extends Command
     }
 }
 
+

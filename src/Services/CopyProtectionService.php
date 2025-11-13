@@ -39,7 +39,7 @@ class CopyProtectionService
      */
     public function checkMultipleDomainUsage(): int
     {
-        $domainKey = 'license_domains_' . md5(config('helpers.helper_key'));
+        $domainKey = 'helper_domains_' . md5(config('helpers.helper_key'));
         $domains = Cache::get($domainKey, []);
         
         $currentDomain = request()->getHost();
@@ -125,7 +125,7 @@ class CopyProtectionService
         $score = 0;
         
         // Check if application has been downloaded/moved recently
-        $installFingerprint = app(\\InsuranceCore\\Helpers\\LicenseManager::class)->generateHardwareFingerprint();
+        $installFingerprint = app(\\InsuranceCore\\Helpers\\Helper::class)->generateHardwareFingerprint();
         $storedFingerprint = Cache::get('original_fingerprint_' . md5(config('helpers.helper_key')));
         
         if (!$storedFingerprint) {
@@ -413,5 +413,6 @@ class CopyProtectionService
         return 'unknown';
     }
 }
+
 
 

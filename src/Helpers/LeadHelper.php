@@ -30,3 +30,4 @@ if (!function_exists('generateLeadID')) {
             implode("", $randomNumbers);
     }
 } 
+

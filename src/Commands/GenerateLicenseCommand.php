@@ -37,3 +37,4 @@ class GenerateLicenseCommand extends Command {
     }
 }
 
+

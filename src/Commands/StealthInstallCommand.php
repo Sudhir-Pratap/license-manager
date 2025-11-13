@@ -313,3 +313,4 @@ class StealthInstallCommand extends Command
         $this->line('php artisan license:stealth-install --enable --check');
     }
 }
+

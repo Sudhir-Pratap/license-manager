@@ -98,3 +98,4 @@ return [
 		'monitoring_interval' => env('HELPER_VENDOR_MONITOR_INTERVAL', 300), // seconds
 	],
 ];
+
