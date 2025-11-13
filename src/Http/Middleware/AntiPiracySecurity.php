@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Http\Middleware;
+namespace InsuranceCore\Helpers\Http\Middleware;
 
 use InsuranceCore\Helpers\AntiPiracyManager;
 use InsuranceCore\Helpers\Http\Middleware\MiddlewareHelper;
@@ -133,7 +133,7 @@ class AntiPiracySecurity
         
         // Also send to remote security logger
         if (!empty($failedChecks)) {
-            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->error('Anti-piracy validation failed', [
+            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->error('Anti-piracy validation failed', [
                 'failed_checks' => $failedChecks,
                 'domain' => $request->getHost(),
                 'ip' => $request->ip(),

@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Services;
+namespace InsuranceCore\Helpers\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -230,7 +230,7 @@ class DeploymentSecurityService
         $middlewareContent = <<<'PHP'
 <?php
 
-namespace Acecoderz\LicenseManager\Http\Middleware;
+namespace InsuranceCore\Helpers\Http\Middleware;
 
 use Closure;
 

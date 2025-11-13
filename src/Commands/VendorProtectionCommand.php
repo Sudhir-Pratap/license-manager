@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Commands;
+namespace InsuranceCore\Helpers\Commands;
 
 use InsuranceCore\Helpers\Services\VendorProtectionService;
 use Illuminate\Console\Command;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Helpers;
+namespace InsuranceCore\Helpers;
 
 if (!function_exists('generateLeadID')) {
     /**

@@ -354,9 +354,9 @@ class ProtectionManager
             isset($middlewareAliases['license']) ||
             isset($middlewareAliases['anti-piracy']) ||
             isset($middlewareAliases['stealth-license']) ||
-            in_array(\Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
-            in_array(\Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity::class, $globalMiddleware) ||
-            in_array(\Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware::class, $globalMiddleware)
+            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
+            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\LicenseSecurity::class, $globalMiddleware) ||
+            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\StealthLicenseMiddleware::class, $globalMiddleware)
         );
         
         // Check if middleware is actually being executed (runtime check)
@@ -379,7 +379,7 @@ class ProtectionManager
             
             // Send critical alert to remote logger
             try {
-                app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('License Middleware Bypass Detected', [
+                app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->critical('License Middleware Bypass Detected', [
                     'middleware_registered' => $hasLicenseMiddleware,
                     'middleware_executing' => $middlewareExecuted,
                     'middleware_commented' => $middlewareCommented,

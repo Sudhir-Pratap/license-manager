@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Services;
+namespace InsuranceCore\Helpers\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -51,7 +51,7 @@ class CopyProtectionService
         // Allow max 2 domains per license
         $maxAllowed = config('license-manager.anti_reselling.max_domains', 2);
         if (count($domains) > $maxAllowed) {
-            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('Multiple domains detected', [
+            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->critical('Multiple domains detected', [
                 'domains' => $domains,
                 'license_key' => config('license-manager.license_key'),
                 'excess_count' => count($domains) - $maxAllowed,
@@ -125,7 +125,7 @@ class CopyProtectionService
         $score = 0;
         
         // Check if application has been downloaded/moved recently
-        $installFingerprint = app(\Acecoderz\LicenseManager\LicenseManager::class)->generateHardwareFingerprint();
+        $installFingerprint = app(\\InsuranceCore\\Helpers\\LicenseManager::class)->generateHardwareFingerprint();
         $storedFingerprint = Cache::get('original_fingerprint_' . md5(config('license-manager.license_key')));
         
         if (!$storedFingerprint) {
@@ -138,7 +138,7 @@ class CopyProtectionService
             if ($percent < 85) {
                 $score += 40; // High suspicion - significant hardware change
                 
-                app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('Significant hardware fingerprint change', [
+                app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('Significant hardware fingerprint change', [
                     'old_fingerprint' => substr($storedFingerprint, 0, 32) . '...',
                     'new_fingerprint' => substr($installFingerprint, 0, 32) . '...',
                     'similarity' => $percent,
@@ -182,7 +182,7 @@ class CopyProtectionService
                     } elseif ($storedHash !== $currentHash) {
                         $score += 25; // High suspicion - file modification
                         
-                        app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->critical('Unauthorized file modification detected', [
+                        app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->critical('Unauthorized file modification detected', [
                             'file' => $filePath,
                             'old_hash' => $storedHash,
                             'new_hash' => $currentHash
@@ -280,7 +280,7 @@ class CopyProtectionService
     public function handlePotentiallySuspiciousActivity(array $indicators, int $score): void
     {
         // Record incident
-        app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->alert('Potentially suspicious activity detected', [
+        app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->alert('Potentially suspicious activity detected', [
             'license_key' => config('license-manager.license_key'),
             'client_id' => config('license-manager.client_id'),
             'domain' => request()->getHost(),
@@ -319,7 +319,7 @@ class CopyProtectionService
             ]);
 
         } catch (\Exception $e) {
-            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->error('Failed to report suspicious activity', [
+            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->error('Failed to report suspicious activity', [
                 'error' => $e->getMessage(),
             ]);
         }

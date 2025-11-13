@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Commands;
+namespace InsuranceCore\Helpers\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;

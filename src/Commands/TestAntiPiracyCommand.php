@@ -1,5 +1,5 @@
 <?php
-namespace Acecoderz\LicenseManager\Commands;
+namespace InsuranceCore\Helpers\Commands;
 
 use InsuranceCore\Helpers\AntiPiracyManager;
 use Illuminate\Console\Command;

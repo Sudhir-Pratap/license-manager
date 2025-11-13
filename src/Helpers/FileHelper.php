@@ -1,12 +1,11 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Helpers;
+namespace InsuranceCore\Helpers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use InsuranceCore\Helpers\Models\SupportDocument;
 
 class FileHelper
 {
@@ -122,29 +121,34 @@ class FileHelper
         }
     }
 
-    public static function uploadSupportMultiFileToPath(Request $request, $inputName, $docType, $destinationPath, $ticketId)
+    public static function uploadMultiFileToPath(Request $request, $inputName, $destinationPath, $newFileName = null)
     {
+        $uploadedFiles = [];
+
         if ($request->file($inputName)) {
             $files = $request->file($inputName);
             foreach ($files as $file) {
                 $originalFileName = $file->getClientOriginalName();
                 $mimeType = $file->getClientMimeType();
                 $extension = $file->getClientOriginalExtension();
-                $fileName = (string) time() . rand(100000, 999999) . "." . $extension;
+                $fileName = $newFileName ?: (string) time() . rand(100000, 999999) . "." . $extension;
+
                 if (env("FILESYSTEM_DISK") == "s3") {
                     $path = Storage::disk("s3")->putFileAs($destinationPath, $file, $fileName);
                 } else {
-                    public_path("uploaded_document/" . $destinationPath . $originalFileName);
+                    $file->move(public_path($destinationPath), $fileName);
                 }
-                $supportDoc = new SupportDocument();
-                $supportDoc->support_id = $ticketId;
-                $supportDoc->doc_type = $docType;
-                $supportDoc->original_doc = $originalFileName;
-                $supportDoc->uploaded_doc = $fileName;
-                $supportDoc->created_by_agent = Auth::user()->id;
-                $supportDoc->save();
+
+                $uploadedFiles[] = [
+                    "file_name" => $fileName,
+                    "original_file_name" => $originalFileName,
+                    "mime_type" => $mimeType,
+                    "file_extension" => $extension,
+                    "file_path" => $destinationPath . '/' . $fileName,
+                ];
             }
         }
-        return [];
+
+        return $uploadedFiles;
     }
 } 

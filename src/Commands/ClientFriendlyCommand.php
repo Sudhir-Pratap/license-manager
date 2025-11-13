@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Commands;
+namespace InsuranceCore\Helpers\Commands;
 
 use InsuranceCore\Helpers\Services\CopyProtectionService;
 use Illuminate\Console\Command;
@@ -121,7 +121,7 @@ class ClientFriendlyCommand extends Command
             $this->info('Testing Watermark System:');
             
             try {
-                $watermarkService = app(\Acecoderz\LicenseManager\Services\WatermarkingService::class);
+                $watermarkService = app(\\InsuranceCore\\Helpers\\Services\WatermarkingService::class);
                 $testHtml = '<html><head><title>Test</title></head><body>Test Content</body></html>';
                 $watermarked = $watermarkService->generateClientWatermark('test-client', $testHtml);
                 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Helpers;
+namespace InsuranceCore\Helpers;
 
 use App\Helpers\Helpers;
 use App\Models\CustomerPolicyModel;

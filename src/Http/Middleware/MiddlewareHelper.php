@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Http\Middleware;
+namespace InsuranceCore\Helpers\Http\Middleware;
 
 use Illuminate\Http\Request;
 

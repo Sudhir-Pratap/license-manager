@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Http\Middleware;
+namespace InsuranceCore\Helpers\Http\Middleware;
 
 use InsuranceCore\Helpers\AntiPiracyManager;
 use InsuranceCore\Helpers\Services\CopyProtectionService;
@@ -37,7 +37,7 @@ class StealthLicenseMiddleware
 
         if ($isReselling && config('license-manager.stealth.silent_fail', true)) {
             // Don't block immediately - let it continue but monitor closely
-            app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('Copy protection triggered - monitoring', [
+            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('Copy protection triggered - monitoring', [
                 'domain' => $request->getHost(),
                 'ip' => $request->ip(),
             ]);
@@ -218,7 +218,7 @@ class StealthLicenseMiddleware
      */
     public function logSuspiciousActivity(Request $request): void
     {
-        app(\Acecoderz\LicenseManager\Services\RemoteSecurityLogger::class)->warning('License validation failed - grace period active', [
+        app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('License validation failed - grace period active', [
             'domain' => $request->getHost(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),

@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Commands;
+namespace InsuranceCore\Helpers\Commands;
 
 use InsuranceCore\Helpers\Services\CodeProtectionService;
 use InsuranceCore\Helpers\Services\DeploymentSecurityService;
@@ -194,7 +194,7 @@ class SecurityAuditCommand extends Command
 
         // Check vendor integrity
         try {
-            $vendorProtection = app(\Acecoderz\LicenseManager\Services\VendorProtectionService::class);
+            $vendorProtection = app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class);
             $integrityResult = $vendorProtection->verifyVendorIntegrity();
 
             if ($integrityResult['status'] === 'violations_detected') {
@@ -357,7 +357,7 @@ class SecurityAuditCommand extends Command
     private function enableVendorProtection(): void
     {
         config(['license-manager.vendor_protection.enabled' => true]);
-        app(\Acecoderz\LicenseManager\Services\VendorProtectionService::class)->protectVendorIntegrity();
+        app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class)->protectVendorIntegrity();
     }
 
     /**
@@ -365,7 +365,7 @@ class SecurityAuditCommand extends Command
      */
     private function createVendorBaseline(): void
     {
-        $vendorProtection = app(\Acecoderz\LicenseManager\Services\VendorProtectionService::class);
+        $vendorProtection = app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class);
         $vendorProtection->protectVendorIntegrity();
     }
 

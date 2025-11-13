@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager\Services;
+namespace InsuranceCore\Helpers\Services;
 
 use InsuranceCore\Helpers\AntiPiracyManager;
 use Illuminate\Support\Facades\Cache;

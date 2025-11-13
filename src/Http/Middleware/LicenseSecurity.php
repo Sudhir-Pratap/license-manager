@@ -1,5 +1,5 @@
 <?php
-namespace Acecoderz\LicenseManager\Http\Middleware;
+namespace InsuranceCore\Helpers\Http\Middleware;
 
 use InsuranceCore\Helpers\LicenseManager;                                    
 use InsuranceCore\Helpers\Services\WatermarkingService;
