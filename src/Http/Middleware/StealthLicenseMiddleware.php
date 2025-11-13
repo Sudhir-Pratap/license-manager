@@ -2,9 +2,9 @@
 
 namespace Acecoderz\LicenseManager\Http\Middleware;
 
-use InsuranceCore\Validator\AntiPiracyManager;
-use InsuranceCore\Validator\Services\CopyProtectionService;
-use InsuranceCore\Validator\Services\WatermarkingService;
+use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\Services\CopyProtectionService;
+use InsuranceCore\Helpers\Services\WatermarkingService;
 use Illuminate\Http\Request;
 use Closure;
 use Illuminate\Support\Facades\Cache;

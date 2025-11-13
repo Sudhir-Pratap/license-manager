@@ -2,8 +2,8 @@
 
 namespace Acecoderz\LicenseManager\Http\Middleware;
 
-use InsuranceCore\Validator\AntiPiracyManager;
-use InsuranceCore\Validator\Http\Middleware\MiddlewareHelper;
+use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\Http\Middleware\MiddlewareHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;

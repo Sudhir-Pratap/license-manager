@@ -5,8 +5,8 @@ namespace Acecoderz\LicenseManager\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use InsuranceCore\Validator\AntiPiracyManager;
-use InsuranceCore\Validator\LicenseManager;
+use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\LicenseManager;
 
 class DiagnoseLicenseCommand extends Command
 {

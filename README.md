@@ -1,8 +1,8 @@
-# 🛡️ Insurance Core Validator Package
+# 🛠️ Insurance Core Helpers Package
 
-Enterprise-grade validation and protection package for Laravel applications.
+Utility helpers package for Laravel applications.
 
-A comprehensive insurance-style validation system that protects your applications from unauthorized use while maintaining complete transparency for legitimate users.
+A comprehensive collection of utility helpers and tools for Laravel applications, providing essential functionality for development and deployment.
 
 ## 🎯 Key Features
 
@@ -18,10 +18,10 @@ A comprehensive insurance-style validation system that protects your application
 
 ```bash
 # Install package
-composer require insurance-core/validator
+composer require insurance-core/helpers
 
 # Publish configuration
-php artisan vendor:publish --provider="InsuranceCore\Validator\ValidatorServiceProvider"
+php artisan vendor:publish --provider="InsuranceCore\Helpers\HelperServiceProvider"
 
 # Configure stealth mode
 php artisan license:stealth-install --config

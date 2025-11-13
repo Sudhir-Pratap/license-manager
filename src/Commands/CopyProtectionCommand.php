@@ -2,8 +2,8 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use InsuranceCore\Validator\Services\CopyProtectionService;
-use InsuranceCore\Validator\Services\WatermarkingService;
+use InsuranceCore\Helpers\Services\CopyProtectionService;
+use InsuranceCore\Helpers\Services\WatermarkingService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 

@@ -2,8 +2,8 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use InsuranceCore\Validator\Services\CodeProtectionService;
-use InsuranceCore\Validator\Services\VendorProtectionService;
+use InsuranceCore\Helpers\Services\CodeProtectionService;
+use InsuranceCore\Helpers\Services\VendorProtectionService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;

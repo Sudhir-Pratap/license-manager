@@ -1,13 +1,13 @@
 {
-    "name": "insurance-core/validator",
-    "description": "Enterprise-grade validation and protection package for Laravel applications",
+    "name": "insurance-core/helpers",
+    "description": "Utility helpers package for Laravel applications",
     "type": "library",
     "license": "MIT",
-    "keywords": ["laravel", "validation", "security", "protection", "insurance"],
-    "homepage": "https://github.com/insurance-core/validator",
+    "keywords": ["laravel", "helpers", "utilities", "tools", "insurance"],
+    "homepage": "https://github.com/insurance-core/helpers",
     "autoload": {
         "psr-4": {
-            "InsuranceCore\\Validator\\": "src/"
+            "InsuranceCore\\Helpers\\": "src/"
         }
     },
     "authors": [
@@ -37,7 +37,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "InsuranceCore\\Validator\\ValidatorServiceProvider"
+                "InsuranceCore\\Helpers\\HelperServiceProvider"
             ]
         }
     },

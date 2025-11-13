@@ -2,7 +2,7 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use InsuranceCore\Validator\LicenseManager;
+use InsuranceCore\Helpers\LicenseManager;
 use Illuminate\Console\Command;
 
 class LicenseInfoCommand extends Command

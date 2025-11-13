@@ -1,6 +1,6 @@
 <?php
 
-namespace InsuranceCore\Validator;
+namespace InsuranceCore\Helpers;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -12,16 +12,16 @@ use Illuminate\Support\Str;
 
 class ProtectionManager
 {
-    public $validator;
+    public $helper;
     public $hardwareFingerprint;
     public $installationId;
     public $lastValidationTime;
     public $lastValidationResults = [];
     
-    public function __construct(Validator $validator)
+    public function __construct(Helper $helper)
     {
-        $this->validator = $validator;
-        $this->hardwareFingerprint = $this->validator->generateHardwareFingerprint();
+        $this->helper = $helper;
+        $this->hardwareFingerprint = $this->helper->generateHardwareFingerprint();
         $this->installationId = $this->getOrCreateInstallationId();
     }
 
@@ -117,7 +117,7 @@ class ProtectionManager
     public function generateHardwareFingerprint(): string
     {
         // Use the persisted hardware fingerprint from LicenseManager
-        return $this->validator->generateHardwareFingerprint();
+        return $this->helper->generateHardwareFingerprint();
     }
 
     /**
@@ -154,7 +154,7 @@ class ProtectionManager
         		// Use the original client ID for validation (not enhanced with hardware fingerprint)
 		// The hardware fingerprint is sent separately to the license server
 		
-		return $this->validator->validateLicense(
+		return $this->helper->validateLicense(
 			$licenseKey, 
 			$productId, 
 			$currentDomain, 
