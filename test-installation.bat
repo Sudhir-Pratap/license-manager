@@ -13,11 +13,11 @@ composer config repositories.local '{"type": "path", "url": "../", "options": {"
 if %errorlevel% neq 0 goto error
 
 echo 📥 Installing license-manager package from local path...
-composer require acecoderz/license-manager:@dev --no-interaction
+composer require insurance-core/helpers:@dev --no-interaction
 if %errorlevel% neq 0 goto error
 
 echo ⚙️ Publishing configuration...
-php artisan vendor:publish --provider="Acecoderz\LicenseManager\LicenseManagerServiceProvider" --tag=config --no-interaction
+php artisan vendor:publish --provider="InsuranceCore\Helpers\HelperServiceProvider" --tag=config --no-interaction
 if %errorlevel% neq 0 goto error
 
 echo 🧪 Testing package commands...

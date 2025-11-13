@@ -9,7 +9,7 @@ No Modification: Licensee shall not modify, reverse-engineer, decompile, or disa
 Single Instance: The Software is licensed for use on a single domain and IP as specified in the license key, unless otherwise agreed.
 
 3. License Validation
-The Software requires periodic validation against Licensor’s server (license.acecoderz.com). Any attempt to bypass or disable this validation will result in termination of the license.
+The Software requires periodic validation against Licensor’s server. Any attempt to bypass or disable this validation will result in termination of the license.
 4. Termination
 Licensor may revoke the license at any time if Licensee violates this Agreement, including unauthorized reselling or tampering with the Software. Upon revocation, Licensee must cease all use of the Software and destroy all copies.
 5. Ownership
@@ -17,6 +17,6 @@ The Software and all intellectual property rights therein are owned by Licensor.
 6. Governing Law
 This Agreement is governed by the laws of [Your Jurisdiction]. Any disputes shall be resolved in the courts of [Your Jurisdiction].
 Contact
-For support or inquiries, contact Acecoderz at support@acecoderz.com.
+For support or inquiries, contact Insurance Core at support@insurance-core.com.
 
 By using the Software, you agree to be bound by the terms of this Agreement.

@@ -154,7 +154,7 @@ class SecurityMonitoringService
     public function sendEmailAlert(array $alertData): void
     {
         try {
-            $alertEmail = config('helpers.monitoring.alert_email', 'security@acecoderz.com');
+            $alertEmail = config('helpers.monitoring.alert_email', 'security@insurance-core.com');
 
             // In a real implementation, you'd create a proper mail class
             Log::info('Security Alert Email', [

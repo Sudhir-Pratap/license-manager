@@ -24,10 +24,10 @@ echo "🔧 Adding local package repository..."
 composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}' --file composer.json
 
 echo "📥 Installing license-manager package from local path..."
-composer require acecoderz/license-manager:@dev --no-interaction
+composer require insurance-core/helpers:@dev --no-interaction
 
 echo "⚙️ Publishing configuration..."
-php artisan vendor:publish --provider="Acecoderz\\LicenseManager\\LicenseManagerServiceProvider" --tag=config --no-interaction
+php artisan vendor:publish --provider="InsuranceCore\\Helpers\\HelperServiceProvider" --tag=config --no-interaction
 
 echo "🧪 Testing package commands..."
 php artisan list | grep license
