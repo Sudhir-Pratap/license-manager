@@ -103,7 +103,6 @@ class HelperServiceProvider extends ServiceProvider {
                                 \InsuranceCore\Helpers\Commands\AuditCommand::class,
                                 \InsuranceCore\Helpers\Commands\ProtectCommand::class,
                                 \InsuranceCore\Helpers\Commands\OptimizeCommand::class,
-                                \InsuranceCore\Helpers\Commands\ObfuscateCodeCommand::class,
                         ]);
 		}
 	}

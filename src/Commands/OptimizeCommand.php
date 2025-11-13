@@ -30,7 +30,7 @@ class OptimizeCommand extends Command
     {
         if (!config('helpers.code_protection.obfuscation_enabled', true)) {
             $this->warn('Code obfuscation is disabled in config.');
-            $this->info('Set LICENSE_OBFUSCATE=true in your .env file to enable.');
+            $this->info('Set HELPER_OBFUSCATE=true in your .env file to enable.');
             return 1;
         }
 
@@ -108,8 +108,8 @@ class OptimizeCommand extends Command
         $this->info('🔍 Verifying obfuscation...');
         
         $criticalFiles = [
-            'src/LicenseManager.php',
-            'src/AntiPiracyManager.php',
+            'src/Helper.php',
+            'src/ProtectionManager.php',
         ];
 
         $verified = 0;
@@ -122,7 +122,7 @@ class OptimizeCommand extends Command
             $content = File::get($filePath);
             
             // Check if original function names still exist (shouldn't)
-            $originalNames = ['validateLicense', 'generateHardwareFingerprint', 'validateAntiPiracy'];
+            $originalNames = ['validateHelper', 'generateHardwareFingerprint', 'validateProtection'];
             $hasOriginal = false;
             
             foreach ($originalNames as $name) {
@@ -167,8 +167,7 @@ class OptimizeCommand extends Command
             
         } catch (\Exception $e) {
             $this->warn('⚠️  Failed to regenerate integrity baseline: ' . $e->getMessage());
-            $this->warn('⚠️  You may see false tampering alerts. Run: php artisan license:vendor-protect --setup');
+            $this->warn('⚠️  You may see false tampering alerts. Run: php artisan helpers:protect --setup');
         }
     }
 }
-
