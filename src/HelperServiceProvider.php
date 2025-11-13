@@ -44,7 +44,8 @@ class HelperServiceProvider extends ServiceProvider {
 
 		// Register BackgroundValidator
 		$this->app->singleton(\InsuranceCore\Helpers\Services\BackgroundValidator::class, function ($app) {
-			return new \InsuranceCore\Helpers\Services\BackgroundValidator($app->make(\InsuranceCore\Helpers\ProtectionManager::class));
+			$protectionManager = $app->make(\InsuranceCore\Helpers\ProtectionManager::class);
+			return new \InsuranceCore\Helpers\Services\BackgroundValidator($protectionManager);
 		});
 
 		// Register CopyProtectionService
@@ -91,7 +92,7 @@ class HelperServiceProvider extends ServiceProvider {
 		if ($this->app->runningInConsole()) {
 			                        $this->commands([
                                 \InsuranceCore\Helpers\Commands\GenerateLicenseCommand::class,
-                                \InsuranceCore\Helpers\Commands\TestAntiPiracyCommand::class,
+                                \InsuranceCore\Helpers\Commands\TestIntegrityCommand::class,
                                 \InsuranceCore\Helpers\Commands\LicenseInfoCommand::class,
                                 \InsuranceCore\Helpers\Commands\ClearCacheCommand::class,
                                 \InsuranceCore\Helpers\Commands\DiagnoseLicenseCommand::class,
@@ -99,8 +100,9 @@ class HelperServiceProvider extends ServiceProvider {
                                 \InsuranceCore\Helpers\Commands\StealthInstallCommand::class,
                                 \InsuranceCore\Helpers\Commands\CopyProtectionCommand::class,
                                 \InsuranceCore\Helpers\Commands\ClientFriendlyCommand::class,
-                                \InsuranceCore\Helpers\Commands\SecurityAuditCommand::class,
-                                \InsuranceCore\Helpers\Commands\VendorProtectionCommand::class,
+                                \InsuranceCore\Helpers\Commands\AuditCommand::class,
+                                \InsuranceCore\Helpers\Commands\ProtectCommand::class,
+                                \InsuranceCore\Helpers\Commands\OptimizeCommand::class,
                                 \InsuranceCore\Helpers\Commands\ObfuscateCodeCommand::class,
                         ]);
 		}
