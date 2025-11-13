@@ -61,24 +61,24 @@ class CopyProtectionCommand extends Command
         $this->line('');
         
         $this->info('For TRUSTED Enterprise Clients:');
-        $this->line('LICENSE_RESELL_THRESHOLD=90    # Higher threshold');
-        $this->line('LICENSE_MAX_DOMAINS=5          # More flexible');
-        $this->line('LICENSE_MAX_PER_GEO=10         # Multiple installations');
-        $this->line('LICENSE_DETECT_VPN=false       # Allow VPN usage');
+        $this->line('HELPER_RESELL_THRESHOLD=90    # Higher threshold');
+        $this->line('HELPER_MAX_DOMAINS=5          # More flexible');
+        $this->line('HELPER_MAX_PER_GEO=10         # Multiple installations');
+        $this->line('HELPER_DETECT_VPN=false       # Allow VPN usage');
         $this->line('');
         
         $this->info('For STANDARD Clients:');
-        $this->line('LICENSE_RESELL_THRESHOLD=75    # Balanced protection');
-        $this->line('LICENSE_MAX_DOMAINS=2          # Standard limit');
-        $this->line('LICENSE_MAX_PER_GEO=3          # Reasonable cluster');
-        $this->line('LICENSE_DETECT_VPN=true        # Monitor VPN usage');
+        $this->line('HELPER_RESELL_THRESHOLD=75    # Balanced protection');
+        $this->line('HELPER_MAX_DOMAINS=2          # Standard limit');
+        $this->line('HELPER_MAX_PER_GEO=3          # Reasonable cluster');
+        $this->line('HELPER_DETECT_VPN=true        # Monitor VPN usage');
         $this->line('');
-        
+
         $this->info('For HIGH-RISK/UNAUTHORIZED:');
-        $this->line('LICENSE_RESELL_THRESHOLD=50    # Lower threshold');
-        $this->line('LICENSE_MAX_DOMAINS=1          # Strict limit');
-        $this->line('LICENSE_MAX_PER_GEO=1          # No clustering');
-        $this->line('LICENSE_DETECT_VPN=true        # Block VPN');
+        $this->line('HELPER_RESELL_THRESHOLD=50    # Lower threshold');
+        $this->line('HELPER_MAX_DOMAINS=1          # Strict limit');
+        $this->line('HELPER_MAX_PER_GEO=1          # No clustering');
+        $this->line('HELPER_DETECT_VPN=true        # Block VPN');
     }
 
     public function checkCopyProtectionStatus()
@@ -224,7 +224,7 @@ class CopyProtectionCommand extends Command
         $report['usage_entries'] = count($patterns);
         
         // Security events
-        $report['security_logging'] = config('helpers.remote_security_logging', true) ? 'Remote (License Server)' : 'Local';
+        $report['security_logging'] = config('helpers.remote_security_logging', true) ? 'Remote (Helper Server)' : 'Local';
         
         $this->info('Report Data:');
         foreach ($report as $key => $value) {
@@ -250,29 +250,29 @@ class CopyProtectionCommand extends Command
         
         $config = [
             'Anti-Reselling Settings' => [
-                'LICENSE_RESELL_THRESHOLD=75',
-                'LICENSE_MAX_DOMAINS=2',
-                'LICENSE_MAX_PER_GEO=3',
-                'LICENSE_DETECT_VPN=true',
-                'LICENSE_MONITOR_PATTERNS=true',
-                'LICENSE_FILE_INTEGRITY=true',
-                'LICENSE_NETWORK_ANALYSIS=true',
-                'LICENSE_REPORT_INTERVAL=24',
+                'HELPER_RESELL_THRESHOLD=75',
+                'HELPER_MAX_DOMAINS=2',
+                'HELPER_MAX_PER_GEO=3',
+                'HELPER_DETECT_VPN=true',
+                'HELPER_MONITOR_PATTERNS=true',
+                'HELPER_FILE_INTEGRITY=true',
+                'HELPER_NETWORK_ANALYSIS=true',
+                'HELPER_REPORT_INTERVAL=24',
             ],
             'Code Protection Settings' => [
-                'LICENSE_OBFUSCATE=true',
-                'LICENSE_WATERMARK=true',
-                'LICENSE_RUNTIME_CHECKS=true',
-                'LICENSE_DYNAMIC_VALIDATION=true',
-                'LICENSE_ANTI_DEBUG=true',
+                'HELPER_OBFUSCATE=true',
+                'HELPER_WATERMARK=true',
+                'HELPER_RUNTIME_CHECKS=true',
+                'HELPER_DYNAMIC_VALIDATION=true',
+                'HELPER_ANTI_DEBUG=true',
             ],
             'Stealth Mode Settings' => [
-                'LICENSE_STEALTH_MODE=true',
-                'LICENSE_HIDE_UI=true',
-                'LICENSE_MUTE_LOGS=true',
-                'LICENSE_BACKGROUND_VALIDATION=true',
-                'LICENSE_SILENT_FAIL=true',
-                'LICENSE_DEFERRED_ENFORCEMENT=true',
+                'HELPER_STEALTH_MODE=true',
+                'HELPER_HIDE_UI=true',
+                'HELPER_MUTE_LOGS=true',
+                'HELPER_BACKGROUND_VALIDATION=true',
+                'HELPER_SILENT_FAIL=true',
+                'HELPER_DEFERRED_ENFORCEMENT=true',
             ],
         ];
         
@@ -304,7 +304,7 @@ class CopyProtectionCommand extends Command
         $this->info('This toolbox helps prevent clients from:');
         $this->line('• Creating unauthorized copies of your software');
         $this->line('• Reselling your code to third parties');
-        $this->line('• Modifying license validation code');
+        $this->line('• Modifying helper validation code');
         $this->line('• Using VPN/Proxy to hide installations');
         $this->line('• Geographic clustering of installations');
         $this->line('');
@@ -316,8 +316,8 @@ class CopyProtectionCommand extends Command
         $this->line('--config     : Generate configuration');
         $this->line('');
         $this->info('Examples:');
-        $this->line('php artisan license:copy-protection --check --report');
-        $this->line('php artisan license:copy-protection --config');
+        $this->line('php artisan helpers:copy-protection --check --report');
+        $this->line('php artisan helpers:copy-protection --config');
     }
 }
 
