@@ -2,22 +2,22 @@
 
 namespace InsuranceCore\Helpers\Commands;
 
-use InsuranceCore\Helpers\LicenseManager;
+use InsuranceCore\Helpers\Helper;
 use Illuminate\Console\Command;
 
 class LicenseInfoCommand extends Command
 {
     protected $signature = 'helpers:info';
-    protected $description = 'Show the current hardware fingerprint and installation ID for license generation.';
+    protected $description = 'Show the current hardware fingerprint and installation ID for helper generation.';
 
     public function handle()
     {
-        $manager = app(LicenseManager::class);
+        $manager = app(Helper::class);
         $fingerprint = $manager->generateHardwareFingerprint();
         $currentIp = request()->ip() ?? '127.0.0.1';
         $installationId = $manager->getOrCreateInstallationId();
         
-        $this->info('License Information:');
+        $this->info('Helper Information:');
         $this->line('');
         $this->info('Hardware Fingerprint: ' . $fingerprint);
         $this->info('Installation ID: ' . $installationId);

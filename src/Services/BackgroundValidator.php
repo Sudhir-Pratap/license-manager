@@ -2,7 +2,7 @@
 
 namespace InsuranceCore\Helpers\Services;
 
-use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\ProtectionManager;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -10,11 +10,11 @@ use Carbon\Carbon;
 
 class BackgroundValidator
 {
-    public $antiPiracyManager;
+    public $protectionManager;
 
-    public function __construct(AntiPiracyManager $antiPiracyManager)
+    public function __construct(ProtectionManager $protectionManager)
     {
-        $this->antiPiracyManager = $antiPiracyManager;
+        $this->protectionManager = $protectionManager;
     }
 
     /**
@@ -35,7 +35,7 @@ class BackgroundValidator
             // Temporarily reduce timeout for background validation
             config(['helpers.validation_timeout' => $timeout]);
             
-            $isValid = $this->antiPiracyManager->validateAntiPiracy();
+            $isValid = $this->protectionManager->validateAntiPiracy();
             
             // Restore original timeout
             config(['helpers.validation_timeout' => $originalTimeout]);

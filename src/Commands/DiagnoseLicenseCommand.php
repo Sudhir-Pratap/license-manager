@@ -101,8 +101,8 @@ class DiagnoseLicenseCommand extends Command
     {
         $this->info('🖥️  Checking Hardware Fingerprint...');
 
-        $licenseManager = app(Helper::class);
-        $currentFingerprint = $licenseManager->generateHardwareFingerprint();
+        $helper = app(Helper::class);
+        $currentFingerprint = $helper->generateHardwareFingerprint();
         $storedFingerprint = Cache::get('hardware_fingerprint');
 
         if ($storedFingerprint) {
@@ -124,14 +124,14 @@ class DiagnoseLicenseCommand extends Command
         $this->info('🔐 Checking Helper Validation...');
 
         try {
-            $licenseManager = app(Helper::class);
+            $helper = app(Helper::class);
             $helperKey = config('helpers.helper_key');
             $productId = config('helpers.product_id');
             $clientId = config('helpers.client_id');
             $domain = request()->getHost() ?: 'localhost';
             $ip = request()->ip() ?: '127.0.0.1';
 
-            $isValid = $licenseManager->validateHelper($helperKey, $productId, $domain, $ip, $clientId);
+            $isValid = $helper->validateHelper($helperKey, $productId, $domain, $ip, $clientId);
             
             if ($isValid) {
                 $this->line("✅ Helper validation: Success");

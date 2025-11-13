@@ -1,28 +1,28 @@
 <?php
 namespace InsuranceCore\Helpers\Commands;
 
-use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\ProtectionManager;
 use Illuminate\Console\Command;
 
 class TestIntegrityCommand extends Command {
 	protected $signature   = 'helpers:test-integrity {--detailed}';
 	protected $description = 'Test the integrity system and generate a detailed report';
 
-	public function handle(AntiPiracyManager $antiPiracyManager) {
+	public function handle(ProtectionManager $protectionManager) {
 		$this->info('🔒 Testing Integrity System...');
 		$this->newLine();
 
 		// Test basic validation
-		$isValid = $antiPiracyManager->validateAntiPiracy();
+		$isValid = $protectionManager->validateAntiPiracy();
 		
 		if ($isValid) {
-			$this->info('✅ Anti-piracy validation passed');
+			$this->info('✅ Protection validation passed');
 		} else {
-			$this->error('❌ Anti-piracy validation failed');
+			$this->error('❌ Protection validation failed');
 		}
 
 		// Get detailed report
-		$report = $antiPiracyManager->getValidationReport();
+		$report = $protectionManager->getValidationReport();
 		
 		$this->newLine();
 		$this->info('📊 Installation Details:');
@@ -42,7 +42,7 @@ class TestIntegrityCommand extends Command {
 			$this->newLine();
 			$this->info('🔍 Detailed Hardware Fingerprint Components:');
 			
-			// Get hardware components (you would need to expose this from AntiPiracyManager)
+			// Get hardware components (you would need to expose this from ProtectionManager)
 			$this->warn('Hardware fingerprint includes:');
 			$this->line('• Server characteristics');
 			$this->line('• File system paths');

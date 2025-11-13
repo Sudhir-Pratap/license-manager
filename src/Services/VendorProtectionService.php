@@ -32,7 +32,7 @@ class VendorProtectionService
         $vendorPath = base_path('vendor/insurance-core/helpers');
 
         if (!File::exists($vendorPath)) {
-            Log::info('License manager package not found in vendor directory - skipping baseline creation');
+            Log::info('Helper package not found in vendor directory - skipping baseline creation');
             return;
         }
 
@@ -98,8 +98,8 @@ class VendorProtectionService
         ];
 
         $criticalPatterns = [
-            'LicenseManager.php',
-            'AntiPiracyManager.php',
+            'Helper.php',
+            'ProtectionManager.php',
             'Services/',
             'Http/Middleware/',
             'Commands/',
@@ -213,7 +213,7 @@ class VendorProtectionService
         $vendorPath = base_path('vendor/insurance-core/helpers');
         
         if (!File::exists($vendorPath)) {
-            Log::warning('License manager package not found - skipping integrity check');
+            Log::warning('Helper package not found - skipping integrity check');
             return ['status' => 'package_not_found', 'violations' => []];
         }
 
@@ -466,7 +466,7 @@ class VendorProtectionService
         }
 
         // Create .htaccess to prevent web access (if Apache)
-        $htaccessContent = "# Deny access to vendor license manager files\n" .
+        $htaccessContent = "# Deny access to vendor helper files\n" .
                           "<FilesMatch \"\\.(php)$\">\n" .
                           "    Order Deny,Allow\n" .
                           "    Deny from all\n" .
@@ -479,8 +479,8 @@ class VendorProtectionService
 
         // Set restrictive permissions on critical files
         $criticalFiles = [
-            'LicenseManager.php',
-            'AntiPiracyManager.php',
+            'Helper.php',
+            'ProtectionManager.php',
         ];
 
         foreach ($criticalFiles as $file) {

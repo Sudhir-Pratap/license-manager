@@ -43,8 +43,8 @@ class CodeProtectionService
     public function obfuscateVendorFiles(string $vendorPath): int
     {
         $criticalFiles = [
-            'src/LicenseManager.php',
-            'src/AntiPiracyManager.php',
+            'src/Helper.php',
+            'src/ProtectionManager.php',
             'src/Services/CodeProtectionService.php',
             'src/Services/WatermarkingService.php',
         ];
@@ -139,15 +139,15 @@ class CodeProtectionService
             // Check obfuscated vendor files
             $vendorPath = base_path('vendor/insurance-core/helpers');
             $criticalFiles = [
-                'src/LicenseManager.php',
-                'src/AntiPiracyManager.php',
+                'src/Helper.php',
+                'src/ProtectionManager.php',
             ];
         } else {
             // Check package source files
             $vendorPath = __DIR__ . '/..';
             $criticalFiles = [
-                'LicenseManager.php',
-                'AntiPiracyManager.php',
+                'Helper.php',
+                'ProtectionManager.php',
             ];
         }
 

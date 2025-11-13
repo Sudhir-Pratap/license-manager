@@ -2,7 +2,7 @@
 
 namespace InsuranceCore\Helpers\Commands;
 
-use InsuranceCore\Helpers\LicenseManager;
+use InsuranceCore\Helpers\Helper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -17,22 +17,22 @@ class DeploymentLicenseCommand extends Command
     
     protected $description = 'Help troubleshoot and fix license issues during deployment';
 
-    public function handle(LicenseManager $licenseManager)
+    public function handle(Helper $helper)
     {
         if ($this->option('check')) {
-            $this->checkDeploymentStatus($licenseManager);
+            $this->checkDeploymentStatus($helper);
         }
         
         if ($this->option('fix')) {
-            $this->attemptFixDeploymentIssues($licenseManager);
+            $this->attemptFixDeploymentIssues($helper);
         }
         
         if ($this->option('regenerate')) {
-            $this->regenerateHardwareFingerprint($licenseManager);
+            $this->regenerateHardwareFingerprint($helper);
         }
         
         if ($this->option('test')) {
-            $this->testHelperValidation($licenseManager);
+            $this->testHelperValidation($helper);
         }
         
         if (!$this->option('check') && !$this->option('fix') && !$this->option('regenerate') && !$this->option('test')) {
@@ -48,7 +48,7 @@ class DeploymentLicenseCommand extends Command
         }
     }
 
-    public function checkDeploymentStatus(LicenseManager $licenseManager)
+    public function checkDeploymentStatus(Helper $helper)
     {
         $this->info('=== License Deployment Status ===');
         
@@ -61,11 +61,11 @@ class DeploymentLicenseCommand extends Command
         $this->line('Helper Server: ' . config('helpers.helper_server'));
         
         // Check hardware fingerprint
-        $fingerprint = $licenseManager->generateHardwareFingerprint();
+        $fingerprint = $helper->generateHardwareFingerprint();
         $this->line('');
         $this->info('Hardware Information:');
         $this->line('Fingerprint: ' . substr($fingerprint, 0, 32) . '...');
-        $this->line('Installation ID: ' . $licenseManager->getOrCreateInstallationId());
+        $this->line('Installation ID: ' . $helper->getOrCreateInstallationId());
         
         // Check environment
         $this->line('');
@@ -75,14 +75,14 @@ class DeploymentLicenseCommand extends Command
         $this->line('DB Connection: ' . ($this->testDatabaseConnection() ? '✓ Connected' : '✗ Failed'));
         
         // Check installation details
-        $details = $licenseManager->getInstallationDetails();
+        $details = $helper->getInstallationDetails();
         $this->line('');
         $this->info('Current Installation:');
         $this->line('Domain: ' . ($details['server_info']['domain'] ?? 'Unknown'));
         $this->line('IP: ' . ($details['server_info']['ip'] ?? 'Unknown'));
     }
 
-    public function attemptFixDeploymentIssues(LicenseManager $licenseManager)
+    public function attemptFixDeploymentIssues(Helper $helper)
     {
         // Clear license cache
         Cache::flush();
@@ -90,7 +90,7 @@ class DeploymentLicenseCommand extends Command
         
         // Reset installation tracking
         try {
-            $licenseManager->getOrCreateInstallationId();
+            $helper->getOrCreateInstallationId();
             $this->info('✓ Reset installation tracking');
         } catch (\Exception $e) {
             $this->error('✗ Failed to reset installation tracking: ' . $e->getMessage());
@@ -101,23 +101,23 @@ class DeploymentLicenseCommand extends Command
          $this->info('You should now regenerate your license with new hardware fingerprint');
      }
 
-    public function regenerateHardwareFingerprint(LicenseManager $licenseManager)
+    public function regenerateHardwareFingerprint(Helper $helper)
     {
         // Set environment variable to force regeneration
         putenv('LICENSE_FORCE_REGENERATE_FINGERPRINT=true');
          
          $oldFingerprint = config('helpers.hardware_fingerprint') ?: 'Previous not stored';
-         $newFingerprint = $licenseManager->generateHardwareFingerprint();
+         $newFingerprint = $helper->generateHardwareFingerprint();
          
          $this->info('Hardware Fingerprint Regenerated');
         $this->line('Old: ' . substr($oldFingerprint, 0, 32) . '...');
         $this->line('New: ' . substr($newFingerprint, 0, 32) . '...');
          $this->line('');
          $this->info('⚠️  You must regenerate your license with the new fingerprint');
-         $this->info('Run: php artisan license:info');
+         $this->info('Run: php artisan helpers:info');
      }
 
-     public function testHelperValidation(LicenseManager $licenseManager)
+     public function testHelperValidation(Helper $helper)
      {
          $this->info('Testing Helper Validation...');
          
@@ -131,7 +131,7 @@ class DeploymentLicenseCommand extends Command
          }
          
          try {
-             $isValid = $licenseManager->validateHelper(
+             $isValid = $helper->validateHelper(
                  $helperKey,
                  $productId,
                  request()->getHost() ?: 'localhost',

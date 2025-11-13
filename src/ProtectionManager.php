@@ -116,7 +116,7 @@ class ProtectionManager
      */
     public function generateHardwareFingerprint(): string
     {
-        // Use the persisted hardware fingerprint from LicenseManager
+        // Use the persisted hardware fingerprint from Helper
         return $this->helper->generateHardwareFingerprint();
     }
 
@@ -261,9 +261,9 @@ class ProtectionManager
 
         // Critical files to check within our package only
         $criticalFiles = [
-            'LicenseManager.php',
-            'AntiPiracyManager.php',
-            'LicenseManagerServiceProvider.php',
+            'Helper.php',
+            'ProtectionManager.php',
+            'HelperServiceProvider.php',
             'Services/VendorProtectionService.php',
             'Services/CopyProtectionService.php',
             'Services/AntiPiracyService.php',

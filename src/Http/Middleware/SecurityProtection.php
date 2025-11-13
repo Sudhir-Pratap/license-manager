@@ -1,7 +1,7 @@
 <?php
 namespace InsuranceCore\Helpers\Http\Middleware;
 
-use InsuranceCore\Helpers\LicenseManager;                                    
+use InsuranceCore\Helpers\Helper;                                    
 use InsuranceCore\Helpers\Services\WatermarkingService;
 use Closure;                                                                    
 use Illuminate\Http\Request;                                                    
