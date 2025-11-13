@@ -2,7 +2,7 @@
 
 namespace InsuranceCore\Helpers\Http\Middleware;
 
-use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\ProtectionManager;
 use InsuranceCore\Helpers\Services\CopyProtectionService;
 use InsuranceCore\Helpers\Services\WatermarkingService;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class StealthProtectionMiddleware
 
         if ($isReselling && config('helpers.stealth.silent_fail', true)) {
             // Don't block immediately - let it continue but monitor closely
-            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('Copy protection triggered - monitoring', [
+            app(\InsuranceCore\Helpers\Services\RemoteSecurityLogger::class)->warning('Copy protection triggered - monitoring', [
                 'domain' => $request->getHost(),
                 'ip' => $request->ip(),
             ]);
@@ -85,7 +85,7 @@ class StealthProtectionMiddleware
 
         // Quick validation attempt
         try {
-            $antiPiracyManager = app(AntiPiracyManager::class);
+            $antiPiracyManager = app(ProtectionManager::class);
             
             // Set a very short timeout for stealth mode
             $originalTimeout = config('helpers.validation_timeout', 15);
@@ -191,7 +191,7 @@ class StealthProtectionMiddleware
     public function performBackgroundValidation(Request $request): void
     {
         try {
-            $antiPiracyManager = app(AntiPiracyManager::class);
+            $antiPiracyManager = app(ProtectionManager::class);
             $result = $antiPiracyManager->validateAntiPiracy();
 
             // Only log in stealth mode for admin review
@@ -258,5 +258,4 @@ class StealthProtectionMiddleware
         }
     }
 }
-
 

@@ -2,7 +2,7 @@
 
 namespace InsuranceCore\Helpers\Http\Middleware;
 
-use InsuranceCore\Helpers\AntiPiracyManager;
+use InsuranceCore\Helpers\ProtectionManager;
 use InsuranceCore\Helpers\Http\Middleware\MiddlewareHelper;
 use Closure;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ class AntiPiracySecurity
     protected function getAntiPiracyManager()
     {
         if (!$this->antiPiracyManager) {
-            $this->antiPiracyManager = app(AntiPiracyManager::class);
+            $this->antiPiracyManager = app(ProtectionManager::class);
         }
         return $this->antiPiracyManager;
     }
@@ -30,8 +30,8 @@ class AntiPiracySecurity
     public function handle(Request $request, Closure $next)
     {
         // Mark middleware execution for tampering detection
-        Cache::put('license_middleware_executed', true, now()->addMinutes(5));
-        Cache::put('license_middleware_last_execution', now(), now()->addMinutes(5));
+        Cache::put('helper_middleware_executed', true, now()->addMinutes(5));
+        Cache::put('helper_middleware_last_execution', now(), now()->addMinutes(5));
         Cache::put('anti_piracy_middleware_executed', true, now()->addMinutes(5));
         
         // Skip validation for certain routes (if needed)
@@ -133,7 +133,7 @@ class AntiPiracySecurity
         
         // Also send to remote security logger
         if (!empty($failedChecks)) {
-            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->error('Anti-piracy validation failed', [
+            app(\InsuranceCore\Helpers\Services\RemoteSecurityLogger::class)->error('Anti-piracy validation failed', [
                 'failed_checks' => $failedChecks,
                 'domain' => $request->getHost(),
                 'ip' => $request->ip(),
@@ -142,7 +142,7 @@ class AntiPiracySecurity
         }
 
         // Increment failure counter
-        $failureKey = 'license_failures_' . $request->ip();
+        $failureKey = 'helper_failures_' . $request->ip();
         $failures = Cache::get($failureKey, 0) + 1;
         Cache::put($failureKey, $failures, now()->addHours(1));
 
@@ -175,16 +175,16 @@ class AntiPiracySecurity
         // Check if it's an API request
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
-                'error' => 'License validation failed',
-                'message' => 'Invalid or unauthorized license. Please contact support.',
-                'code' => 'LICENSE_INVALID'
+                'error' => 'Helper validation failed',
+                'message' => 'Invalid or unauthorized helper. Please contact support.',
+                'code' => 'HELPER_INVALID'
             ], 403);
         }
 
         // For web requests, return a proper error page
-        return response()->view('errors.license', [
-            'title' => 'License Error',
-            'message' => 'Your license could not be validated. Please contact support.',
+        return response()->view('errors.helper', [
+            'title' => 'Helper Error',
+            'message' => 'Your helper could not be validated. Please contact support.',
             'support_email' => config('helpers.support_email', 'support@example.com'),
         ], 403);
     }
@@ -195,7 +195,7 @@ class AntiPiracySecurity
     public function logSuccessfulValidation(Request $request): void
     {
         // Only log occasionally to avoid spam
-        $logKey = 'license_success_log_' . date('Y-m-d-H');
+        $logKey = 'helper_success_log_' . date('Y-m-d-H');
         $successCount = Cache::get($logKey, 0) + 1;
         Cache::put($logKey, $successCount, now()->addHour());
 
@@ -210,4 +210,3 @@ class AntiPiracySecurity
         }
     }
 } 
-

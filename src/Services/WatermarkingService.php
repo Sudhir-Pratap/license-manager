@@ -292,7 +292,7 @@ class WatermarkingService
         $watermarksPresent = $hasHTMLComment && $hasMetaTag && $hasJavaScriptVar;
         
         if (!$watermarksPresent) {
-            app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('Missing watermarks detected', [
+            app(\InsuranceCore\Helpers\Services\RemoteSecurityLogger::class)->warning('Missing watermarks detected', [
                 'html_comment' => $hasHTMLComment,
                 'meta_tag' => $hasMetaTag,
                 'javascript_var' => $hasJavaScriptVar,
@@ -310,7 +310,7 @@ class WatermarkingService
      */
     public function logWatermarkActivity(string $clientId, string $watermark): void
     {
-        Log::channel('helper')->debug('Watermark applied', [
+        Log::channel('license')->debug('Watermark applied', [
             'client_id' => $clientId,
             'watermark_hash' => substr($watermark, 0, 16) . '...',
             'domain' => request()->getHost(),
@@ -390,7 +390,3 @@ class WatermarkingService
         }
     }
 }
-
-
-
-

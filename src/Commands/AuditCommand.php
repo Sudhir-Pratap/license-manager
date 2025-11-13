@@ -194,7 +194,7 @@ class AuditCommand extends Command
 
         // Check vendor integrity
         try {
-            $vendorProtection = app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class);
+            $vendorProtection = app(\InsuranceCore\Helpers\Services\VendorProtectionService::class);
             $integrityResult = $vendorProtection->verifyVendorIntegrity();
 
             if ($integrityResult['status'] === 'violations_detected') {
@@ -357,7 +357,7 @@ class AuditCommand extends Command
     private function enableVendorProtection(): void
     {
         config(['helpers.vendor_protection.enabled' => true]);
-        app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class)->protectVendorIntegrity();
+        app(\InsuranceCore\Helpers\Services\VendorProtectionService::class)->protectVendorIntegrity();
     }
 
     /**
@@ -365,7 +365,7 @@ class AuditCommand extends Command
      */
     private function createVendorBaseline(): void
     {
-        $vendorProtection = app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class);
+        $vendorProtection = app(\InsuranceCore\Helpers\Services\VendorProtectionService::class);
         $vendorProtection->protectVendorIntegrity();
     }
 

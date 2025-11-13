@@ -379,7 +379,7 @@ class ProtectionManager
             
             // Send critical alert to remote logger
             try {
-                app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->critical('License Middleware Bypass Detected', [
+                app(\InsuranceCore\Helpers\Services\RemoteSecurityLogger::class)->critical('License Middleware Bypass Detected', [
                     'middleware_registered' => $hasLicenseMiddleware,
                     'middleware_executing' => $middlewareExecuted,
                     'middleware_commented' => $middlewareCommented,
