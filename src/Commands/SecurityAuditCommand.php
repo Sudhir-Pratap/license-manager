@@ -2,10 +2,10 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use Acecoderz\LicenseManager\Services\CodeProtectionService;
-use Acecoderz\LicenseManager\Services\DeploymentSecurityService;
-use Acecoderz\LicenseManager\Services\EnvironmentHardeningService;
-use Acecoderz\LicenseManager\Services\SecurityMonitoringService;
+use InsuranceCore\Validator\Services\CodeProtectionService;
+use InsuranceCore\Validator\Services\DeploymentSecurityService;
+use InsuranceCore\Validator\Services\EnvironmentHardeningService;
+use InsuranceCore\Validator\Services\SecurityMonitoringService;
 use Illuminate\Console\Command;
 
 class SecurityAuditCommand extends Command

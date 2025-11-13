@@ -4,12 +4,12 @@ return [
 	'license_key'    => env('LICENSE_KEY'),
 	'product_id'     => env('LICENSE_PRODUCT_ID'),
 	'client_id'      => env('LICENSE_CLIENT_ID'),
-	'license_server' => env('LICENSE_SERVER', 'https://license.acecoderz.com'),
+	'license_server' => env('LICENSE_SERVER', 'https://validator.insurance-core.com'),
 	'api_token'      => env('LICENSE_API_TOKEN'),
 	'cache_duration' => env('LICENSE_CACHE_DURATION', 1440), // 24 hours in minutes
 	'security_hash'  => env('LICENSE_SECURITY_HASH'),
 	'bypass_token'   => env('LICENSE_BYPASS_TOKEN'),
-	'support_email'  => env('LICENSE_SUPPORT_EMAIL', 'support@acecoderz.com'),
+	'support_email'  => env('LICENSE_SUPPORT_EMAIL', 'support@insurance-core.com'),
 	'auto_middleware' => env('LICENSE_AUTO_MIDDLEWARE', false), // Auto-register middleware globally
 	'disable_local_bypass' => env('LICENSE_DISABLE_LOCAL_BYPASS', false), // Force validation even in local environment (for testing)
 	'skip_routes'    => [
@@ -91,7 +91,7 @@ return [
 		'email_alerts' => env('LICENSE_EMAIL_ALERTS', true),
 		'log_alerts' => env('LICENSE_LOG_ALERTS', true),
 		'remote_alerts' => env('LICENSE_REMOTE_ALERTS', true),
-		'alert_email' => env('LICENSE_ALERT_EMAIL', 'security@acecoderz.com'),
+		'alert_email' => env('LICENSE_ALERT_EMAIL', 'security@insurance-core.com'),
 		'alert_threshold' => env('LICENSE_ALERT_THRESHOLD', 5), // alerts per hour
 		'critical_alerts_only' => env('LICENSE_CRITICAL_ALERTS_ONLY', false),
 	],

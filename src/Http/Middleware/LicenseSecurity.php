@@ -1,8 +1,8 @@
 <?php
 namespace Acecoderz\LicenseManager\Http\Middleware;
 
-use Acecoderz\LicenseManager\LicenseManager;                                    
-use Acecoderz\LicenseManager\Services\WatermarkingService;
+use InsuranceCore\Validator\LicenseManager;                                    
+use InsuranceCore\Validator\Services\WatermarkingService;
 use Closure;                                                                    
 use Illuminate\Http\Request;                                                    
 use Illuminate\Support\Facades\Log;                                             

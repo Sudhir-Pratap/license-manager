@@ -1,5 +1,5 @@
 <?php
-namespace Acecoderz\LicenseManager;
+namespace InsuranceCore\Validator;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-class LicenseManager {
+class Validator {
 	public function validateLicense(string $licenseKey, string $productId, string $domain, string $ip, string $clientId): bool {
 		$licenseServer = config('license-manager.license_server');
 		$apiToken      = config('license-manager.api_token');

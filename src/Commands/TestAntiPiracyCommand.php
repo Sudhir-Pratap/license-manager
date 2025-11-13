@@ -1,7 +1,7 @@
 <?php
 namespace Acecoderz\LicenseManager\Commands;
 
-use Acecoderz\LicenseManager\AntiPiracyManager;
+use InsuranceCore\Validator\AntiPiracyManager;
 use Illuminate\Console\Command;
 
 class TestAntiPiracyCommand extends Command {

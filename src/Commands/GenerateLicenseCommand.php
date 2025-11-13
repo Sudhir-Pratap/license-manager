@@ -1,7 +1,7 @@
 <?php
 namespace Acecoderz\LicenseManager\Commands;
 
-use Acecoderz\LicenseManager\LicenseManager;
+use InsuranceCore\Validator\LicenseManager;
 use Illuminate\Console\Command;
 
 class GenerateLicenseCommand extends Command {

@@ -2,7 +2,7 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use Acecoderz\LicenseManager\Services\CopyProtectionService;
+use InsuranceCore\Validator\Services\CopyProtectionService;
 use Illuminate\Console\Command;
 
 class ClientFriendlyCommand extends Command

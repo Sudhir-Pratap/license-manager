@@ -1,20 +1,20 @@
 {
-    "name": "acecoderz/license-manager",
-    "description": "Enterprise-grade license validation package for Laravel applications",
+    "name": "insurance-core/validator",
+    "description": "Enterprise-grade validation and protection package for Laravel applications",
     "type": "library",
     "license": "MIT",
-    "keywords": ["laravel", "license", "validation", "anti-piracy", "security"],
-    "homepage": "https://github.com/acecoderz/laravel-license-manager",
+    "keywords": ["laravel", "validation", "security", "protection", "insurance"],
+    "homepage": "https://github.com/insurance-core/validator",
     "autoload": {
         "psr-4": {
-            "Acecoderz\\LicenseManager\\": "src/"
+            "InsuranceCore\\Validator\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "Acecoderz Team",
-            "email": "support@acecoderz.com",
-            "homepage": "https://acecoderz.com"
+            "name": "Insurance Core Team",
+            "email": "support@insurance-core.com",
+            "homepage": "https://insurance-core.com"
         }
     ],
     "require": {
@@ -37,7 +37,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Acecoderz\\LicenseManager\\LicenseManagerServiceProvider"
+                "InsuranceCore\\Validator\\ValidatorServiceProvider"
             ]
         }
     },

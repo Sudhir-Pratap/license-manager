@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Acecoderz\LicenseManager\Models\SupportDocument;
+use InsuranceCore\Validator\Models\SupportDocument;
 
 class FileHelper
 {

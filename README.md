@@ -1,8 +1,8 @@
-# 🔒 Acecoderz License Manager Package
+# 🛡️ Insurance Core Validator Package
 
-Enterprise-grade license validation package for Laravel applications.
+Enterprise-grade validation and protection package for Laravel applications.
 
-Protect your applications from unauthorized use while maintaining complete transparency for legitimate users.
+A comprehensive insurance-style validation system that protects your applications from unauthorized use while maintaining complete transparency for legitimate users.
 
 ## 🎯 Key Features
 
@@ -18,10 +18,10 @@ Protect your applications from unauthorized use while maintaining complete trans
 
 ```bash
 # Install package
-composer require acecoderz/license-manager
+composer require insurance-core/validator
 
 # Publish configuration
-php artisan vendor:publish --provider="Acecoderz\LicenseManager\LicenseManagerServiceProvider"
+php artisan vendor:publish --provider="InsuranceCore\Validator\ValidatorServiceProvider"
 
 # Configure stealth mode
 php artisan license:stealth-install --config

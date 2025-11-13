@@ -2,7 +2,7 @@
 
 namespace Acecoderz\LicenseManager\Commands;
 
-use Acecoderz\LicenseManager\Services\VendorProtectionService;
+use InsuranceCore\Validator\Services\VendorProtectionService;
 use Illuminate\Console\Command;
 
 class VendorProtectionCommand extends Command

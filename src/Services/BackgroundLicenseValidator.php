@@ -2,7 +2,7 @@
 
 namespace Acecoderz\LicenseManager\Services;
 
-use Acecoderz\LicenseManager\AntiPiracyManager;
+use InsuranceCore\Validator\AntiPiracyManager;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;

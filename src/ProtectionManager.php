@@ -1,6 +1,6 @@
 <?php
 
-namespace Acecoderz\LicenseManager;
+namespace InsuranceCore\Validator;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -10,18 +10,18 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class AntiPiracyManager
+class ProtectionManager
 {
-    public $licenseManager;
+    public $validator;
     public $hardwareFingerprint;
     public $installationId;
     public $lastValidationTime;
     public $lastValidationResults = [];
     
-    public function __construct(LicenseManager $licenseManager)
+    public function __construct(Validator $validator)
     {
-        $this->licenseManager = $licenseManager;
-        $this->hardwareFingerprint = $this->licenseManager->generateHardwareFingerprint();
+        $this->validator = $validator;
+        $this->hardwareFingerprint = $this->validator->generateHardwareFingerprint();
         $this->installationId = $this->getOrCreateInstallationId();
     }
 
@@ -117,7 +117,7 @@ class AntiPiracyManager
     public function generateHardwareFingerprint(): string
     {
         // Use the persisted hardware fingerprint from LicenseManager
-        return $this->licenseManager->generateHardwareFingerprint();
+        return $this->validator->generateHardwareFingerprint();
     }
 
     /**
@@ -154,7 +154,7 @@ class AntiPiracyManager
         		// Use the original client ID for validation (not enhanced with hardware fingerprint)
 		// The hardware fingerprint is sent separately to the license server
 		
-		return $this->licenseManager->validateLicense(
+		return $this->validator->validateLicense(
 			$licenseKey, 
 			$productId, 
 			$currentDomain, 
@@ -228,7 +228,7 @@ class AntiPiracyManager
         }
 
         try {
-            $vendorProtection = app(\Acecoderz\LicenseManager\Services\VendorProtectionService::class);
+            $vendorProtection = app(\InsuranceCore\Validator\Services\VendorProtectionService::class);
             $integrityResult = $vendorProtection->verifyVendorIntegrity();
 
             if ($integrityResult['status'] === 'violations_detected') {
@@ -469,7 +469,7 @@ class AntiPiracyManager
                     'AntiPiracySecurity',
                     'LicenseSecurity',
                     'StealthLicenseMiddleware',
-                    'Acecoderz\\LicenseManager',
+                    'InsuranceCore\\Validator',
                 ];
                 
                 foreach ($middlewareClasses as $className) {

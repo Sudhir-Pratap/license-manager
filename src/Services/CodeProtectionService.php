@@ -5,7 +5,7 @@ namespace Acecoderz\LicenseManager\Services;
 use Illuminate\Support\Facades\Log;                                             
 use Illuminate\Support\Facades\Cache;                                           
 use Illuminate\Support\Facades\File;
-use Acecoderz\LicenseManager\Services\RemoteSecurityLogger;
+use InsuranceCore\Validator\Services\RemoteSecurityLogger;
 use Illuminate\Support\Str;
 
 class CodeProtectionService

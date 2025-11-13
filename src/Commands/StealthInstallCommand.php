@@ -4,9 +4,9 @@ namespace Acecoderz\LicenseManager\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
-use Acecoderz\LicenseManager\Http\Middleware\StealthLicenseMiddleware;
-use Acecoderz\LicenseManager\Http\Middleware\AntiPiracySecurity;
-use Acecoderz\LicenseManager\Http\Middleware\LicenseSecurity;
+use InsuranceCore\Validator\Http\Middleware\StealthLicenseMiddleware;
+use InsuranceCore\Validator\Http\Middleware\AntiPiracySecurity;
+use InsuranceCore\Validator\Http\Middleware\LicenseSecurity;
 
 class StealthInstallCommand extends Command
 {
