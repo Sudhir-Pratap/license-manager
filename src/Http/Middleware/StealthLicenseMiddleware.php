@@ -89,12 +89,12 @@ class StealthLicenseMiddleware
             
             // Set a very short timeout for stealth mode
             $originalTimeout = config('helpers.validation_timeout', 15);
-            config(['license-manager.validation_timeout' => config('helpers.stealth.validation_timeout', 5)]);
+            config(['helpers.validation_timeout' => config('helpers.stealth.validation_timeout', 5)]);
 
             $isValid = $antiPiracyManager->validateAntiPiracy();
 
             // Restore original timeout
-            config(['license-manager.validation_timeout' => $originalTimeout]);
+            config(['helpers.validation_timeout' => $originalTimeout]);
 
             // Cache result briefly
             Cache::put($cacheKey . '_valid', $isValid, now()->addMinutes(10));

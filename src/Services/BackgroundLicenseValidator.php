@@ -33,12 +33,12 @@ class BackgroundLicenseValidator
             $originalTimeout = config('helpers.validation_timeout', 15);
             
             // Temporarily reduce timeout for background validation
-            config(['license-manager.validation_timeout' => $timeout]);
+            config(['helpers.validation_timeout' => $timeout]);
             
             $isValid = $this->antiPiracyManager->validateAntiPiracy();
             
             // Restore original timeout
-            config(['license-manager.validation_timeout' => $originalTimeout]);
+            config(['helpers.validation_timeout' => $originalTimeout]);
 
             // Cache result for immediate future requests
             $this->cacheValidationResult($isValid, $context);

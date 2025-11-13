@@ -251,14 +251,14 @@ class StealthInstallCommand extends Command
         
         // Update running configuration
         config([
-            'license-manager.stealth.enabled' => true,
-            'license-manager.stealth.hide_ui_elements' => true,
-            'license-manager.stealth.mute_logs' => true,
-            'license-manager.stealth.background_validation' => true,
-            'license-manager.stealth.silent_fail' => true,
-            'license-manager.stealth.deferred_enforcement' => true,
-            'license-manager.stealth.validation_timeout' => 5,
-            'license-manager.stealth.fallback_grace_period' => 72,
+            'helpers.stealth.enabled' => true,
+            'helpers.stealth.hide_ui_elements' => true,
+            'helpers.stealth.mute_logs' => true,
+            'helpers.stealth.background_validation' => true,
+            'helpers.stealth.silent_fail' => true,
+            'helpers.stealth.deferred_enforcement' => true,
+            'helpers.stealth.validation_timeout' => 5,
+            'helpers.stealth.fallback_grace_period' => 72,
         ]);
         
         $this->info('✅ Stealth mode enabled temporarily');
@@ -278,12 +278,12 @@ class StealthInstallCommand extends Command
         $this->info('Disabling Stealth Mode...');
         
         config([
-            'license-manager.stealth.enabled' => false,
-            'license-manager.stealth.hide_ui_elements' => false,
-            'license-manager.stealth.mute_logs' => false,
-            'license-manager.stealth.background_validation' => false,
-            'license-manager.stealth.silent_fail' => false,
-            'license-manager.stealth.deferred_enforcement' => false,
+            'helpers.stealth.enabled' => false,
+            'helpers.stealth.hide_ui_elements' => false,
+            'helpers.stealth.mute_logs' => false,
+            'helpers.stealth.background_validation' => false,
+            'helpers.stealth.silent_fail' => false,
+            'helpers.stealth.deferred_enforcement' => false,
         ]);
         
         $this->info('✅ Stealth mode disabled temporarily');

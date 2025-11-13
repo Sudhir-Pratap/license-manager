@@ -137,7 +137,7 @@ class CodeProtectionService
         
         if ($isObfuscated) {
             // Check obfuscated vendor files
-            $vendorPath = base_path('vendor/acecoderz/license-manager');
+            $vendorPath = base_path('vendor/insurance-core/helpers');
             $criticalFiles = [
                 'src/LicenseManager.php',
                 'src/AntiPiracyManager.php',

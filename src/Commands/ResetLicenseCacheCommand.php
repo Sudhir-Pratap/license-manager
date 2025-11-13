@@ -49,7 +49,7 @@ class ResetLicenseCacheCommand extends Command
         $criticalFiles = [
             'app/Http/Kernel.php',
             'config/app.php',
-            'config/license-manager.php',
+            'config/helpers.php',
             'routes/web.php',
             'routes/agent.php',
         ];

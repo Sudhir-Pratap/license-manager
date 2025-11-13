@@ -347,7 +347,7 @@ class SecurityAuditCommand extends Command
      */
     private function enableObfuscation(): void
         {
-        config(['license-manager.code_protection.obfuscation_enabled' => true]);
+        config(['helpers.code_protection.obfuscation_enabled' => true]);
         app(CodeProtectionService::class)->applyProtection();
     }
 
@@ -356,7 +356,7 @@ class SecurityAuditCommand extends Command
      */
     private function enableVendorProtection(): void
     {
-        config(['license-manager.vendor_protection.enabled' => true]);
+        config(['helpers.vendor_protection.enabled' => true]);
         app(\\InsuranceCore\\Helpers\\Services\VendorProtectionService::class)->protectVendorIntegrity();
     }
 

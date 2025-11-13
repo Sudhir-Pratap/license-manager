@@ -36,7 +36,7 @@ class ObfuscateCodeCommand extends Command
 
         $this->info('🔒 Starting code obfuscation process...');
         
-        $vendorPath = $this->option('vendor-path') ?? base_path('vendor/acecoderz/license-manager');
+        $vendorPath = $this->option('vendor-path') ?? base_path('vendor/insurance-core/helpers');
         
         if (!File::exists($vendorPath)) {
             $this->error("❌ Vendor path not found: {$vendorPath}");
@@ -91,7 +91,7 @@ class ObfuscateCodeCommand extends Command
      */
     private function createBackup(string $vendorPath): void
     {
-        $backupPath = storage_path('app/license-manager-backup-' . date('Y-m-d-His'));
+        $backupPath = storage_path('app/helpers-backup-' . date('Y-m-d-His'));
         
         $this->info("💾 Creating backup to: {$backupPath}");
         

@@ -23,13 +23,13 @@ class VendorProtectionService
     /**
      * Create initial integrity baseline for vendor files
      * 
-     * NOTE: Only checks files within vendor/acecoderz/license-manager directory.
+     * NOTE: Only checks files within vendor/insurance-core/helpers directory.
      * Clients can freely modify their own code, Laravel core, and other vendor packages.
      */
     public function createVendorIntegrityBaseline(): void
     {
         // Only check our package directory - clients can modify everything else
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
 
         if (!File::exists($vendorPath)) {
             Log::info('License manager package not found in vendor directory - skipping baseline creation');
@@ -61,20 +61,20 @@ class VendorProtectionService
     /**
      * Generate comprehensive baseline for vendor directory
      * 
-     * IMPORTANT: Only processes files within the license-manager package directory.
+     * IMPORTANT: Only processes files within the helpers package directory.
      * This ensures clients can modify their own code, Laravel core, and other packages.
      */
     public function generateVendorBaseline(string $vendorPath): array
     {
         // Validate that we're only checking our package directory
         $normalizedPath = realpath($vendorPath);
-        $expectedPath = realpath(base_path('vendor/acecoderz/license-manager'));
+        $expectedPath = realpath(base_path('vendor/insurance-core/helpers'));
         
         // Handle cases where realpath might fail (permissions, symlinks, etc.)
         if (!$normalizedPath || !$expectedPath) {
             // Fallback to string comparison with normalized separators
             $normalizedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $vendorPath);
-            $expectedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, base_path('vendor/acecoderz/license-manager'));
+            $expectedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, base_path('vendor/insurance-core/helpers'));
         }
         
         // Normalize paths for comparison (handle Windows case-insensitivity)
@@ -84,9 +84,9 @@ class VendorProtectionService
         if ($normalizedPathLower !== $expectedPathLower) {
             Log::error('Attempted to generate baseline for wrong directory', [
                 'requested' => $vendorPath,
-                'expected' => base_path('vendor/acecoderz/license-manager')
+                'expected' => base_path('vendor/insurance-core/helpers')
             ]);
-            throw new \InvalidArgumentException('Can only generate baseline for license-manager package directory');
+            throw new \InvalidArgumentException('Can only generate baseline for helpers package directory');
         }
 
         $baseline = [
@@ -183,7 +183,7 @@ class VendorProtectionService
     /**
      * Verify vendor directory integrity
      *
-     * NOTE: Only verifies files within vendor/acecoderz/license-manager directory.                                                                             
+     * NOTE: Only verifies files within vendor/insurance-core/helpers directory.                                                                             
      * Clients can modify their own code, Laravel core, and other vendor packages without triggering violations.                                                
      * 
      * IMPORTANT: If files are obfuscated, baseline must be regenerated after obfuscation.
@@ -210,7 +210,7 @@ class VendorProtectionService
         }
 
         // Only check our package directory - not Laravel core or other packages
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
         
         if (!File::exists($vendorPath)) {
             Log::warning('License manager package not found - skipping integrity check');
@@ -459,7 +459,7 @@ class VendorProtectionService
      */
     public function implementVendorFileLocking(): void
     {
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
 
         if (!File::exists($vendorPath)) {
             return;
@@ -544,7 +544,7 @@ class VendorProtectionService
     public function createDecoyFiles(): void
     {
         // Only create decoy files in our package directory
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
 
         if (!File::exists($vendorPath)) {
             return;
@@ -593,7 +593,7 @@ class VendorProtectionService
     public function restoreFromBackup(): bool
     {
         $backupLocation = storage_path('vendor_backups');
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
 
         if (!File::exists($backupLocation)) {
             Log::error('No vendor backup found for restoration');

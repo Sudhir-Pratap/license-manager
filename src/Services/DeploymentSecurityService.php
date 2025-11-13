@@ -46,7 +46,7 @@ class DeploymentSecurityService
     {
         $sensitiveFiles = [
             '.env',
-            'config/license-manager.php',
+            'config/helpers.php',
             'storage/app/license-keys/',
             'storage/logs/',
         ];
@@ -199,7 +199,7 @@ class DeploymentSecurityService
      */
     public function encryptSensitiveConfig(): void
     {
-        $configPath = config_path('license-manager.php');
+        $configPath = config_path('helpers.php');
 
         if (!File::exists($configPath)) {
             return;

@@ -159,7 +159,7 @@ class CopyProtectionService
         // List of critical files that shouldn't be modified
         $criticalFiles = [
             'app/Http/Kernel.php',
-            'config/license-manager.php',
+            'config/helpers.php',
             'config/app.php',
             'routes/web.php',
         ];

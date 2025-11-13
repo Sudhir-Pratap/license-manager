@@ -256,7 +256,7 @@ class SecurityMonitoringService
         $criticalFiles = [
             'composer.json',
             'config/app.php',
-            'config/license-manager.php',
+            'config/helpers.php',
         ];
 
         foreach ($criticalFiles as $file) {
@@ -285,9 +285,9 @@ class SecurityMonitoringService
     {
         // Check if sensitive config values are properly encrypted
         $sensitiveConfigs = [
-            'license-manager.license_key',
-            'license-manager.api_token',
-            'license-manager.client_id',
+            'helpers.license_key',
+            'helpers.api_token',
+            'helpers.client_id',
         ];
 
         foreach ($sensitiveConfigs as $config) {

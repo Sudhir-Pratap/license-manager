@@ -52,10 +52,10 @@ class DiagnoseLicenseCommand extends Command
         $this->info('📋 Checking Configuration...');
 
         $requiredConfigs = [
-            'license-manager.license_key' => 'LICENSE_KEY',
-            'license-manager.product_id' => 'LICENSE_PRODUCT_ID',
-            'license-manager.api_token' => 'LICENSE_API_TOKEN',
-            'license-manager.license_server' => 'LICENSE_SERVER',
+            'helpers.license_key' => 'LICENSE_KEY',
+            'helpers.product_id' => 'LICENSE_PRODUCT_ID',
+            'helpers.api_token' => 'LICENSE_API_TOKEN',
+            'helpers.license_server' => 'LICENSE_SERVER',
         ];
 
         foreach ($requiredConfigs as $config => $env) {

@@ -250,9 +250,9 @@ class ProtectionManager
      */
     public function detectTampering(): bool
     {
-        // Only check files within our package directory (vendor/acecoderz/license-manager)
+        // Only check files within our package directory (vendor/insurance-core/helpers)
         // Clients can modify their own app code, Laravel core, and other vendor packages
-        $vendorPath = base_path('vendor/acecoderz/license-manager');
+        $vendorPath = base_path('vendor/insurance-core/helpers');
         
         if (!File::exists($vendorPath)) {
             // Package not installed via Composer, skip tampering check
@@ -270,7 +270,7 @@ class ProtectionManager
             'Http/Middleware/LicenseSecurity.php',
             'Http/Middleware/AntiPiracySecurity.php',
             'Http/Middleware/StealthLicenseMiddleware.php',
-            'config/license-manager.php',
+            'config/helpers.php',
         ];
 
         foreach ($criticalFiles as $file) {
