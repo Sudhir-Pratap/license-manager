@@ -8,20 +8,20 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 
-class ObfuscateCodeCommand extends Command
+class OptimizeCommand extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'license:obfuscate
+    protected $signature = 'helpers:optimize
                           {--vendor-path= : Path to vendor directory}
-                          {--backup : Create backup before obfuscation}
-                          {--verify : Verify obfuscation was applied}';
+                          {--backup : Create backup before optimization}
+                          {--verify : Verify optimization was applied}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Obfuscate license manager code in vendor directory for production';
+    protected $description = 'Optimize helper code in vendor directory for production';
 
     /**
      * Execute the console command.
@@ -159,8 +159,8 @@ class ObfuscateCodeCommand extends Command
             $vendorProtection->createVendorIntegrityBaseline();
             
             // Mark obfuscation state so integrity checks know files are obfuscated
-            Cache::put('license_files_obfuscated', true, now()->addYears(1));
-            Cache::put('license_obfuscation_timestamp', now()->toISOString(), now()->addYears(1));
+            Cache::put('helper_files_optimized', true, now()->addYears(1));
+            Cache::put('helper_optimization_timestamp', now()->toISOString(), now()->addYears(1));
             
             $this->info('✅ Vendor integrity baseline regenerated with obfuscated files');
             $this->info('✅ Tampering detection will now expect obfuscated file hashes');

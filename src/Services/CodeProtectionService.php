@@ -133,7 +133,7 @@ class CodeProtectionService
     public function generateIntegrityHash(): string
     {
         // Check if files are obfuscated - if so, check vendor files
-        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        $isObfuscated = Cache::get('helper_files_optimized', false);
         
         if ($isObfuscated) {
             // Check obfuscated vendor files

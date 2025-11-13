@@ -47,7 +47,7 @@ class VendorProtectionService
         Cache::put('vendor_baseline_timestamp', now()->toISOString(), now()->addYears(1));
         
         // Mark if baseline was created for obfuscated files
-        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        $isObfuscated = Cache::get('helper_files_optimized', false);
         if ($isObfuscated) {
             Cache::put('vendor_baseline_obfuscated', true, now()->addYears(1));
         }
@@ -194,7 +194,7 @@ class VendorProtectionService
         $backupBaseline = Cache::get('vendor_baseline_backup');
 
         // Check if files are obfuscated - if so, baseline should already reflect obfuscated state
-        $isObfuscated = Cache::get('license_files_obfuscated', false);
+        $isObfuscated = Cache::get('helper_files_optimized', false);
         
         if (!$baseline) {
             // If obfuscation is expected but no baseline exists, create one
@@ -264,7 +264,7 @@ class VendorProtectionService
         // Handle violations
         if (!empty($violations)) {
             // Check if violations are due to obfuscation (expected changes)
-            $obfuscationTimestamp = Cache::get('license_obfuscation_timestamp');
+            $obfuscationTimestamp = Cache::get('helper_optimization_timestamp');
             $baselineTimestamp = Cache::get('vendor_baseline_timestamp');
             
             // If baseline was created after obfuscation, violations are legitimate
@@ -395,7 +395,7 @@ class VendorProtectionService
             'user_agent' => request()->userAgent(),
         ];
 
-        $existingRecords = Cache::get('vendor_tampering_records', []);
+        $existingRecords = Cache::get('helper_tampering_records', []);
         $existingRecords[] = $violationRecord;
 
         // Keep only last 50 records
@@ -403,7 +403,7 @@ class VendorProtectionService
             $existingRecords = array_slice($existingRecords, -50);
         }
 
-        Cache::put('vendor_tampering_records', $existingRecords, now()->addDays(30));
+        Cache::put('helper_tampering_records', $existingRecords, now()->addDays(30));
     }
 
     /**
@@ -412,11 +412,11 @@ class VendorProtectionService
     public function implementCriticalCountermeasures(array $violations): void
     {
         // Immediate license suspension
-        Cache::put('license_force_invalid', true, now()->addHours(24));
+        Cache::put('helper_force_invalid', true, now()->addHours(24));
 
         // Clear all license caches
-        Cache::forget('license_valid_' . md5(config('helpers.license_key') ?? ''));
-        Cache::forget('license_last_check_' . md5(config('helpers.license_key') ?? ''));
+        Cache::forget('helper_valid_' . md5(config('helpers.license_key') ?? ''));
+        Cache::forget('helper_last_check_' . md5(config('helpers.license_key') ?? ''));
 
         // Log critical security event
         Log::emergency('CRITICAL: Vendor tampering detected - license suspended', [
@@ -443,10 +443,10 @@ class VendorProtectionService
     public function implementWarningCountermeasures(array $violations): void
     {
         // Reduce license cache duration
-        Cache::put('license_cache_reduced', true, now()->addHours(1));
+        Cache::put('helper_cache_reduced', true, now()->addHours(1));
 
         // Force immediate server validation
-        Cache::put('force_server_validation', true, now()->addMinutes(30));
+        Cache::put('force_helper_validation', true, now()->addMinutes(30));
 
         // Log warning
         Log::warning('Vendor tampering warning - enhanced monitoring activated', [
@@ -605,7 +605,7 @@ class VendorProtectionService
             Log::warning('Vendor restoration initiated - manual verification required');
 
             // Clear tampering detection
-            Cache::forget('license_force_invalid');
+            Cache::forget('helper_force_invalid');
 
             // Recreate baseline
             $this->createVendorIntegrityBaseline();
@@ -622,7 +622,7 @@ class VendorProtectionService
      */
     public function getTamperingReport(): array
     {
-        $records = Cache::get('vendor_tampering_records', []);
+        $records = Cache::get('helper_tampering_records', []);
 
         return [
             'total_incidents' => count($records),

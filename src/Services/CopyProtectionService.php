@@ -336,7 +336,7 @@ class CopyProtectionService
             Cache::put('security_block_' . md5(config('helpers.license_key')), true, now()->addHours(24));
             
             // Force license server validation
-            Cache::forget('license_valid_' . md5(config('helpers.license_key')));
+            Cache::forget('helper_valid_' . md5(config('helpers.license_key')));
             
         } elseif ($score >= 75) {
             // Reduce cache duration for frequent validation

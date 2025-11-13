@@ -8,20 +8,20 @@ use InsuranceCore\Helpers\Services\EnvironmentHardeningService;
 use InsuranceCore\Helpers\Services\SecurityMonitoringService;
 use Illuminate\Console\Command;
 
-class SecurityAuditCommand extends Command
+class AuditCommand extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'license:security-audit
-                          {--fix : Automatically fix security issues}
-                          {--report : Generate detailed security report}
+    protected $signature = 'helpers:audit
+                          {--fix : Automatically fix issues}
+                          {--report : Generate detailed report}
                           {--monitor : Run monitoring checks}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Run comprehensive security audit for license manager';
+    protected $description = 'Run comprehensive audit for helper system';
 
     /**
      * Execute the console command.

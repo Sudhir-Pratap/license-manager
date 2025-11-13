@@ -6,38 +6,38 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class ResetLicenseCacheCommand extends Command
+class ClearCacheCommand extends Command
 {
-    protected $signature = 'license:reset-cache {--force : Force reset without confirmation}';
-    protected $description = 'Reset license validation cache and hardware fingerprint';
+    protected $signature = 'helpers:clear-cache {--force : Force reset without confirmation}';
+    protected $description = 'Clear helper cache and system identifiers';
 
     public function handle()
     {
         if (!$this->option('force')) {
-            if (!$this->confirm('This will reset all license cache and hardware fingerprint. Continue?')) {
+            if (!$this->confirm('This will reset all helper cache and system identifiers. Continue?')) {
                 $this->info('Operation cancelled.');
                 return 0;
             }
         }
 
-        $this->info('Resetting license cache...');
+        $this->info('Clearing helper cache...');
 
-        // Clear all license-related cache
+        // Clear all helper-related cache
         $cacheKeys = [
             'hardware_fingerprint',
             'installation_id',
             'last_validation_time',
         ];
 
-        // Add license-specific cache keys
+        // Add helper-specific cache keys
         $licenseKey = config('helpers.license_key');
         $productId = config('helpers.product_id');
         $clientId = config('helpers.client_id');
 
         if ($licenseKey && $productId && $clientId) {
-            $cacheKeys[] = "license_valid_{$licenseKey}_{$productId}_{$clientId}";
-            $cacheKeys[] = "license_last_check_{$licenseKey}_{$productId}_{$clientId}";
-            $cacheKeys[] = "license_valid_{$licenseKey}_{$productId}_{$clientId}_recent_success";
+            $cacheKeys[] = "helper_valid_{$licenseKey}_{$productId}_{$clientId}";
+            $cacheKeys[] = "helper_last_check_{$licenseKey}_{$productId}_{$clientId}";
+            $cacheKeys[] = "helper_valid_{$licenseKey}_{$productId}_{$clientId}_recent_success";
         }
 
         // Clear cache keys
@@ -60,7 +60,7 @@ class ResetLicenseCacheCommand extends Command
 
         // Clear active installations cache
         if ($licenseKey) {
-            Cache::forget('active_installations_' . $licenseKey);
+            Cache::forget('active_helpers_' . $licenseKey);
         }
 
         // Clear IP blacklist

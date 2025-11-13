@@ -4,12 +4,12 @@ namespace InsuranceCore\Helpers\Commands;
 use InsuranceCore\Helpers\AntiPiracyManager;
 use Illuminate\Console\Command;
 
-class TestAntiPiracyCommand extends Command {
-	protected $signature   = 'license:test-anti-piracy {--detailed}';
-	protected $description = 'Test the anti-piracy system and generate a detailed report';
+class TestIntegrityCommand extends Command {
+	protected $signature   = 'helpers:test-integrity {--detailed}';
+	protected $description = 'Test the integrity system and generate a detailed report';
 
 	public function handle(AntiPiracyManager $antiPiracyManager) {
-		$this->info('🔒 Testing Anti-Piracy System...');
+		$this->info('🔒 Testing Integrity System...');
 		$this->newLine();
 
 		// Test basic validation
@@ -78,10 +78,10 @@ class TestAntiPiracyCommand extends Command {
 		$this->line('1. Keep your license keys secure');
 		$this->line('2. Monitor installation logs regularly');
 		$this->line('3. Use HTTPS for all communications');
-		$this->line('4. Regularly update your license server');
+		$this->line('4. Regularly update your helper server');
 		$this->line('5. Monitor for suspicious activity');
 
 		$this->newLine();
-		$this->info('✅ Anti-piracy test completed');
+		$this->info('✅ Integrity test completed');
 	}
 } 

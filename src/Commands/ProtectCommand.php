@@ -5,12 +5,12 @@ namespace InsuranceCore\Helpers\Commands;
 use InsuranceCore\Helpers\Services\VendorProtectionService;
 use Illuminate\Console\Command;
 
-class VendorProtectionCommand extends Command
+class ProtectCommand extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'license:vendor-protect
+    protected $signature = 'helpers:protect
                           {--setup : Setup vendor protection}
                           {--verify : Verify vendor integrity}
                           {--report : Generate tampering report}
@@ -19,7 +19,7 @@ class VendorProtectionCommand extends Command
     /**
      * The console command description.
      */
-    protected $description = 'Manage vendor directory protection and integrity monitoring';
+    protected $description = 'Manage helper directory protection and integrity monitoring';
 
     /**
      * Execute the console command.

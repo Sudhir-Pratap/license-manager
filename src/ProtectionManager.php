@@ -603,12 +603,12 @@ class ProtectionManager
         Cache::put('last_validation_time', $currentTime, now()->addMinutes(10));
         
         // Check for multiple installations with same license
-        $activeInstallations = Cache::get('active_installations_' . md5(config('helpers.license_key')), []);
+        $activeInstallations = Cache::get('active_helpers_' . md5(config('helpers.license_key')), []);
         $currentInstallation = $this->installationId;
         
         if (!in_array($currentInstallation, $activeInstallations)) {
             $activeInstallations[] = $currentInstallation;
-            Cache::put('active_installations_' . md5(config('helpers.license_key')), $activeInstallations, now()->addHours(1));
+            Cache::put('active_helpers_' . md5(config('helpers.license_key')), $activeInstallations, now()->addHours(1));
         }
 
         // Allow maximum 2 installations per license
@@ -700,7 +700,7 @@ class ProtectionManager
      */
     public function forceServerValidation(): bool
     {
-        Cache::forget('license_valid_' . md5(config('helpers.license_key')) . '_' . config('helpers.product_id') . '_' . config('helpers.client_id'));
+        Cache::forget('helper_valid_' . md5(config('helpers.license_key')) . '_' . config('helpers.product_id') . '_' . config('helpers.client_id'));
         return $this->validateAntiPiracy();
     }
 

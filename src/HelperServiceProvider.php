@@ -2,17 +2,17 @@
 namespace InsuranceCore\Helpers;
 
 use InsuranceCore\Helpers\Commands\GenerateLicenseCommand;
-use InsuranceCore\Helpers\Commands\TestAntiPiracyCommand;
+use InsuranceCore\Helpers\Commands\TestIntegrityCommand;
 use InsuranceCore\Helpers\Commands\LicenseInfoCommand;
-use InsuranceCore\Helpers\Commands\ResetLicenseCacheCommand;
+use InsuranceCore\Helpers\Commands\ClearCacheCommand;
 use InsuranceCore\Helpers\Commands\DiagnoseLicenseCommand;
 use InsuranceCore\Helpers\Commands\DeploymentLicenseCommand;
 use InsuranceCore\Helpers\Commands\StealthInstallCommand;
 use InsuranceCore\Helpers\Commands\CopyProtectionCommand;
 use InsuranceCore\Helpers\Commands\ClientFriendlyCommand;
-use InsuranceCore\Helpers\Commands\SecurityAuditCommand;
-use InsuranceCore\Helpers\Commands\VendorProtectionCommand;
-use InsuranceCore\Helpers\Commands\ObfuscateCodeCommand;
+use InsuranceCore\Helpers\Commands\AuditCommand;
+use InsuranceCore\Helpers\Commands\ProtectCommand;
+use InsuranceCore\Helpers\Commands\OptimizeCommand;
 use InsuranceCore\Helpers\Http\Middleware\LicenseSecurity;
 use InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity;
 use InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware;
@@ -93,7 +93,7 @@ class HelperServiceProvider extends ServiceProvider {
                                 \InsuranceCore\Helpers\Commands\GenerateLicenseCommand::class,
                                 \InsuranceCore\Helpers\Commands\TestAntiPiracyCommand::class,
                                 \InsuranceCore\Helpers\Commands\LicenseInfoCommand::class,
-                                \InsuranceCore\Helpers\Commands\ResetLicenseCacheCommand::class,
+                                \InsuranceCore\Helpers\Commands\ClearCacheCommand::class,
                                 \InsuranceCore\Helpers\Commands\DiagnoseLicenseCommand::class,
                                 \InsuranceCore\Helpers\Commands\DeploymentLicenseCommand::class,
                                 \InsuranceCore\Helpers\Commands\StealthInstallCommand::class,

@@ -27,7 +27,7 @@ class SecurityMonitoringService
      */
     public function monitorLicenseViolations(): void
     {
-        $violations = Cache::get('license_violations', []);
+        $violations = Cache::get('helper_violations', []);
 
         // Remove old violations (older than 24 hours)
         $violations = array_filter($violations, function($violation) {
@@ -45,7 +45,7 @@ class SecurityMonitoringService
             ], 'critical');
         }
 
-        Cache::put('license_violations', $violations, now()->addHours(24));
+        Cache::put('helper_violations', $violations, now()->addHours(24));
     }
 
     /**
@@ -240,7 +240,7 @@ class SecurityMonitoringService
             'period' => 'last_24_hours',
             'critical_issues' => $this->countCriticalIssues(),
             'warnings' => $this->countWarnings(),
-            'license_violations' => count(Cache::get('license_violations', [])),
+            'helper_violations' => count(Cache::get('helper_violations', [])),
             'suspicious_activities' => $this->countSuspiciousActivities(),
             'integrity_status' => $this->getIntegrityStatus(),
             'system_health' => $this->getSystemHealth(),
