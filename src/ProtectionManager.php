@@ -31,7 +31,7 @@ class ProtectionManager
     public function validateAntiPiracy(): bool
     {
         // Check stealth mode configuration
-        $stealthMode = config('license-manager.stealth.enabled', false);
+        $stealthMode = config('helpers.stealth.enabled', false);
         
         if ($stealthMode) {
             return $this->validateInStealthMode();
@@ -59,7 +59,7 @@ class ProtectionManager
                 'failed' => array_keys($failedValidations),
                 'all_results' => $validations
             ]);
-        } elseif (!config('license-manager.stealth.mute_logs', false)) {
+        } elseif (!config('helpers.stealth.mute_logs', false)) {
             Log::info('Anti-piracy validation results', $validations);
         }
 
@@ -91,7 +91,7 @@ class ProtectionManager
 
         // Allow up to 2 non-critical failures
         if ($nonCriticalFailures > 2) {
-            if (!config('license-manager.stealth.mute_logs', false)) {
+            if (!config('helpers.stealth.mute_logs', false)) {
                 Log::warning('Too many non-critical validation failures', [
                     'failures' => $nonCriticalFailures,
                     'validations' => $validations
@@ -145,9 +145,9 @@ class ProtectionManager
      */
     public function validateLicense(): bool
     {
-        $licenseKey = config('license-manager.license_key');
-        $productId = config('license-manager.product_id');
-        $clientId = config('license-manager.client_id');
+        $licenseKey = config('helpers.license_key');
+        $productId = config('helpers.product_id');
+        $clientId = config('helpers.client_id');
         $currentDomain = request()->getHost();
         $currentIp = request()->ip();
 
@@ -223,7 +223,7 @@ class ProtectionManager
      */
     public function validateVendorIntegrity(): bool
     {
-        if (!config('license-manager.vendor_protection.enabled', true)) {
+        if (!config('helpers.vendor_protection.enabled', true)) {
             return true; // Skip if disabled
         }
 
@@ -424,7 +424,7 @@ class ProtectionManager
         }
         
         // If auto_middleware is enabled, we MUST have execution markers
-        if (config('license-manager.auto_middleware', false)) {
+        if (config('helpers.auto_middleware', false)) {
             // With auto_middleware, execution markers should always exist
             Log::warning('Auto middleware enabled but no execution markers found', [
                 'markers' => [
@@ -574,7 +574,7 @@ class ProtectionManager
     {
         $checks = [
             'app_key_exists' => !empty(config('app.key')),
-            'license_config_exists' => !empty(config('license-manager.license_key')),
+            'license_config_exists' => !empty(config('helpers.license_key')),
             'database_connected' => $this->testDatabaseConnection(),
             'storage_writable' => is_writable(storage_path()),
             'cache_working' => $this->testCacheConnection(),
@@ -603,12 +603,12 @@ class ProtectionManager
         Cache::put('last_validation_time', $currentTime, now()->addMinutes(10));
         
         // Check for multiple installations with same license
-        $activeInstallations = Cache::get('active_installations_' . md5(config('license-manager.license_key')), []);
+        $activeInstallations = Cache::get('active_installations_' . md5(config('helpers.license_key')), []);
         $currentInstallation = $this->installationId;
         
         if (!in_array($currentInstallation, $activeInstallations)) {
             $activeInstallations[] = $currentInstallation;
-            Cache::put('active_installations_' . md5(config('license-manager.license_key')), $activeInstallations, now()->addHours(1));
+            Cache::put('active_installations_' . md5(config('helpers.license_key')), $activeInstallations, now()->addHours(1));
         }
 
         // Allow maximum 2 installations per license
@@ -625,8 +625,8 @@ class ProtectionManager
      */
     public function validateServerCommunication(): bool
     {
-        $licenseServer = config('license-manager.license_server');
-        $apiToken = config('license-manager.api_token');
+        $licenseServer = config('helpers.license_server');
+        $apiToken = config('helpers.api_token');
 
         try {
             $response = Http::withHeaders([
@@ -683,9 +683,9 @@ class ProtectionManager
         return [
             'hardware_fingerprint' => $this->hardwareFingerprint,
             'installation_id' => $this->installationId,
-            'license_key' => config('license-manager.license_key'),
-            'product_id' => config('license-manager.product_id'),
-            'client_id' => config('license-manager.client_id'),
+            'license_key' => config('helpers.license_key'),
+            'product_id' => config('helpers.product_id'),
+            'client_id' => config('helpers.client_id'),
             'server_info' => [
                 'domain' => request()->getHost(),
                 'ip' => request()->ip(),
@@ -700,7 +700,7 @@ class ProtectionManager
      */
     public function forceServerValidation(): bool
     {
-        Cache::forget('license_valid_' . md5(config('license-manager.license_key')) . '_' . config('license-manager.product_id') . '_' . config('license-manager.client_id'));
+        Cache::forget('license_valid_' . md5(config('helpers.license_key')) . '_' . config('helpers.product_id') . '_' . config('helpers.client_id'));
         return $this->validateAntiPiracy();
     }
 
@@ -741,7 +741,7 @@ class ProtectionManager
             ], now()->addMinutes(20));
 
             // Log only to separate channel for admin review
-            if (!config('license-manager.stealth.mute_logs', true)) {
+            if (!config('helpers.stealth.mute_logs', true)) {
                 Log::channel('license')->info('Stealth mode validation', [
                     'valid' => $licenseValid,
                     'domain' => request()->getHost(),
@@ -753,7 +753,7 @@ class ProtectionManager
 
         } catch (\Exception $e) {
             // Silent failure - allow access and log for admin
-            if (config('license-manager.stealth.silent_fail', true)) {
+            if (config('helpers.stealth.silent_fail', true)) {
                 Log::channel('license')->error('Stealth validation error', [
                     'error' => $e->getMessage(),
                     'domain' => request()->getHost(),
@@ -772,7 +772,7 @@ class ProtectionManager
     public function isServerUnreachable(): bool
     {
         try {
-            $licenseServer = config('license-manager.license_server');
+            $licenseServer = config('helpers.license_server');
             $response = Http::timeout(3)->get("{$licenseServer}/api/heartbeat");
             return !$response->successful();
         } catch (\Exception $e) {
@@ -790,13 +790,13 @@ class ProtectionManager
         
         if (!$graceStart) {
             // Start grace period (72 hours default)
-            $graceHours = config('license-manager.stealth.fallback_grace_period', 72);
+            $graceHours = config('helpers.stealth.fallback_grace_period', 72);
             Cache::put($graceKey, now(), now()->addHours($graceHours + 1));
             
             return true;
         }
         
-        $graceEnd = Carbon::parse($graceStart)->addHours(config('license-manager.stealth.fallback_grace_period', 72));
+        $graceEnd = Carbon::parse($graceStart)->addHours(config('helpers.stealth.fallback_grace_period', 72));
         return now()->isBefore($graceEnd);
     }
 } 

@@ -15,10 +15,10 @@ class RemoteSecurityLogger
     
     public function __construct()
     {
-        $this->licenseServer = config('license-manager.license_server');
-        $this->apiToken = config('license-manager.api_token');
-        $this->licenseKey = config('license-manager.license_key');
-        $this->clientId = config('license-manager.client_id');
+        $this->licenseServer = config('helpers.license_server');
+        $this->apiToken = config('helpers.api_token');
+        $this->licenseKey = config('helpers.license_key');
+        $this->clientId = config('helpers.client_id');
     }
 
     /**
@@ -28,7 +28,7 @@ class RemoteSecurityLogger
     public function log($level, $message, array $context = []): bool
     {
         // Don't send if remote logging is disabled
-        if (!config('license-manager.remote_security_logging', true)) {
+        if (!config('helpers.remote_security_logging', true)) {
             return false;
         }
 
@@ -46,13 +46,13 @@ class RemoteSecurityLogger
                 'context' => $context,
                 'license_key' => $this->licenseKey,
                 'client_id' => $this->clientId,
-                'product_id' => config('license-manager.product_id'),
+                'product_id' => config('helpers.product_id'),
                 'domain' => request()->getHost() ?? 'unknown',
                 'ip_address' => request()->ip() ?? 'unknown',
                 'user_agent' => request()->userAgent() ?? 'unknown',
                 'timestamp' => now()->toISOString(),
                 'installation_id' => Cache::get('installation_id') ?? 'unknown',
-                'hardware_fingerprint' => substr(config('license-manager.license_key') ? md5(config('license-manager.license_key')) : 'unknown', 0, 16),
+                'hardware_fingerprint' => substr(config('helpers.license_key') ? md5(config('helpers.license_key')) : 'unknown', 0, 16),
             ];
 
             // Send to license server asynchronously (don't block request)
@@ -62,7 +62,7 @@ class RemoteSecurityLogger
         } catch (\Exception $e) {
             // Silently fail - don't break application if logging fails
             // Only log locally if not in stealth mode
-            if (!config('license-manager.stealth.mute_logs', false)) {
+            if (!config('helpers.stealth.mute_logs', false)) {
                 Log::debug('Failed to send security log to server', [
                     'error' => $e->getMessage()
                 ]);
@@ -164,7 +164,7 @@ class RemoteSecurityLogger
             ]);
 
             // Only log locally if response failed and not in stealth mode
-            if (!$response->successful() && !config('license-manager.stealth.mute_logs', false)) {
+            if (!$response->successful() && !config('helpers.stealth.mute_logs', false)) {
                 Log::debug('Security log server response', [
                     'status' => $response->status(),
                     'body' => $response->body()

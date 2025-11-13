@@ -88,16 +88,16 @@ class StealthInstallCommand extends Command
         $this->line('');
         
         // Check stealth mode status
-        $stealthEnabled = config('license-manager.stealth.enabled', false);
+        $stealthEnabled = config('helpers.stealth.enabled', false);
         $this->line('Stealth Mode: ' . ($stealthEnabled ? '✅ Enabled' : '❌ Disabled'));
         
         // Check individual stealth settings
         $settings = [
-            'Hide UI Elements' => config('license-manager.stealth.hide_ui_elements', false),
-            'Mute Logs' => config('license-manager.stealth.mute_logs', false),
-            'Background Validation' => config('license-manager.stealth.background_validation', false),
-            'Silent Fail' => config('license-manager.stealth.silent_fail', false),
-            'Deferred Enforcement' => config('license-manager.stealth.deferred_enforcement', false),
+            'Hide UI Elements' => config('helpers.stealth.hide_ui_elements', false),
+            'Mute Logs' => config('helpers.stealth.mute_logs', false),
+            'Background Validation' => config('helpers.stealth.background_validation', false),
+            'Silent Fail' => config('helpers.stealth.silent_fail', false),
+            'Deferred Enforcement' => config('helpers.stealth.deferred_enforcement', false),
         ];
         
         $this->line('');
@@ -107,12 +107,12 @@ class StealthInstallCommand extends Command
         }
         
         // Check grace period
-        $gracePeriod = config('license-manager.stealth.fallback_grace_period', 72);
+        $gracePeriod = config('helpers.stealth.fallback_grace_period', 72);
         $this->line('');
         $this->line("Grace Period: {$gracePeriod} hours");
         
         // Check validation timeout
-        $timeout = config('license-manager.stealth.validation_timeout', 5);
+        $timeout = config('helpers.stealth.validation_timeout', 5);
         $this->line("Validation Timeout: {$timeout} seconds");
         
         // Check middleware registration

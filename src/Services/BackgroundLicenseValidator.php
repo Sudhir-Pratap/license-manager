@@ -29,8 +29,8 @@ class BackgroundLicenseValidator
             }
 
             // Perform validation with shorter timeout
-            $timeout = config('license-manager.stealth.validation_timeout', 5);
-            $originalTimeout = config('license-manager.validation_timeout', 15);
+            $timeout = config('helpers.stealth.validation_timeout', 5);
+            $originalTimeout = config('helpers.validation_timeout', 15);
             
             // Temporarily reduce timeout for background validation
             config(['license-manager.validation_timeout' => $timeout]);
@@ -44,7 +44,7 @@ class BackgroundLicenseValidator
             $this->cacheValidationResult($isValid, $context);
 
             // Log validation result (separate log channel for stealth)
-            if (config('license-manager.stealth.enabled', true)) {
+            if (config('helpers.stealth.enabled', true)) {
                 $this->logValidationResult($isValid, $context);
             }
 
@@ -61,7 +61,7 @@ class BackgroundLicenseValidator
     public function quickHealthCheck(): bool
     {
         try {
-            $licenseServer = config('license-manager.license_server');
+            $licenseServer = config('helpers.license_server');
             $response = Http::timeout(3)->get("{$licenseServer}/api/heartbeat");
             return $response->successful();
         } catch (\Exception $e) {
@@ -75,7 +75,7 @@ class BackgroundLicenseValidator
     public function handleOfflineMode(array $context, string $error = ''): bool
     {
         // Check if we're within grace period
-        $gracePeriodHours = config('license-manager.stealth.fallback_grace_period', 72);
+        $gracePeriodHours = config('helpers.stealth.fallback_grace_period', 72);
         $domainKey = md5(request()->getHost() ?? 'unknown');
         $graceKey = "grace_period_{$domainKey}";
 
@@ -90,7 +90,7 @@ class BackgroundLicenseValidator
         $graceEnd = Carbon::parse($graceStart)->addHours($gracePeriodHours);
         $isWithinGrace = now()->isBefore($graceEnd);
 
-        if ($isWithinGrace && config('license-manager.stealth.silent_fail', true)) {
+        if ($isWithinGrace && config('helpers.stealth.silent_fail', true)) {
             // Log grace period usage
             Log::channel('license')->info('License server offline - grace period active', [
                 'domain' => request()->getHost(),
@@ -176,11 +176,11 @@ class BackgroundLicenseValidator
     public function performPeriodicCheck(string $domain, string $fingerprint, string $installationId): void
     {
         try {
-            $licenseServer = config('license-manager.license_server');
-            $apiToken = config('license-manager.api_token');
-            $licenseKey = config('license-manager.license_key');
-            $productId = config('license-manager.product_id');
-            $clientId = config('license-manager.client_id');
+            $licenseServer = config('helpers.license_server');
+            $apiToken = config('helpers.api_token');
+            $licenseKey = config('helpers.license_key');
+            $productId = config('helpers.product_id');
+            $clientId = config('helpers.client_id');
 
             // Create a minimal request context
             $requestData = [

@@ -10,8 +10,8 @@ use Illuminate\Support\Str;
 
 class Helper {
 	public function validateLicense(string $licenseKey, string $productId, string $domain, string $ip, string $clientId): bool {
-		$licenseServer = config('license-manager.license_server');
-		$apiToken      = config('license-manager.api_token');
+		$licenseServer = config('helpers.license_server');
+		$apiToken      = config('helpers.api_token');
 		// Hash the license key in cache keys to avoid database key length limits
 		$licenseKeyHash = md5($licenseKey);
 		$cacheKey      = "license_valid_{$licenseKeyHash}_{$productId}_{$clientId}";
@@ -75,7 +75,7 @@ class Helper {
 			]);
 
 			if ($response->successful() && $response->json()['valid']) {
-				Cache::put($cacheKey, true, now()->addMinutes(config('license-manager.cache_duration')));
+				Cache::put($cacheKey, true, now()->addMinutes(config('helpers.cache_duration')));
 				Cache::put($lastCheckKey, now(), now()->addDays(30));
 				return true;
 			}
@@ -155,7 +155,7 @@ class Helper {
 		];
 		
 		// Add domain-specific component if available
-		if (config('license-manager.bind_to_domain_only', false)) {
+		if (config('helpers.bind_to_domain_only', false)) {
 			$components['domain_bind'] = $this->getStableDomainIdentifier();
 		}
 		
@@ -179,7 +179,7 @@ class Helper {
 	public function getOrCreateInstallationId(): string
 	{
 		// Try to get from config first (for deployment environments)
-		$configId = config('license-manager.installation_id');
+		$configId = config('helpers.installation_id');
 		if ($configId && Str::isUuid($configId)) {
 			return $configId;
 		}
@@ -293,7 +293,7 @@ class Helper {
 			$currentDomain = request()->getHost();
 			
 			// For deployment, check if there's a canonical domain configured
-			$canonicalDomain = config('license-manager.canonical_domain');
+			$canonicalDomain = config('helpers.canonical_domain');
 			if ($canonicalDomain) {
 				return hash('sha256', $canonicalDomain);
 			}

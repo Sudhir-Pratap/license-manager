@@ -55,10 +55,10 @@ class DeploymentLicenseCommand extends Command
         // Check configuration
         $this->line('');
         $this->info('Configuration:');
-        $this->line('License Key: ' . (config('license-manager.license_key') ? '✓ Set' : '✗ Missing'));
-        $this->line('Product ID: ' . (config('license-manager.product_id') ?: 'Missing'));
-        $this->line('Client ID: ' . (config('license-manager.client_id') ?: 'Missing'));
-        $this->line('License Server: ' . config('license-manager.license_server'));
+        $this->line('License Key: ' . (config('helpers.license_key') ? '✓ Set' : '✗ Missing'));
+        $this->line('Product ID: ' . (config('helpers.product_id') ?: 'Missing'));
+        $this->line('Client ID: ' . (config('helpers.client_id') ?: 'Missing'));
+        $this->line('License Server: ' . config('helpers.license_server'));
         
         // Check hardware fingerprint
         $fingerprint = $licenseManager->generateHardwareFingerprint();
@@ -106,7 +106,7 @@ class DeploymentLicenseCommand extends Command
         // Set environment variable to force regeneration
         putenv('LICENSE_FORCE_REGENERATE_FINGERPRINT=true');
          
-         $oldFingerprint = config('license-manager.hardware_fingerprint') ?: 'Previous not stored';
+         $oldFingerprint = config('helpers.hardware_fingerprint') ?: 'Previous not stored';
          $newFingerprint = $licenseManager->generateHardwareFingerprint();
          
          $this->info('Hardware Fingerprint Regenerated');
@@ -121,9 +121,9 @@ class DeploymentLicenseCommand extends Command
      {
          $this->info('Testing License Validation...');
          
-         $licenseKey = config('license-manager.license_key');
-         $productId = config('license-manager.product_id');
-         $clientId = config('license-manager.client_id');
+         $licenseKey = config('helpers.license_key');
+         $productId = config('helpers.product_id');
+         $clientId = config('helpers.client_id');
          
          if (!$licenseKey || !$productId || !$clientId) {
              $this->error('Missing required license configuration');

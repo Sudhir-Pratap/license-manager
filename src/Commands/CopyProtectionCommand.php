@@ -88,16 +88,16 @@ class CopyProtectionCommand extends Command
         
         // Check configuration
         $settings = [
-            'Suspicion Threshold' => config('license-manager.anti_reselling.threshold_score', 75),
-            'Max Domains' => config('license-manager.anti_reselling.max_domains', 2),
-            'Max Per Geo Area' => config('license-manager.anti_reselling.max_per_geo', 3),
-            'VPN Detection' => config('license-manager.anti_reselling.detect_vpn', true),
-            'Pattern Monitoring' => config('license-manager.anti_reselling.monitor_patterns', true),
-            'File Integrity' => config('license-manager.anti_reselling.file_integrity', true),
-            'Watermarking' => config('license-manager.code_protection.watermarking', true),
-            'Obfuscation' => config('license-manager.code_protection.obfuscation_enabled', true),
-            'Runtime Checks' => config('license-manager.code_protection.runtime_checks', true),
-            'Anti Debug' => config('license-manager.code_protection.anti_debug', true),
+            'Suspicion Threshold' => config('helpers.anti_reselling.threshold_score', 75),
+            'Max Domains' => config('helpers.anti_reselling.max_domains', 2),
+            'Max Per Geo Area' => config('helpers.anti_reselling.max_per_geo', 3),
+            'VPN Detection' => config('helpers.anti_reselling.detect_vpn', true),
+            'Pattern Monitoring' => config('helpers.anti_reselling.monitor_patterns', true),
+            'File Integrity' => config('helpers.anti_reselling.file_integrity', true),
+            'Watermarking' => config('helpers.code_protection.watermarking', true),
+            'Obfuscation' => config('helpers.code_protection.obfuscation_enabled', true),
+            'Runtime Checks' => config('helpers.code_protection.runtime_checks', true),
+            'Anti Debug' => config('helpers.code_protection.anti_debug', true),
         ];
         
         $this->info('Configuration Status:');
@@ -165,7 +165,7 @@ class CopyProtectionCommand extends Command
         
         try {
             $watermarkingService = app(WatermarkingService::class);
-            $clientId = config('license-manager.client_id');
+            $clientId = config('helpers.client_id');
             
             // Test basic watermarking
             $testHtml = '<html><head><title>Test</title></head><body>Test Content</body></html>';
@@ -207,24 +207,24 @@ class CopyProtectionCommand extends Command
         
         $report = [
             'timestamp' => now()->toDateTimeString(),
-            'client_id' => config('license-manager.client_id'),
+            'client_id' => config('helpers.client_id'),
             'domain' => request()->getHost() ?? 'localhost',
             'ip' => request()->ip() ?? '127.0.0.1',
-            'license_key' => substr(config('license-manager.license_key'), 0, 16) . '...',
+            'license_key' => substr(config('helpers.license_key'), 0, 16) . '...',
         ];
         
         // Current domain usage
-        $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
+        $domainKey = 'license_domains_' . md5(config('helpers.license_key'));
         $domains = cache()->get($domainKey, []);
         $report['domains_used'] = $domains;
         
         // Usage patterns
-        $usageKey = 'usage_pattern_' . md5(config('license-manager.license_key'));
+        $usageKey = 'usage_pattern_' . md5(config('helpers.license_key'));
         $patterns = cache()->get($usageKey, []);
         $report['usage_entries'] = count($patterns);
         
         // Security events
-        $report['security_logging'] = config('license-manager.remote_security_logging', true) ? 'Remote (License Server)' : 'Local';
+        $report['security_logging'] = config('helpers.remote_security_logging', true) ? 'Remote (License Server)' : 'Local';
         
         $this->info('Report Data:');
         foreach ($report as $key => $value) {
@@ -239,8 +239,8 @@ class CopyProtectionCommand extends Command
         $this->info('Summary:');
         $this->line('• Total domains tracked: ' . count($domains));
         $this->line('• Usage pattern entries: ' . count($patterns));
-        $this->line('• Copy protection: ' . (config('license-manager.code_protection.watermarking') ? 'Active' : 'Inactive'));
-        $this->line('• Suspicion threshold: ' . config('license-manager.anti_reselling.threshold_score', 75));
+        $this->line('• Copy protection: ' . (config('helpers.code_protection.watermarking') ? 'Active' : 'Inactive'));
+        $this->line('• Suspicion threshold: ' . config('helpers.anti_reselling.threshold_score', 75));
     }
 
     public function generateCopyProtectionConfig()

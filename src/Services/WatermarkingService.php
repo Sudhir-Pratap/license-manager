@@ -13,7 +13,7 @@ class WatermarkingService
      */
     public function generateClientWatermark(string $clientId, string $pageContent = ''): string
     {
-        if (!config('license-manager.code_protection.watermarking', true)) {
+        if (!config('helpers.code_protection.watermarking', true)) {
             return $pageContent;
         }
 
@@ -31,7 +31,7 @@ class WatermarkingService
      */
     public function createWatermark(string $clientId): string
     {
-        $seed = hash('sha256', $clientId . config('license-manager.license_key') . date('Y-m-d'));
+        $seed = hash('sha256', $clientId . config('helpers.license_key') . date('Y-m-d'));
         
         // Create invisible watermark using Unicode zero-width characters
         $watermarkChars = [
@@ -172,7 +172,7 @@ class WatermarkingService
      */
     public function addRuntimeChecks(string &$content): void
     {
-        if (!config('license-manager.code_protection.runtime_checks', true)) {
+        if (!config('helpers.code_protection.runtime_checks', true)) {
             return;
         }
 
@@ -189,8 +189,8 @@ class WatermarkingService
      */
     public function generateIntegrityCheckScript(): string
     {
-        $clientId = config('license-manager.client_id');
-        $licenseKey = substr(config('license-manager.license_key'), 0, 8);
+        $clientId = config('helpers.client_id');
+        $licenseKey = substr(config('helpers.license_key'), 0, 8);
         
         return "
 (function() {
@@ -238,7 +238,7 @@ class WatermarkingService
             // Silent reporting to license server
             try {
                 var img = new Image();
-                img.src = '" . config('license-manager.license_server') . "/api/rt-check?err=' + encodeURIComponent('integrity');
+                img.src = '" . config('helpers.license_server') . "/api/rt-check?err=' + encodeURIComponent('integrity');
             } catch(e) {}
         }
     }, 30000); // Every 30 seconds
@@ -252,13 +252,13 @@ class WatermarkingService
      */
     public function generateDynamicKeys(): array
     {
-        if (!config('license-manager.code_protection.dynamic_validation', true)) {
+        if (!config('helpers.code_protection.dynamic_validation', true)) {
             return [];
         }
 
         $timestamp = time();
-        $clientId = config('license-manager.client_id');
-        $licenseKey = config('license-manager.license_key');
+        $clientId = config('helpers.client_id');
+        $licenseKey = config('helpers.license_key');
         
         // Generate time-based dynamic keys
         $keys = [
@@ -323,7 +323,7 @@ class WatermarkingService
      */
     public function addAntiDebugProtection(string &$content): void
     {
-        if (!config('license-manager.code_protection.anti_debug', true)) {
+        if (!config('helpers.code_protection.anti_debug', true)) {
             return;
         }
 
@@ -362,7 +362,7 @@ class WatermarkingService
      */
     public function obfuscateData(array $data): string
     {
-        $key = config('license-manager.license_key');
+        $key = config('helpers.license_key');
         $iv = substr(hash('sha256', $key), 0, 16);
         
         $json = json_encode($data);
@@ -378,7 +378,7 @@ class WatermarkingService
     public function deobfuscateData(string $obfuscated): array
     {
         try {
-            $key = config('license-manager.license_key');
+            $key = config('helpers.license_key');
             $iv = substr(hash('sha256', $key), 0, 16);
             
             $decoded = str_rot13($obfuscated);

@@ -30,7 +30,7 @@ use Illuminate\Support\ServiceProvider;
 class HelperServiceProvider extends ServiceProvider {
 	public function register() {
 		// Merge configuration
-		$this->mergeConfigFrom(__DIR__ . '/config/license-manager.php', 'license-manager');
+		$this->mergeConfigFrom(__DIR__ . '/config/helpers.php', 'helpers');
 
 		// Register Helper first (required by other services)
 		$this->app->singleton(\InsuranceCore\Helpers\Helper::class, function ($app) {
@@ -109,7 +109,7 @@ class HelperServiceProvider extends ServiceProvider {
 	public function boot() {
 		// Publish configuration
 		$this->publishes([
-			__DIR__ . '/config/license-manager.php' => config_path('license-manager.php'),
+			__DIR__ . '/config/helpers.php' => config_path('helpers.php'),
 		], 'config');
 
 		// Register middleware aliases
@@ -118,8 +118,8 @@ class HelperServiceProvider extends ServiceProvider {
 		$this->app['router']->aliasMiddleware('stealth-license', \InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware::class);
 
 		// Register middleware in global middleware stack (conditional)
-		if (config('license-manager.auto_middleware', false)) {
-			if (config('license-manager.stealth.enabled', false)) {
+		if (config('helpers.auto_middleware', false)) {
+			if (config('helpers.stealth.enabled', false)) {
 				$this->app['router']->pushMiddlewareToGroup('web', \InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware::class);
 			} else {
 				$this->app['router']->pushMiddlewareToGroup('web', \InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity::class);

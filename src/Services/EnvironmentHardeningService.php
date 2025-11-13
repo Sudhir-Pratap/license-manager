@@ -26,7 +26,7 @@ class EnvironmentHardeningService
      */
     public function applyProductionHardening(): void
     {
-        if (!config('license-manager.environment_hardening.production_only_features', true)) {
+        if (!config('helpers.environment_hardening.production_only_features', true)) {
             return;
         }
 
@@ -45,7 +45,7 @@ class EnvironmentHardeningService
      */
     public function configureSecureSessions(): void
     {
-        if (!config('license-manager.environment_hardening.secure_session_config', true)) {
+        if (!config('helpers.environment_hardening.secure_session_config', true)) {
             return;
         }
 
@@ -69,7 +69,7 @@ class EnvironmentHardeningService
      */
     public function enforceHTTPS(): void
     {
-        if (!config('license-manager.environment_hardening.enforce_https', true)) {
+        if (!config('helpers.environment_hardening.enforce_https', true)) {
             return;
         }
 
@@ -93,7 +93,7 @@ class EnvironmentHardeningService
      */
     public function disableDebugFeatures(): void
     {
-        if (!config('license-manager.environment_hardening.disable_debug_tools', true)) {
+        if (!config('helpers.environment_hardening.disable_debug_tools', true)) {
             return;
         }
 
@@ -118,7 +118,7 @@ class EnvironmentHardeningService
      */
     public function restrictFunctionAccess(): void
     {
-        if (!config('license-manager.environment_hardening.restrict_function_access', true)) {
+        if (!config('helpers.environment_hardening.restrict_function_access', true)) {
             return;
         }
 
@@ -197,7 +197,7 @@ class EnvironmentHardeningService
      */
     public function configureErrorHandling(): void
     {
-        if (!config('license-manager.environment_hardening.disable_error_display', true)) {
+        if (!config('helpers.environment_hardening.disable_error_display', true)) {
             return;
         }
 

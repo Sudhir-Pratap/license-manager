@@ -11,7 +11,7 @@ class MiddlewareHelper
      */
     public static function shouldSkipValidation(Request $request): bool
     {
-        $skipRoutes = config('license-manager.skip_routes', []);
+        $skipRoutes = config('helpers.skip_routes', []);
         $path = $request->path();
 
         // Skip specific routes
@@ -39,12 +39,12 @@ class MiddlewareHelper
     public static function hasBypass(Request $request): bool
     {
         // Allow bypass in local environment (unless explicitly disabled for testing)
-        if (app()->environment('local') && !config('license-manager.disable_local_bypass', false)) {
+        if (app()->environment('local') && !config('helpers.disable_local_bypass', false)) {
             return true;
         }
 
         // Check for bypass token
-        $bypassToken = config('license-manager.bypass_token');
+        $bypassToken = config('helpers.bypass_token');
         if ($bypassToken && $request->header('X-License-Bypass') === $bypassToken) {
             return true;
         }
@@ -70,7 +70,7 @@ class MiddlewareHelper
         return response()->view('errors.license', [
             'title' => 'License Error',
             'message' => $message,
-            'support_email' => config('license-manager.support_email', 'support@example.com'),
+            'support_email' => config('helpers.support_email', 'support@example.com'),
         ], 403);
     }
 }

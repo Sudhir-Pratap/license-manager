@@ -26,10 +26,10 @@ class LicenseInfoCommand extends Command
         // Show current configuration
         $this->line('');
         $this->info('Current Configuration:');
-        $this->info('License Key: ' . (config('license-manager.license_key') ? 'Configured' : 'Not set'));
-        $this->info('Product ID: ' . (config('license-manager.product_id') ?: 'Not set'));
-        $this->info('Client ID: ' . (config('license-manager.client_id') ?: 'Not set'));
-        $this->info('License Server: ' . config('license-manager.license_server'));
+        $this->info('License Key: ' . (config('helpers.license_key') ? 'Configured' : 'Not set'));
+        $this->info('Product ID: ' . (config('helpers.product_id') ?: 'Not set'));
+        $this->info('Client ID: ' . (config('helpers.client_id') ?: 'Not set'));
+        $this->info('License Server: ' . config('helpers.license_server'));
         
         $this->line('');
         $this->info('Use this information to generate a license:');

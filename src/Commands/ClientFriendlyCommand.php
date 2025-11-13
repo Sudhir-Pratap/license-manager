@@ -35,18 +35,18 @@ class ClientFriendlyCommand extends Command
         
         // Check license configuration
         $this->info('License Configuration:');
-        $this->line('License Key: ' . (config('license-manager.license_key') ? '✅ Configured' : '❌ Missing'));
-        $this->line('Product ID: ' . (config('license-manager.product_id') ?: 'Not Set'));
-        $this->line('Client ID: ' . (config('license-manager.client_id') ?: 'Not Set'));
-        $this->line('License Server: ' . config('license-manager.license_server'));
+        $this->line('License Key: ' . (config('helpers.license_key') ? '✅ Configured' : '❌ Missing'));
+        $this->line('Product ID: ' . (config('helpers.product_id') ?: 'Not Set'));
+        $this->line('Client ID: ' . (config('helpers.client_id') ?: 'Not Set'));
+        $this->line('License Server: ' . config('helpers.license_server'));
         $this->line('');
         
         // Check stealth mode (for admin reference)
-        $stealthMode = config('license-manager.stealth.enabled', false);
+        $stealthMode = config('helpers.stealth.enabled', false);
         $this->line('Operation Mode: ' . ($stealthMode ? 'Silent (Hidden)' : 'Visible'));
         
         // Check domain tracking status
-        $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
+        $domainKey = 'license_domains_' . md5(config('helpers.license_key'));
         $domains = cache()->get($domainKey, []);
         
         $this->line('');
@@ -82,9 +82,9 @@ class ClientFriendlyCommand extends Command
         
         // Overall status
         $this->line('');
-        $licenseConfigured = config('license-manager.license_key') && 
-                           config('license-manager.product_id') && 
-                           config('license-manager.client_id');
+        $licenseConfigured = config('helpers.license_key') && 
+                           config('helpers.product_id') && 
+                           config('helpers.client_id');
         
         if ($licenseConfigured && !$suspicious) {
             $this->info('🎉 Overall Status: HEALTHY');
@@ -103,11 +103,11 @@ class ClientFriendlyCommand extends Command
         
         // Test basic requirements
         $tests = [
-            'License Configuration' => !empty(config('license-manager.license_key')),
+            'License Configuration' => !empty(config('helpers.license_key')),
             'Database Connection' => $this->testDatabaseConnection(),
             'Cache System' => $this->testCacheSystem(),
-            'Stealth Mode' => config('license-manager.stealth.enabled', false),
-            'Watermarking' => config('license-manager.code_protection.watermarking', false),
+            'Stealth Mode' => config('helpers.stealth.enabled', false),
+            'Watermarking' => config('helpers.code_protection.watermarking', false),
         ];
         
         foreach ($tests as $test => $result) {
@@ -116,7 +116,7 @@ class ClientFriendlyCommand extends Command
         }
         
         // Test watermarking functionality
-        if (config('license-manager.code_protection.watermarking', false)) {
+        if (config('helpers.code_protection.watermarking', false)) {
             $this->line('');
             $this->info('Testing Watermark System:');
             

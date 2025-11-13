@@ -61,7 +61,7 @@ class AntiPiracySecurity
      */
     public function shouldSkipValidation(Request $request): bool
     {
-        $skipRoutes = config('license-manager.skip_routes', []);
+        $skipRoutes = config('helpers.skip_routes', []);
         $path = $request->path();
 
         // Skip specific routes
@@ -89,12 +89,12 @@ class AntiPiracySecurity
     public function hasBypass(Request $request): bool
     {
         // Allow bypass in local environment (unless explicitly disabled for testing)
-        if (app()->environment('local') && !config('license-manager.disable_local_bypass', false)) {
+        if (app()->environment('local') && !config('helpers.disable_local_bypass', false)) {
             return true;
         }
 
         // Check for bypass token (for emergency access)
-        $bypassToken = config('license-manager.bypass_token');
+        $bypassToken = config('helpers.bypass_token');
         if ($bypassToken && $request->header('X-License-Bypass') === $bypassToken) {
             Log::warning('License bypass used', [
                 'ip' => $request->ip(),
@@ -147,9 +147,9 @@ class AntiPiracySecurity
         Cache::put($failureKey, $failures, now()->addHours(1));
 
         // If too many failures, blacklist the IP temporarily
-        $maxFailures = config('license-manager.validation.max_failures', 10);
+        $maxFailures = config('helpers.validation.max_failures', 10);
         if ($failures > $maxFailures) {
-            $blacklistDuration = config('license-manager.validation.blacklist_duration', 24);
+            $blacklistDuration = config('helpers.validation.blacklist_duration', 24);
             Cache::put('blacklisted_ip_' . $request->ip(), true, now()->addHours($blacklistDuration));
             Log::error('IP blacklisted due to repeated license failures', [
                 'ip' => $request->ip(),
@@ -185,7 +185,7 @@ class AntiPiracySecurity
         return response()->view('errors.license', [
             'title' => 'License Error',
             'message' => 'Your license could not be validated. Please contact support.',
-            'support_email' => config('license-manager.support_email', 'support@example.com'),
+            'support_email' => config('helpers.support_email', 'support@example.com'),
         ], 403);
     }
 
@@ -200,7 +200,7 @@ class AntiPiracySecurity
         Cache::put($logKey, $successCount, now()->addHour());
 
         // Log every Nth successful validation (configurable)
-        $logInterval = config('license-manager.validation.success_log_interval', 100);
+        $logInterval = config('helpers.validation.success_log_interval', 100);
         if ($successCount % $logInterval === 0) {
             Log::info('License validation successful', [
                 'success_count' => $successCount,

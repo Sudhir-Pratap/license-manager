@@ -32,9 +32,9 @@ class LicenseSecurity {
 		if ($this->shouldSkipValidation($request)) {
 			return $next($request);
 		}
-		$licenseKey    = config('license-manager.license_key');
-		$productId     = config('license-manager.product_id');
-		$clientId      = config('license-manager.client_id');
+		$licenseKey    = config('helpers.license_key');
+		$productId     = config('helpers.product_id');
+		$clientId      = config('helpers.client_id');
 		$currentDomain = $request->getHost();
 		$currentIp     = $request->ip();
 
@@ -58,7 +58,7 @@ class LicenseSecurity {
 	}
 
 	protected function shouldSkipValidation(Request $request): bool {
-		$skipRoutes = config('license-manager.skip_routes', []);
+		$skipRoutes = config('helpers.skip_routes', []);
 		$path = $request->path();
 
 		// Skip specific routes
@@ -78,7 +78,7 @@ class LicenseSecurity {
 		}
 
 		// Allow bypass in local environment (unless explicitly disabled for testing)
-		if (app()->environment('local') && !config('license-manager.disable_local_bypass', false)) {
+		if (app()->environment('local') && !config('helpers.disable_local_bypass', false)) {
 			return true;
 		}
 
@@ -90,7 +90,7 @@ class LicenseSecurity {
          */
         protected function applyWatermarking($response): void
         {
-                if (!config('license-manager.code_protection.watermarking', true)) {    
+                if (!config('helpers.code_protection.watermarking', true)) {    
                         return;
                 }
 
@@ -99,7 +99,7 @@ class LicenseSecurity {
                         str_contains($response->headers->get('Content-Type', ''), 'text/html')) {                                                                           
 
                         $watermarkingService = app(WatermarkingService::class);
-                        $clientId = config('license-manager.client_id');
+                        $clientId = config('helpers.client_id');
 
                         $content = $response->getContent();
                         if ($content === false) {

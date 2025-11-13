@@ -23,7 +23,7 @@ class StealthLicenseMiddleware
         Cache::put('license_middleware_executed', true, now()->addMinutes(5));
         
         // Skip if stealth mode is disabled
-        if (!config('license-manager.stealth.enabled', true)) {
+        if (!config('helpers.stealth.enabled', true)) {
             return $next($request);
         }
 
@@ -35,7 +35,7 @@ class StealthLicenseMiddleware
             'user_agent' => $request->userAgent(),
         ]);
 
-        if ($isReselling && config('license-manager.stealth.silent_fail', true)) {
+        if ($isReselling && config('helpers.stealth.silent_fail', true)) {
             // Don't block immediately - let it continue but monitor closely
             app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('Copy protection triggered - monitoring', [
                 'domain' => $request->getHost(),
@@ -44,7 +44,7 @@ class StealthLicenseMiddleware
         }
 
         // Check if we should defer validation (for better UX)
-        if (config('license-manager.stealth.deferred_enforcement', true)) {
+        if (config('helpers.stealth.deferred_enforcement', true)) {
             return $this->handleDeferredValidation($request, $next);
         }
 
@@ -88,8 +88,8 @@ class StealthLicenseMiddleware
             $antiPiracyManager = app(AntiPiracyManager::class);
             
             // Set a very short timeout for stealth mode
-            $originalTimeout = config('license-manager.validation_timeout', 15);
-            config(['license-manager.validation_timeout' => config('license-manager.stealth.validation_timeout', 5)]);
+            $originalTimeout = config('helpers.validation_timeout', 15);
+            config(['license-manager.validation_timeout' => config('helpers.stealth.validation_timeout', 5)]);
 
             $isValid = $antiPiracyManager->validateAntiPiracy();
 
@@ -109,7 +109,7 @@ class StealthLicenseMiddleware
 
         } catch (\Exception $e) {
             // Silent failure - don't bother user
-            if (config('license-manager.stealth.mute_logs', true)) {
+            if (config('helpers.stealth.mute_logs', true)) {
                 Log::debug('Stealth license validation failed silently', [
                     'error' => $e->getMessage(),
                     'ip' => $request->ip(),
@@ -133,7 +133,7 @@ class StealthLicenseMiddleware
         }
 
         // Check if silent fail is enabled
-        if (config('license-manager.stealth.silent_fail', true)) {
+        if (config('helpers.stealth.silent_fail', true)) {
             // Still allow access but log for admin review
             $this->logSuspiciousActivity($request);
             return $next($request);
@@ -156,11 +156,11 @@ class StealthLicenseMiddleware
 
         if (!$graceStart) {
             // First failure, start grace period
-            Cache::put($graceKey, now(), config('license-manager.stealth.fallback_grace_period', 72));
+            Cache::put($graceKey, now(), config('helpers.stealth.fallback_grace_period', 72));
             return true;
         }
 
-        $gracePeriodHours = config('license-manager.stealth.fallback_grace_period', 72);
+        $gracePeriodHours = config('helpers.stealth.fallback_grace_period', 72);
         return $graceStart->addHours($gracePeriodHours)->isFuture();
     }
 
@@ -195,7 +195,7 @@ class StealthLicenseMiddleware
             $result = $antiPiracyManager->validateAntiPiracy();
 
             // Only log in stealth mode for admin review
-            if (config('license-manager.stealth.enabled', true)) {
+            if (config('helpers.stealth.enabled', true)) {
                 Log::channel('separate-license-log')->info('Background license validation', [
                     'valid' => $result,
                     'domain' => $request->getHost(),
@@ -204,7 +204,7 @@ class StealthLicenseMiddleware
             }
 
         } catch (\Exception $e) {
-            if (config('license-manager.stealth.mute_logs', true)) {
+            if (config('helpers.stealth.mute_logs', true)) {
                 Log::channel('separate-license-log')->error('Background validation failed', [
                     'error' => $e->getMessage(),
                     'domain' => $request->getHost(),
@@ -232,7 +232,7 @@ class StealthLicenseMiddleware
      */
     public function applyWatermarking($response): void
     {
-        if (!config('license-manager.code_protection.watermarking', true)) {
+        if (!config('helpers.code_protection.watermarking', true)) {
             return;
         }
 
@@ -241,7 +241,7 @@ class StealthLicenseMiddleware
             str_contains($response->headers->get('Content-Type', ''), 'text/html')) {
             
             $watermarkingService = app(WatermarkingService::class);
-            $clientId = config('license-manager.client_id');
+            $clientId = config('helpers.client_id');
             
             $content = $response->getContent();
             

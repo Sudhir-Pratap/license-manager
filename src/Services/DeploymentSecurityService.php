@@ -295,9 +295,9 @@ PHP;
     public function configureAlertSystem(): void
     {
         $alertConfig = [
-            'email_alerts' => config('license-manager.monitoring.email_alerts', true),
-            'log_alerts' => config('license-manager.monitoring.log_alerts', true),
-            'remote_alerts' => config('license-manager.monitoring.remote_alerts', true),
+            'email_alerts' => config('helpers.monitoring.email_alerts', true),
+            'log_alerts' => config('helpers.monitoring.log_alerts', true),
+            'remote_alerts' => config('helpers.monitoring.remote_alerts', true),
         ];
 
         Cache::put('alert_configuration', $alertConfig, now()->addDays(30));

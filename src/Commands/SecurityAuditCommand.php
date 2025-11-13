@@ -85,7 +85,7 @@ class SecurityAuditCommand extends Command
         $issues = [];
 
         // Check if obfuscation is enabled
-        if (!config('license-manager.code_protection.obfuscation_enabled', true)) {
+        if (!config('helpers.code_protection.obfuscation_enabled', true)) {
             $issues[] = [
                 'type' => 'code_protection',
                 'severity' => 'medium',
@@ -183,7 +183,7 @@ class SecurityAuditCommand extends Command
         $issues = [];
 
         // Check if vendor protection is enabled
-        if (!config('license-manager.vendor_protection.enabled', true)) {
+        if (!config('helpers.vendor_protection.enabled', true)) {
             $issues[] = [
                 'type' => 'vendor_protection',
                 'severity' => 'medium',

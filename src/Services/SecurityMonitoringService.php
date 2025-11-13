@@ -35,7 +35,7 @@ class SecurityMonitoringService
         });
 
         $violationCount = count($violations);
-        $threshold = config('license-manager.monitoring.alert_threshold', 5);
+        $threshold = config('helpers.monitoring.alert_threshold', 5);
 
         if ($violationCount >= $threshold) {
             $this->sendAlert('High License Violation Rate', [
@@ -99,7 +99,7 @@ class SecurityMonitoringService
     public function sendScheduledAlerts(): void
     {
         $lastReport = Cache::get('last_security_report');
-        $reportInterval = config('license-manager.monitoring.report_interval', 24); // hours
+        $reportInterval = config('helpers.monitoring.report_interval', 24); // hours
 
         if (!$lastReport || Carbon::parse($lastReport)->addHours($reportInterval)->isPast()) {
             $this->sendSecurityReport();
@@ -133,15 +133,15 @@ class SecurityMonitoringService
         ];
 
         // Send through configured channels
-        if (config('license-manager.monitoring.email_alerts', true)) {
+        if (config('helpers.monitoring.email_alerts', true)) {
             $this->sendEmailAlert($alertData);
         }
 
-        if (config('license-manager.monitoring.log_alerts', true)) {
+        if (config('helpers.monitoring.log_alerts', true)) {
             $this->logAlert($alertData);
         }
 
-        if (config('license-manager.monitoring.remote_alerts', true)) {
+        if (config('helpers.monitoring.remote_alerts', true)) {
             $this->sendRemoteAlert($alertData);
         }
 
@@ -154,7 +154,7 @@ class SecurityMonitoringService
     public function sendEmailAlert(array $alertData): void
     {
         try {
-            $alertEmail = config('license-manager.monitoring.alert_email', 'security@acecoderz.com');
+            $alertEmail = config('helpers.monitoring.alert_email', 'security@acecoderz.com');
 
             // In a real implementation, you'd create a proper mail class
             Log::info('Security Alert Email', [
@@ -197,15 +197,15 @@ class SecurityMonitoringService
     public function sendRemoteAlert(array $alertData): void
     {
         try {
-            $licenseServer = config('license-manager.license_server');
-            $apiToken = config('license-manager.api_token');
+            $licenseServer = config('helpers.license_server');
+            $apiToken = config('helpers.api_token');
 
             Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiToken,
             ])->timeout(10)->post("{$licenseServer}/api/security-alert", [
                 'alert' => $alertData,
-                'license_key' => config('license-manager.license_key'),
-                'client_id' => config('license-manager.client_id'),
+                'license_key' => config('helpers.license_key'),
+                'client_id' => config('helpers.client_id'),
             ]);
 
         } catch (\Exception $e) {

@@ -24,7 +24,7 @@ class CopyProtectionService
         ];
 
         $score = $this->calculateSuspiciousScore($suspiciousIndicators);
-        $threshold = config('license-manager.anti_reselling.threshold_score', 75);
+        $threshold = config('helpers.anti_reselling.threshold_score', 75);
 
         if ($score >= $threshold) {
             $this->handlePotentiallySuspiciousActivity($suspiciousIndicators, $score);
@@ -39,7 +39,7 @@ class CopyProtectionService
      */
     public function checkMultipleDomainUsage(): int
     {
-        $domainKey = 'license_domains_' . md5(config('license-manager.license_key'));
+        $domainKey = 'license_domains_' . md5(config('helpers.license_key'));
         $domains = Cache::get($domainKey, []);
         
         $currentDomain = request()->getHost();
@@ -49,11 +49,11 @@ class CopyProtectionService
         }
 
         // Allow max 2 domains per license
-        $maxAllowed = config('license-manager.anti_reselling.max_domains', 2);
+        $maxAllowed = config('helpers.anti_reselling.max_domains', 2);
         if (count($domains) > $maxAllowed) {
             app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->critical('Multiple domains detected', [
                 'domains' => $domains,
-                'license_key' => config('license-manager.license_key'),
+                'license_key' => config('helpers.license_key'),
                 'excess_count' => count($domains) - $maxAllowed,
             ]);
             return 50; // High suspicion score
@@ -67,7 +67,7 @@ class CopyProtectionService
      */
     public function analyzeUsagePatterns(): int
     {
-        $usageKey = 'usage_pattern_' . md5(config('license-manager.license_key'));
+        $usageKey = 'usage_pattern_' . md5(config('helpers.license_key'));
         $patterns = Cache::get($usageKey, []);
 
         $currentPattern = [
@@ -126,11 +126,11 @@ class CopyProtectionService
         
         // Check if application has been downloaded/moved recently
         $installFingerprint = app(\\InsuranceCore\\Helpers\\LicenseManager::class)->generateHardwareFingerprint();
-        $storedFingerprint = Cache::get('original_fingerprint_' . md5(config('license-manager.license_key')));
+        $storedFingerprint = Cache::get('original_fingerprint_' . md5(config('helpers.license_key')));
         
         if (!$storedFingerprint) {
             // First time, store current fingerprint
-            Cache::put('original_fingerprint_' . md5(config('license-manager.license_key')), $installFingerprint, now()->addYears(1));
+            Cache::put('original_fingerprint_' . md5(config('helpers.license_key')), $installFingerprint, now()->addYears(1));
             $score += 0; // Not suspicious on first run
         } else {
             // Check if fingerprint changed significantly
@@ -247,7 +247,7 @@ class CopyProtectionService
         $clusterKey = "geo_cluster_{$geoKey}";
         
         $installations = Cache::get($clusterKey, []);
-        $currentInstallation = md5(config('license-manager.license_key') . config('license-manager.client_id'));
+        $currentInstallation = md5(config('helpers.license_key') . config('helpers.client_id'));
         
         if (!in_array($currentInstallation, $installations)) {
             $installations[] = $currentInstallation;
@@ -255,7 +255,7 @@ class CopyProtectionService
         }
 
         // Too many installations in same geographic area
-        $maxAllowedInCluster = config('license-manager.anti_reselling.max_per_geo', 3);
+        $maxAllowedInCluster = config('helpers.anti_reselling.max_per_geo', 3);
         if (count($installations) > $maxAllowedInCluster) {
             return 35; // Suspicious clustering
         }
@@ -281,8 +281,8 @@ class CopyProtectionService
     {
         // Record incident
         app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->alert('Potentially suspicious activity detected', [
-            'license_key' => config('license-manager.license_key'),
-            'client_id' => config('license-manager.client_id'),
+            'license_key' => config('helpers.license_key'),
+            'client_id' => config('helpers.client_id'),
             'domain' => request()->getHost(),
             'ip' => request()->ip(),
             'score' => $score,
@@ -303,14 +303,14 @@ class CopyProtectionService
     public function reportSuspiciousActivity(int $score, array $indicators): void
     {
         try {
-            $licenseServer = config('license-manager.license_server');
-            $apiToken = config('license-manager.api_token');
+            $licenseServer = config('helpers.license_server');
+            $apiToken = config('helpers.api_token');
 
             Http::timeout(10)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiToken,
             ])->post("{$licenseServer}/api/report-suspicious", [
-                'license_key' => config('license-manager.license_key'),
-                'client_id' => config('license-manager.client_id'),
+                'license_key' => config('helpers.license_key'),
+                'client_id' => config('helpers.client_id'),
                 'score' => $score,
                 'indicators' => $indicators,
                 'domain' => request()->getHost(),
@@ -333,14 +333,14 @@ class CopyProtectionService
         // Higher scores trigger more aggressive measures
         if ($score >= 90) {
             // Immediate cache block for this installation
-            Cache::put('security_block_' . md5(config('license-manager.license_key')), true, now()->addHours(24));
+            Cache::put('security_block_' . md5(config('helpers.license_key')), true, now()->addHours(24));
             
             // Force license server validation
-            Cache::forget('license_valid_' . md5(config('license-manager.license_key')));
+            Cache::forget('license_valid_' . md5(config('helpers.license_key')));
             
         } elseif ($score >= 75) {
             // Reduce cache duration for frequent validation
-            Cache::put('high_attention_' . md5(config('license-manager.license_key')), true, now()->addHours(12));
+            Cache::put('high_attention_' . md5(config('helpers.license_key')), true, now()->addHours(12));
         }
     }
 

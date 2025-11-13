@@ -415,8 +415,8 @@ class VendorProtectionService
         Cache::put('license_force_invalid', true, now()->addHours(24));
 
         // Clear all license caches
-        Cache::forget('license_valid_' . md5(config('license-manager.license_key') ?? ''));
-        Cache::forget('license_last_check_' . md5(config('license-manager.license_key') ?? ''));
+        Cache::forget('license_valid_' . md5(config('helpers.license_key') ?? ''));
+        Cache::forget('license_last_check_' . md5(config('helpers.license_key') ?? ''));
 
         // Log critical security event
         Log::emergency('CRITICAL: Vendor tampering detected - license suspended', [
@@ -430,7 +430,7 @@ class VendorProtectionService
         // - Create forensic logs
 
         // For now, we'll make the application non-functional
-        if (config('license-manager.vendor_protection.terminate_on_critical', false)) {
+        if (config('helpers.vendor_protection.terminate_on_critical', false)) {
             // Log and exit (be careful with this in production)
             Log::emergency('Application terminated due to critical vendor tampering');
             exit(1);
@@ -579,7 +579,7 @@ class VendorProtectionService
         // For now, we'll implement detection and alerting
 
         $healingConfig = [
-            'enabled' => config('license-manager.vendor_protection.self_healing', false),
+            'enabled' => config('helpers.vendor_protection.self_healing', false),
             'backup_location' => storage_path('vendor_backups'),
             'auto_restore' => false, // Manual intervention required
         ];

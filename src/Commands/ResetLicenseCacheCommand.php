@@ -30,9 +30,9 @@ class ResetLicenseCacheCommand extends Command
         ];
 
         // Add license-specific cache keys
-        $licenseKey = config('license-manager.license_key');
-        $productId = config('license-manager.product_id');
-        $clientId = config('license-manager.client_id');
+        $licenseKey = config('helpers.license_key');
+        $productId = config('helpers.product_id');
+        $clientId = config('helpers.client_id');
 
         if ($licenseKey && $productId && $clientId) {
             $cacheKeys[] = "license_valid_{$licenseKey}_{$productId}_{$clientId}";

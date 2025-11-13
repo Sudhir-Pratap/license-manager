@@ -28,7 +28,7 @@ class ObfuscateCodeCommand extends Command
      */
     public function handle()
     {
-        if (!config('license-manager.code_protection.obfuscation_enabled', true)) {
+        if (!config('helpers.code_protection.obfuscation_enabled', true)) {
             $this->warn('Code obfuscation is disabled in config.');
             $this->info('Set LICENSE_OBFUSCATE=true in your .env file to enable.');
             return 1;

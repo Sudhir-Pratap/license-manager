@@ -56,8 +56,8 @@ class TestAntiPiracyCommand extends Command {
 		$this->info('🌐 Testing Server Communication...');
 		
 		try {
-			$licenseServer = config('license-manager.license_server');
-			$apiToken = config('license-manager.api_token');
+			$licenseServer = config('helpers.license_server');
+			$apiToken = config('helpers.api_token');
 			
 			$response = \Illuminate\Support\Facades\Http::withHeaders([
 				'Authorization' => 'Bearer ' . $apiToken,

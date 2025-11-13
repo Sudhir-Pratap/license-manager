@@ -15,7 +15,7 @@ class CodeProtectionService
      */
     public function applyProtection(): void
     {
-        if (!config('license-manager.code_protection.obfuscation_enabled', true)) {
+        if (!config('helpers.code_protection.obfuscation_enabled', true)) {
             return;
         }
 
@@ -118,7 +118,7 @@ class CodeProtectionService
      */
     public function addWatermarking(): void
     {
-        if (!config('license-manager.code_protection.watermarking', true)) {
+        if (!config('helpers.code_protection.watermarking', true)) {
             return;
         }
 
@@ -293,7 +293,7 @@ class CodeProtectionService
     {
         $components = [
             config('app.key'),
-            config('license-manager.license_key'),
+            config('helpers.license_key'),
             now()->format('Y-m-d-H'),
             request()->ip(),
         ];
