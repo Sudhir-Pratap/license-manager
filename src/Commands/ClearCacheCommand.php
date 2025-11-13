@@ -30,7 +30,7 @@ class ClearCacheCommand extends Command
         ];
 
         // Add helper-specific cache keys
-        $licenseKey = config('helpers.license_key');
+        $licenseKey = config('helpers.helper_key');
         $productId = config('helpers.product_id');
         $clientId = config('helpers.client_id');
 
@@ -100,3 +100,4 @@ class ClearCacheCommand extends Command
         ];
     }
 } 
+

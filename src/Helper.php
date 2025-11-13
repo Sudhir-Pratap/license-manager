@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class Helper {
-	public function validateLicense(string $licenseKey, string $productId, string $domain, string $ip, string $clientId): bool {
-		$licenseServer = config('helpers.license_server');
+	public function validateHelper(string $helperKey, string $productId, string $domain, string $ip, string $clientId): bool {
+		$helperServer = config('helpers.helper_server');
 		$apiToken      = config('helpers.api_token');
-		// Hash the license key in cache keys to avoid database key length limits
-		$licenseKeyHash = md5($licenseKey);
-		$cacheKey      = "license_valid_{$licenseKeyHash}_{$productId}_{$clientId}";
-		$lastCheckKey  = "license_last_check_{$licenseKeyHash}_{$productId}_{$clientId}";
+		// Hash the helper key in cache keys to avoid database key length limits
+		$helperKeyHash = md5($helperKey);
+		$cacheKey      = "helper_valid_{$helperKeyHash}_{$productId}_{$clientId}";
+		$lastCheckKey  = "helper_last_check_{$helperKeyHash}_{$productId}_{$clientId}";
 
 		// Generate hardware fingerprint
 		$hardwareFingerprint = $this->generateHardwareFingerprint();
@@ -24,12 +24,12 @@ class Helper {
 		// Use the original client ID for checksum calculation (not the enhanced one)
 		$originalClientId = $clientId;
 
-		// Use LICENSE_SECRET for cryptography, fallback to APP_KEY for legacy
-		$cryptoKey = env('LICENSE_SECRET', env('APP_KEY'));
+		// Use HELPER_SECRET for cryptography, fallback to APP_KEY for legacy
+		$cryptoKey = env('HELPER_SECRET', env('APP_KEY'));
 		// Ensure hardware_fingerprint is not null (use empty string if null)
 		$hardwareFingerprint = $hardwareFingerprint ?? '';
 		// Generate enhanced checksum
-		$checksum = hash('sha256', $licenseKey . $productId . $originalClientId . $hardwareFingerprint . $cryptoKey);
+		$checksum = hash('sha256', $helperKey . $productId . $originalClientId . $hardwareFingerprint . $cryptoKey);
 
 		// Force server check every 30 minutes (reduced from 60)
 		$lastCheck = Cache::get($lastCheckKey);
@@ -44,8 +44,8 @@ class Helper {
 
 		try {
 			// Enhanced debug log for deployment debugging
-			Log::info('License validation request', [
-				'license_key' => substr($licenseKey, 0, 20) . '...', // Partial key for security
+			Log::info('Helper validation request', [
+				'helper_key' => substr($helperKey, 0, 20) . '...', // Partial key for security
 				'product_id' => $productId,
 				'domain' => $domain,
 				'ip' => $ip,
@@ -55,16 +55,16 @@ class Helper {
 				'checksum' => substr($checksum, 0, 16) . '...',
 				'full_checksum' => $checksum, // Full checksum for debugging
 				'crypto_key_set' => !empty($cryptoKey) ? 'YES' : 'NO',
-				'input_string' => substr($licenseKey, 0, 20) . '...' . $productId . $originalClientId . ($hardwareFingerprint ? substr($hardwareFingerprint, 0, 16) . '...' : 'NULL'),
-				'license_server' => $licenseServer,
+				'input_string' => substr($helperKey, 0, 20) . '...' . $productId . $originalClientId . ($hardwareFingerprint ? substr($hardwareFingerprint, 0, 16) . '...' : 'NULL'),
+				'helper_server' => $helperServer,
 				'environment' => config('app.env'),
 				'deployment_context' => request()->header('X-Deployment-Context'),
 			]);
 
 			$response = Http::withHeaders([
 				'Authorization' => 'Bearer ' . $apiToken,
-			])->timeout(15)->post("{$licenseServer}/api/validate", [
-				'license_key' => $licenseKey,
+			])->timeout(15)->post("{$helperServer}/api/validate", [
+				'helper_key' => $helperKey,
 				'product_id'  => $productId,
 				'domain'      => $domain,
 				'ip'          => $ip,
@@ -313,3 +313,4 @@ class Helper {
 	}
 
 }
+

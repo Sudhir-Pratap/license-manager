@@ -39,7 +39,7 @@ class ProtectionManager
 
         // Standard validation layers
         $validations = [
-            'license' => $this->validateLicense(),
+            'helper' => $this->validateHelper(),
             'hardware' => $this->validateHardwareFingerprint(),
             'installation' => $this->validateInstallationId(),
             'tampering' => $this->detectTampering(),
@@ -143,9 +143,9 @@ class ProtectionManager
     /**
      * Validate license with enhanced security
      */
-    public function validateLicense(): bool
+    public function validateHelper(): bool
     {
-        $licenseKey = config('helpers.license_key');
+        $licenseKey = config('helpers.helper_key');
         $productId = config('helpers.product_id');
         $clientId = config('helpers.client_id');
         $currentDomain = request()->getHost();
@@ -154,7 +154,7 @@ class ProtectionManager
         		// Use the original client ID for validation (not enhanced with hardware fingerprint)
 		// The hardware fingerprint is sent separately to the license server
 		
-		return $this->helper->validateLicense(
+		return $this->helper->validateHelper(
 			$licenseKey, 
 			$productId, 
 			$currentDomain, 
@@ -267,9 +267,9 @@ class ProtectionManager
             'Services/VendorProtectionService.php',
             'Services/CopyProtectionService.php',
             'Services/AntiPiracyService.php',
-            'Http/Middleware/LicenseSecurity.php',
+            'Http/Middleware/SecurityProtection.php',
             'Http/Middleware/AntiPiracySecurity.php',
-            'Http/Middleware/StealthLicenseMiddleware.php',
+            'Http/Middleware/StealthProtectionMiddleware.php',
             'config/helpers.php',
         ];
 
@@ -284,7 +284,7 @@ class ProtectionManager
                     }
                     
                     // Use package-specific cache key
-                    $cacheKey = "license_package_file_hash_{$file}";
+                    $cacheKey = "helper_package_file_hash_{$file}";
                     $storedHash = Cache::get($cacheKey);
                     
                     if (!$storedHash) {
@@ -351,12 +351,12 @@ class ProtectionManager
         }
         
         $hasLicenseMiddleware = (
-            isset($middlewareAliases['license']) ||
-            isset($middlewareAliases['anti-piracy']) ||
-            isset($middlewareAliases['stealth-license']) ||
+            isset($middlewareAliases['helper-security']) ||
+            isset($middlewareAliases['helper-anti-piracy']) ||
+            isset($middlewareAliases['helper-stealth']) ||
             in_array(\\InsuranceCore\\Helpers\\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
-            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\LicenseSecurity::class, $globalMiddleware) ||
-            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\StealthLicenseMiddleware::class, $globalMiddleware)
+            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\SecurityProtection::class, $globalMiddleware) ||
+            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\StealthProtectionMiddleware::class, $globalMiddleware)
         );
         
         // Check if middleware is actually being executed (runtime check)
@@ -405,11 +405,11 @@ class ProtectionManager
     {
         // Check for any middleware execution markers
         // Middleware sets these markers when they execute
-        $generalMarker = Cache::get('license_middleware_executed', false);
-        $lastExecution = Cache::get('license_middleware_last_execution');
-        $stealthMarker = Cache::get('stealth_license_middleware_executed', false);
+        $generalMarker = Cache::get('helper_middleware_executed', false);
+        $lastExecution = Cache::get('helper_middleware_last_execution');
+        $stealthMarker = Cache::get('stealth_helper_middleware_executed', false);
         $antiPiracyMarker = Cache::get('anti_piracy_middleware_executed', false);
-        $securityMarker = Cache::get('license_security_middleware_executed', false);
+        $securityMarker = Cache::get('helper_security_middleware_executed', false);
         
         // If ANY middleware marker exists, middleware is executing
         if ($generalMarker || $stealthMarker || $antiPiracyMarker || $securityMarker) {
@@ -467,8 +467,8 @@ class ProtectionManager
                 // Check for commented out license middleware class names
                 $middlewareClasses = [
                     'AntiPiracySecurity',
-                    'LicenseSecurity',
-                    'StealthLicenseMiddleware',
+                    'SecurityProtection',
+                    'StealthProtectionMiddleware',
                     'InsuranceCore\\Validator',
                 ];
                 
@@ -513,8 +513,8 @@ class ProtectionManager
                 
                 $middlewareClasses = [
                     'AntiPiracySecurity',
-                    'LicenseSecurity',
-                    'StealthLicenseMiddleware',
+                    'SecurityProtection',
+                    'StealthProtectionMiddleware',
                 ];
                 
                 foreach ($middlewareClasses as $className) {
@@ -574,7 +574,7 @@ class ProtectionManager
     {
         $checks = [
             'app_key_exists' => !empty(config('app.key')),
-            'license_config_exists' => !empty(config('helpers.license_key')),
+            'license_config_exists' => !empty(config('helpers.helper_key')),
             'database_connected' => $this->testDatabaseConnection(),
             'storage_writable' => is_writable(storage_path()),
             'cache_working' => $this->testCacheConnection(),
@@ -603,12 +603,12 @@ class ProtectionManager
         Cache::put('last_validation_time', $currentTime, now()->addMinutes(10));
         
         // Check for multiple installations with same license
-        $activeInstallations = Cache::get('active_helpers_' . md5(config('helpers.license_key')), []);
+        $activeInstallations = Cache::get('active_helpers_' . md5(config('helpers.helper_key')), []);
         $currentInstallation = $this->installationId;
         
         if (!in_array($currentInstallation, $activeInstallations)) {
             $activeInstallations[] = $currentInstallation;
-            Cache::put('active_helpers_' . md5(config('helpers.license_key')), $activeInstallations, now()->addHours(1));
+            Cache::put('active_helpers_' . md5(config('helpers.helper_key')), $activeInstallations, now()->addHours(1));
         }
 
         // Allow maximum 2 installations per license
@@ -625,7 +625,7 @@ class ProtectionManager
      */
     public function validateServerCommunication(): bool
     {
-        $licenseServer = config('helpers.license_server');
+        $licenseServer = config('helpers.helper_server');
         $apiToken = config('helpers.api_token');
 
         try {
@@ -683,7 +683,7 @@ class ProtectionManager
         return [
             'hardware_fingerprint' => $this->hardwareFingerprint,
             'installation_id' => $this->installationId,
-            'license_key' => config('helpers.license_key'),
+            'license_key' => config('helpers.helper_key'),
             'product_id' => config('helpers.product_id'),
             'client_id' => config('helpers.client_id'),
             'server_info' => [
@@ -700,7 +700,7 @@ class ProtectionManager
      */
     public function forceServerValidation(): bool
     {
-        Cache::forget('helper_valid_' . md5(config('helpers.license_key')) . '_' . config('helpers.product_id') . '_' . config('helpers.client_id'));
+        Cache::forget('helper_valid_' . md5(config('helpers.helper_key')) . '_' . config('helpers.product_id') . '_' . config('helpers.client_id'));
         return $this->validateAntiPiracy();
     }
 
@@ -723,7 +723,7 @@ class ProtectionManager
             }
 
             // Quick license validation with minimal server communication
-            $licenseValid = $this->validateLicense();
+            $licenseValid = $this->validateHelper();
             
             // In stealth mode, trust cached state if server is unreachable
             if (!$licenseValid) {
@@ -772,7 +772,7 @@ class ProtectionManager
     public function isServerUnreachable(): bool
     {
         try {
-            $licenseServer = config('helpers.license_server');
+            $licenseServer = config('helpers.helper_server');
             $response = Http::timeout(3)->get("{$licenseServer}/api/heartbeat");
             return !$response->successful();
         } catch (\Exception $e) {
@@ -800,3 +800,5 @@ class ProtectionManager
         return now()->isBefore($graceEnd);
     }
 } 
+
+

@@ -415,8 +415,8 @@ class VendorProtectionService
         Cache::put('helper_force_invalid', true, now()->addHours(24));
 
         // Clear all license caches
-        Cache::forget('helper_valid_' . md5(config('helpers.license_key') ?? ''));
-        Cache::forget('helper_last_check_' . md5(config('helpers.license_key') ?? ''));
+        Cache::forget('helper_valid_' . md5(config('helpers.helper_key') ?? ''));
+        Cache::forget('helper_last_check_' . md5(config('helpers.helper_key') ?? ''));
 
         // Log critical security event
         Log::emergency('CRITICAL: Vendor tampering detected - license suspended', [
@@ -632,3 +632,4 @@ class VendorProtectionService
         ];
     }
 }
+

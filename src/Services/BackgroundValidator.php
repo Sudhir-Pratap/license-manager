@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
-class BackgroundLicenseValidator
+class BackgroundValidator
 {
     public $antiPiracyManager;
 
@@ -61,7 +61,7 @@ class BackgroundLicenseValidator
     public function quickHealthCheck(): bool
     {
         try {
-            $licenseServer = config('helpers.license_server');
+            $licenseServer = config('helpers.helper_server');
             $response = Http::timeout(3)->get("{$licenseServer}/api/heartbeat");
             return $response->successful();
         } catch (\Exception $e) {
@@ -92,7 +92,7 @@ class BackgroundLicenseValidator
 
         if ($isWithinGrace && config('helpers.stealth.silent_fail', true)) {
             // Log grace period usage
-            Log::channel('license')->info('License server offline - grace period active', [
+            Log::channel('helper')->info('License server offline - grace period active', [
                 'domain' => request()->getHost(),
                 'grace_end' => $graceEnd->toDateTimeString(),
                 'error' => $error,
@@ -134,9 +134,9 @@ class BackgroundLicenseValidator
         ];
 
         if ($isValid) {
-            Log::channel('license')->info('Background license validation successful', $logData);
+            Log::channel('helper')->info('Background license validation successful', $logData);
         } else {
-            Log::channel('license')->warning('Background license validation failed', $logData);
+            Log::channel('helper')->warning('Background license validation failed', $logData);
         }
     }
 
@@ -163,7 +163,7 @@ class BackgroundLicenseValidator
             })->onQueue('license-validation');
             
         } catch (\Exception $e) {
-            Log::channel('license')->error('Failed to schedule license validation', [
+            Log::channel('helper')->error('Failed to schedule license validation', [
                 'error' => $e->getMessage(),
                 'domain' => $domain,
             ]);
@@ -176,9 +176,9 @@ class BackgroundLicenseValidator
     public function performPeriodicCheck(string $domain, string $fingerprint, string $installationId): void
     {
         try {
-            $licenseServer = config('helpers.license_server');
+            $licenseServer = config('helpers.helper_server');
             $apiToken = config('helpers.api_token');
-            $licenseKey = config('helpers.license_key');
+            $licenseKey = config('helpers.helper_key');
             $productId = config('helpers.product_id');
             $clientId = config('helpers.client_id');
 
@@ -207,19 +207,19 @@ class BackgroundLicenseValidator
             ];
 
             if ($response->successful() && $response->json('valid')) {
-                Log::channel('license')->info('Periodic license validation successful', $logData);
+                Log::channel('helper')->info('Periodic license validation successful', $logData);
                 
                 // Update cache
                 $this->cacheValidationResult(true, ['periodic' => true]);
             } else {
-                Log::channel('license')->warning('Periodic license validation failed', $logData);
+                Log::channel('helper')->warning('Periodic license validation failed', $logData);
                 
                 // Update cache
                 $this->cacheValidationResult(false, ['periodic' => true]);
             }
 
         } catch (\Exception $e) {
-            Log::channel('license')->error('Periodic license validation error', [
+            Log::channel('helper')->error('Periodic license validation error', [
                 'domain' => $domain,
                 'error' => $e->getMessage(),
                 'timestamp' => now(),
@@ -227,3 +227,6 @@ class BackgroundLicenseValidator
         }
     }
 }
+
+
+

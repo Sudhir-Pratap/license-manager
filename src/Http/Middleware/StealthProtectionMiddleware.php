@@ -10,7 +10,7 @@ use Closure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class StealthLicenseMiddleware
+class StealthProtectionMiddleware
 {
     /**
      * Transparent license validation without client awareness

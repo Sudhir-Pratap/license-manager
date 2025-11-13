@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class LicenseInfoCommand extends Command
 {
-    protected $signature = 'license:info';
+    protected $signature = 'helpers:info';
     protected $description = 'Show the current hardware fingerprint and installation ID for license generation.';
 
     public function handle()
@@ -26,13 +26,15 @@ class LicenseInfoCommand extends Command
         // Show current configuration
         $this->line('');
         $this->info('Current Configuration:');
-        $this->info('License Key: ' . (config('helpers.license_key') ? 'Configured' : 'Not set'));
+        $this->info('Helper Key: ' . (config('helpers.helper_key') ? 'Configured' : 'Not set'));
         $this->info('Product ID: ' . (config('helpers.product_id') ?: 'Not set'));
         $this->info('Client ID: ' . (config('helpers.client_id') ?: 'Not set'));
-        $this->info('License Server: ' . config('helpers.license_server'));
+        $this->info('Helper Server: ' . config('helpers.helper_server'));
         
         $this->line('');
-        $this->info('Use this information to generate a license:');
-        $this->info('php artisan license:generate --product-id=YOUR_PRODUCT_ID --domain=' . request()->getHost() . ' --ip=' . $currentIp . ' --client-id=YOUR_CLIENT_ID');
+        $this->info('Use this information to generate a helper:');
+        $this->info('php artisan helpers:generate --product-id=YOUR_PRODUCT_ID --domain=' . request()->getHost() . ' --ip=' . $currentIp . ' --client-id=YOUR_CLIENT_ID');
     }
 }
+
+

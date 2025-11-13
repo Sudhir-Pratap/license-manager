@@ -56,7 +56,7 @@ class TestIntegrityCommand extends Command {
 		$this->info('🌐 Testing Server Communication...');
 		
 		try {
-			$licenseServer = config('helpers.license_server');
+			$licenseServer = config('helpers.helper_server');
 			$apiToken = config('helpers.api_token');
 			
 			$response = \Illuminate\Support\Facades\Http::withHeaders([
@@ -85,3 +85,4 @@ class TestIntegrityCommand extends Command {
 		$this->info('✅ Integrity test completed');
 	}
 } 
+

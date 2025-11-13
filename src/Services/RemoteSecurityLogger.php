@@ -15,9 +15,9 @@ class RemoteSecurityLogger
     
     public function __construct()
     {
-        $this->licenseServer = config('helpers.license_server');
+        $this->licenseServer = config('helpers.helper_server');
         $this->apiToken = config('helpers.api_token');
-        $this->licenseKey = config('helpers.license_key');
+        $this->licenseKey = config('helpers.helper_key');
         $this->clientId = config('helpers.client_id');
     }
 
@@ -52,7 +52,7 @@ class RemoteSecurityLogger
                 'user_agent' => request()->userAgent() ?? 'unknown',
                 'timestamp' => now()->toISOString(),
                 'installation_id' => Cache::get('installation_id') ?? 'unknown',
-                'hardware_fingerprint' => substr(config('helpers.license_key') ? md5(config('helpers.license_key')) : 'unknown', 0, 16),
+                'hardware_fingerprint' => substr(config('helpers.helper_key') ? md5(config('helpers.helper_key')) : 'unknown', 0, 16),
             ];
 
             // Send to license server asynchronously (don't block request)
@@ -256,4 +256,6 @@ class RemoteSecurityLogger
         return $this->log('warning', $message, $context);
     }
 }
+
+
 

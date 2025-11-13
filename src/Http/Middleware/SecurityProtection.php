@@ -8,39 +8,39 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;                                             
 use Illuminate\Support\Facades\Cache;
 
-class LicenseSecurity {
-	protected $licenseManager;
+class SecurityProtection {
+	protected $helperManager;
 
 	public function __construct() {
 		// Don't inject dependencies in constructor to avoid circular dependencies
 	}
 
-	protected function getLicenseManager() {
-		if (!$this->licenseManager) {
-			$this->licenseManager = app(LicenseManager::class);
+	protected function getHelperManager() {
+		if (!$this->helperManager) {
+			$this->helperManager = app(\InsuranceCore\Helpers\Helper::class);
 		}
-		return $this->licenseManager;
+		return $this->helperManager;
 	}
 
 	public function handle(Request $request, Closure $next) {
 		// Mark middleware execution for tampering detection
-		Cache::put('license_middleware_executed', true, now()->addMinutes(5));
-		Cache::put('license_middleware_last_execution', now(), now()->addMinutes(5));
-		Cache::put('license_security_middleware_executed', true, now()->addMinutes(5));
+		Cache::put('helper_middleware_executed', true, now()->addMinutes(5));
+		Cache::put('helper_middleware_last_execution', now(), now()->addMinutes(5));
+		Cache::put('helper_security_middleware_executed', true, now()->addMinutes(5));
 		
 		// Skip validation for certain routes
 		if ($this->shouldSkipValidation($request)) {
 			return $next($request);
 		}
-		$licenseKey    = config('helpers.license_key');
+		$helperKey    = config('helpers.helper_key');
 		$productId     = config('helpers.product_id');
 		$clientId      = config('helpers.client_id');
 		$currentDomain = $request->getHost();
 		$currentIp     = $request->ip();
 
-		                if (! $this->getLicenseManager()->validateLicense($licenseKey, $productId, $currentDomain, $currentIp, $clientId)) {                            
-                        Log::error('License check failed, aborting request', [  
-                                'license_key' => $licenseKey,
+		                if (! $this->getHelperManager()->validateHelper($helperKey, $productId, $currentDomain, $currentIp, $clientId)) {                            
+                        Log::error('Helper check failed, aborting request', [
+                                'helper_key' => $helperKey,
                                 'product_id'  => $productId,
                                 'domain'      => $currentDomain,
                                 'ip'          => $currentIp,
@@ -119,3 +119,4 @@ class LicenseSecurity {
                 }
         }
 }
+

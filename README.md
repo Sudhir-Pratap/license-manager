@@ -24,28 +24,28 @@ composer require insurance-core/helpers
 php artisan vendor:publish --provider="InsuranceCore\Helpers\HelperServiceProvider"
 
 # Configure stealth mode
-php artisan license:stealth-install --config
+php artisan helpers:stealth-install --config
 
 # Check client status  
-php artisan license:client-status --check
+php artisan helpers:client-status --check
 ```
 
 ## 📝 Configuration
 
 Add to your `.env` file:
 ```env
-LICENSE_KEY=your_generated_license_key
-LICENSE_SERVER=http://your-license-server.com/api
+HELPER_KEY=your_generated_helper_key
+HELPER_SERVER=http://your-helper-server.com/api
 API_TOKEN=your_secure_api_token
 ```
 
 ## 🔧 Management Commands
 
-- `license:client-status` - Check system status (client-friendly)
-- `license:stealth-install` - Configure stealth mode
-- `license:deployment-license` - Diagnose deployment issues
-- `license:vendor-protect` - Manage vendor directory protection
-- `license:security-audit` - Comprehensive security assessment
+- `helpers:client-status` - Check system status (client-friendly)
+- `helpers:stealth-install` - Configure stealth mode
+- `helpers:deployment` - Diagnose deployment issues
+- `helpers:protect` - Manage vendor directory protection
+- `helpers:audit` - Comprehensive security assessment
 
 ## 🛡️ Protection Features
 
@@ -56,7 +56,7 @@ API_TOKEN=your_secure_api_token
 - Evidence collection for legal action
 - **Vendor file tampering protection**
 - **Real-time integrity monitoring**
-- **Automatic license suspension on tampering**
+- **Automatic helper suspension on tampering**
 
 **For Your Clients:**
 - Transparent operation
@@ -71,21 +71,21 @@ API_TOKEN=your_secure_api_token
 ### Setup Vendor Protection
 ```bash
 # Initialize vendor protection (run after installation)
-php artisan license:vendor-protect --setup
+php artisan helpers:protect --setup
 
 # Verify vendor integrity
-php artisan license:vendor-protect --verify
+php artisan helpers:protect --verify
 
 # Generate tampering report
-php artisan license:vendor-protect --report
+php artisan helpers:protect --report
 ```
 
 ### What Happens When Files Are Modified
 
-1. **Immediate Detection:** Every license validation checks vendor file integrity
+1. **Immediate Detection:** Every helper validation checks vendor file integrity
 2. **Automatic Response:**
    - **Minor tampering:** Enhanced monitoring and warnings
-   - **Critical tampering:** Immediate license suspension
+   - **Critical tampering:** Immediate helper suspension
    - **Severe violations:** Application termination (optional)
 3. **Remote Alerting:** Security team notified instantly
 4. **Evidence Collection:** Detailed logs for legal action
@@ -103,4 +103,4 @@ php artisan license:vendor-protect --report
 - **Critical:** License suspended for 24 hours, immediate alerts
 - **Severe:** Application termination, full security lockdown
 
-**Professional license protection made simple!** ✨
+**Professional helper protection made simple!** ✨

@@ -197,14 +197,14 @@ class SecurityMonitoringService
     public function sendRemoteAlert(array $alertData): void
     {
         try {
-            $licenseServer = config('helpers.license_server');
+            $licenseServer = config('helpers.helper_server');
             $apiToken = config('helpers.api_token');
 
             Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiToken,
             ])->timeout(10)->post("{$licenseServer}/api/security-alert", [
                 'alert' => $alertData,
-                'license_key' => config('helpers.license_key'),
+                'license_key' => config('helpers.helper_key'),
                 'client_id' => config('helpers.client_id'),
             ]);
 
@@ -468,3 +468,5 @@ class SecurityMonitoringService
         }
     }
 }
+
+

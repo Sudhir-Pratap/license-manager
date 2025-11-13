@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 class DeploymentLicenseCommand extends Command
 {
-    protected $signature = 'license:deployment 
+    protected $signature = 'helpers:deployment
                            {--check : Check current deployment status}
                            {--fix : Attempt to fix deployment issues}
                            {--regenerate : Force regenerate hardware fingerprint}
@@ -32,7 +32,7 @@ class DeploymentLicenseCommand extends Command
         }
         
         if ($this->option('test')) {
-            $this->testLicenseValidation($licenseManager);
+            $this->testHelperValidation($licenseManager);
         }
         
         if (!$this->option('check') && !$this->option('fix') && !$this->option('regenerate') && !$this->option('test')) {
@@ -42,9 +42,9 @@ class DeploymentLicenseCommand extends Command
             $this->line('--check     : Check current deployment status');
             $this->line('--fix       : Attempt to fix deployment issues');
             $this->line('--regenerate: Force regenerate hardware fingerprint');
-            $this->line('--test      : Test license validation');
+            $this->line('--test      : Test helper validation');
             $this->line('');
-            $this->info('Example: php artisan license:deployment --check --fix');
+            $this->info('Example: php artisan helpers:deployment --check --fix');
         }
     }
 
@@ -55,10 +55,10 @@ class DeploymentLicenseCommand extends Command
         // Check configuration
         $this->line('');
         $this->info('Configuration:');
-        $this->line('License Key: ' . (config('helpers.license_key') ? '✓ Set' : '✗ Missing'));
+        $this->line('Helper Key: ' . (config('helpers.helper_key') ? '✓ Set' : '✗ Missing'));
         $this->line('Product ID: ' . (config('helpers.product_id') ?: 'Missing'));
         $this->line('Client ID: ' . (config('helpers.client_id') ?: 'Missing'));
-        $this->line('License Server: ' . config('helpers.license_server'));
+        $this->line('Helper Server: ' . config('helpers.helper_server'));
         
         // Check hardware fingerprint
         $fingerprint = $licenseManager->generateHardwareFingerprint();
@@ -86,7 +86,7 @@ class DeploymentLicenseCommand extends Command
     {
         // Clear license cache
         Cache::flush();
-        $this->info('✓ Cleared license validation cache');
+        $this->info('✓ Cleared helper validation cache');
         
         // Reset installation tracking
         try {
@@ -117,22 +117,22 @@ class DeploymentLicenseCommand extends Command
          $this->info('Run: php artisan license:info');
      }
 
-     public function testLicenseValidation(LicenseManager $licenseManager)
+     public function testHelperValidation(LicenseManager $licenseManager)
      {
-         $this->info('Testing License Validation...');
+         $this->info('Testing Helper Validation...');
          
-         $licenseKey = config('helpers.license_key');
+         $helperKey = config('helpers.helper_key');
          $productId = config('helpers.product_id');
          $clientId = config('helpers.client_id');
          
-         if (!$licenseKey || !$productId || !$clientId) {
-             $this->error('Missing required license configuration');
+         if (!$helperKey || !$productId || !$clientId) {
+             $this->error('Missing required helper configuration');
              return;
          }
          
          try {
-             $isValid = $licenseManager->validateLicense(
-                 $licenseKey,
+             $isValid = $licenseManager->validateHelper(
+                 $helperKey,
                  $productId,
                  request()->getHost() ?: 'localhost',
                  request()->ip() ?: '127.0.0.1',
@@ -140,18 +140,18 @@ class DeploymentLicenseCommand extends Command
              );
              
              if ($isValid) {
-                 $this->info('✅ License validation successful');
+                 $this->info('✅ Helper validation successful');
              } else {
-                 $this->error('❌ License validation failed');
+                 $this->error('❌ Helper validation failed');
                  $this->line('');
                  $this->info('Common fixes:');
-                 $this->line('1. Check if license server is accessible');
+                 $this->line('1. Check if helper server is accessible');
                  $this->line('2. Verify API token is correct');
                  $this->line('3. Ensure hardware fingerprint matches');
-                 $this->line('4. Run: php artisan license:deployment --fix');
+                 $this->line('4. Run: php artisan helpers:deployment --fix');
              }
          } catch (\Exception $e) {
-             $this->error('License validation error: ' . $e->getMessage());
+             $this->error('Helper validation error: ' . $e->getMessage());
          }
      }
 
@@ -165,3 +165,5 @@ class DeploymentLicenseCommand extends Command
         }
     }
 }
+
+

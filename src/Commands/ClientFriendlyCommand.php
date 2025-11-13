@@ -7,11 +7,11 @@ use Illuminate\Console\Command;
 
 class ClientFriendlyCommand extends Command
 {
-    protected $signature = 'license:client-status 
+    protected $signature = 'helpers:client-status
                            {--check : Check if installation is operating normally}
                            {--test : Test system functionality}';
     
-    protected $description = 'Client-friendly license system status check';
+    protected $description = 'Client-friendly helper system status check';
 
     public function handle()
     {
@@ -33,12 +33,12 @@ class ClientFriendlyCommand extends Command
         $this->info('=== System Status Check ===');
         $this->line('');
         
-        // Check license configuration
-        $this->info('License Configuration:');
-        $this->line('License Key: ' . (config('helpers.license_key') ? '✅ Configured' : '❌ Missing'));
+        // Check helper configuration
+        $this->info('Helper Configuration:');
+        $this->line('Helper Key: ' . (config('helpers.helper_key') ? '✅ Configured' : '❌ Missing'));
         $this->line('Product ID: ' . (config('helpers.product_id') ?: 'Not Set'));
         $this->line('Client ID: ' . (config('helpers.client_id') ?: 'Not Set'));
-        $this->line('License Server: ' . config('helpers.license_server'));
+        $this->line('Helper Server: ' . config('helpers.helper_server'));
         $this->line('');
         
         // Check stealth mode (for admin reference)
@@ -46,7 +46,7 @@ class ClientFriendlyCommand extends Command
         $this->line('Operation Mode: ' . ($stealthMode ? 'Silent (Hidden)' : 'Visible'));
         
         // Check domain tracking status
-        $domainKey = 'license_domains_' . md5(config('helpers.license_key'));
+        $domainKey = 'helper_domains_' . md5(config('helpers.helper_key'));
         $domains = cache()->get($domainKey, []);
         
         $this->line('');
@@ -82,7 +82,7 @@ class ClientFriendlyCommand extends Command
         
         // Overall status
         $this->line('');
-        $licenseConfigured = config('helpers.license_key') && 
+        $licenseConfigured = config('helpers.helper_key') && 
                            config('helpers.product_id') && 
                            config('helpers.client_id');
         
@@ -103,7 +103,7 @@ class ClientFriendlyCommand extends Command
         
         // Test basic requirements
         $tests = [
-            'License Configuration' => !empty(config('helpers.license_key')),
+            'Helper Configuration' => !empty(config('helpers.helper_key')),
             'Database Connection' => $this->testDatabaseConnection(),
             'Cache System' => $this->testCacheSystem(),
             'Stealth Mode' => config('helpers.stealth.enabled', false),
@@ -188,10 +188,12 @@ class ClientFriendlyCommand extends Command
         $this->line('• Watermarking functionality');
         $this->line('');
         $this->info('Examples:');
-        $this->line('php artisan license:client-status --check');
-        $this->line('php artisan license:client-status --test');
+        $this->line('php artisan helpers:client-status --check');
+        $this->line('php artisan helpers:client-status --test');
         $this->line('');
         $this->info('Note: This tool provides client-friendly status information.');
         $this->info('For detailed technical information, contact your administrator.');
     }
 }
+
+

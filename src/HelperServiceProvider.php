@@ -13,10 +13,10 @@ use InsuranceCore\Helpers\Commands\ClientFriendlyCommand;
 use InsuranceCore\Helpers\Commands\AuditCommand;
 use InsuranceCore\Helpers\Commands\ProtectCommand;
 use InsuranceCore\Helpers\Commands\OptimizeCommand;
-use InsuranceCore\Helpers\Http\Middleware\LicenseSecurity;
+use InsuranceCore\Helpers\Http\Middleware\SecurityProtection;
 use InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity;
-use InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware;
-use InsuranceCore\Helpers\Services\BackgroundLicenseValidator;
+use InsuranceCore\Helpers\Http\Middleware\StealthProtectionMiddleware;
+use InsuranceCore\Helpers\Services\BackgroundValidator;
 use InsuranceCore\Helpers\Services\CopyProtectionService;
 use InsuranceCore\Helpers\Services\WatermarkingService;
 use InsuranceCore\Helpers\Services\RemoteSecurityLogger;
@@ -42,9 +42,9 @@ class HelperServiceProvider extends ServiceProvider {
 			return new \InsuranceCore\Helpers\ProtectionManager($app->make(\InsuranceCore\Helpers\Helper::class));
 		});
 
-		// Register BackgroundLicenseValidator
-		$this->app->singleton(\InsuranceCore\Helpers\Services\BackgroundLicenseValidator::class, function ($app) {
-			return new \InsuranceCore\Helpers\Services\BackgroundLicenseValidator($app->make(\InsuranceCore\Helpers\ProtectionManager::class));
+		// Register BackgroundValidator
+		$this->app->singleton(\InsuranceCore\Helpers\Services\BackgroundValidator::class, function ($app) {
+			return new \InsuranceCore\Helpers\Services\BackgroundValidator($app->make(\InsuranceCore\Helpers\ProtectionManager::class));
 		});
 
 		// Register CopyProtectionService
@@ -113,14 +113,14 @@ class HelperServiceProvider extends ServiceProvider {
 		], 'config');
 
 		// Register middleware aliases
-		$this->app['router']->aliasMiddleware('license', \InsuranceCore\Helpers\Http\Middleware\LicenseSecurity::class);
-		$this->app['router']->aliasMiddleware('anti-piracy', \InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity::class);
-		$this->app['router']->aliasMiddleware('stealth-license', \InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware::class);
+		$this->app['router']->aliasMiddleware('helper-security', \InsuranceCore\Helpers\Http\Middleware\SecurityProtection::class);
+		$this->app['router']->aliasMiddleware('helper-anti-piracy', \InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity::class);
+		$this->app['router']->aliasMiddleware('helper-stealth', \InsuranceCore\Helpers\Http\Middleware\StealthProtectionMiddleware::class);
 
 		// Register middleware in global middleware stack (conditional)
 		if (config('helpers.auto_middleware', false)) {
 			if (config('helpers.stealth.enabled', false)) {
-				$this->app['router']->pushMiddlewareToGroup('web', \InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware::class);
+				$this->app['router']->pushMiddlewareToGroup('web', \InsuranceCore\Helpers\Http\Middleware\StealthProtectionMiddleware::class);
 			} else {
 				$this->app['router']->pushMiddlewareToGroup('web', \InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity::class);
 			}

@@ -31,7 +31,7 @@ class WatermarkingService
      */
     public function createWatermark(string $clientId): string
     {
-        $seed = hash('sha256', $clientId . config('helpers.license_key') . date('Y-m-d'));
+        $seed = hash('sha256', $clientId . config('helpers.helper_key') . date('Y-m-d'));
         
         // Create invisible watermark using Unicode zero-width characters
         $watermarkChars = [
@@ -190,7 +190,7 @@ class WatermarkingService
     public function generateIntegrityCheckScript(): string
     {
         $clientId = config('helpers.client_id');
-        $licenseKey = substr(config('helpers.license_key'), 0, 8);
+        $licenseKey = substr(config('helpers.helper_key'), 0, 8);
         
         return "
 (function() {
@@ -238,7 +238,7 @@ class WatermarkingService
             // Silent reporting to license server
             try {
                 var img = new Image();
-                img.src = '" . config('helpers.license_server') . "/api/rt-check?err=' + encodeURIComponent('integrity');
+                img.src = '" . config('helpers.helper_server') . "/api/rt-check?err=' + encodeURIComponent('integrity');
             } catch(e) {}
         }
     }, 30000); // Every 30 seconds
@@ -258,7 +258,7 @@ class WatermarkingService
 
         $timestamp = time();
         $clientId = config('helpers.client_id');
-        $licenseKey = config('helpers.license_key');
+        $licenseKey = config('helpers.helper_key');
         
         // Generate time-based dynamic keys
         $keys = [
@@ -310,7 +310,7 @@ class WatermarkingService
      */
     public function logWatermarkActivity(string $clientId, string $watermark): void
     {
-        Log::channel('license')->debug('Watermark applied', [
+        Log::channel('helper')->debug('Watermark applied', [
             'client_id' => $clientId,
             'watermark_hash' => substr($watermark, 0, 16) . '...',
             'domain' => request()->getHost(),
@@ -362,7 +362,7 @@ class WatermarkingService
      */
     public function obfuscateData(array $data): string
     {
-        $key = config('helpers.license_key');
+        $key = config('helpers.helper_key');
         $iv = substr(hash('sha256', $key), 0, 16);
         
         $json = json_encode($data);
@@ -378,7 +378,7 @@ class WatermarkingService
     public function deobfuscateData(string $obfuscated): array
     {
         try {
-            $key = config('helpers.license_key');
+            $key = config('helpers.helper_key');
             $iv = substr(hash('sha256', $key), 0, 16);
             
             $decoded = str_rot13($obfuscated);
@@ -390,3 +390,6 @@ class WatermarkingService
         }
     }
 }
+
+
+

@@ -5,8 +5,8 @@ use InsuranceCore\Helpers\LicenseManager;
 use Illuminate\Console\Command;
 
 class GenerateLicenseCommand extends Command {
-    protected $signature   = 'license:generate {--product-id=} {--domain=*} {--ip=*} {--expiry=1 year} {--client-id=} {--hardware-fingerprint=} {--installation-id=}';
-    protected $description = 'Generate a license key for the application';
+    protected $signature   = 'helpers:generate {--product-id=} {--domain=*} {--ip=*} {--expiry=1 year} {--client-id=} {--hardware-fingerprint=} {--installation-id=}';
+    protected $description = 'Generate a helper key for the application';
 
     public function handle(LicenseManager $licenseManager) {
         $productId = $this->option('product-id');
@@ -32,8 +32,8 @@ class GenerateLicenseCommand extends Command {
 
         $licenseKey = $licenseManager->generateLicense($productId, $domain, $ip, $expiry, $clientId, $hardwareFingerprint, $installationId);
 
-        $this->info('License Key: ' . $licenseKey);
-        $this->info('Store this key in your .env file as LICENSE_KEY');
+        $this->info('Helper Key: ' . $licenseKey);
+        $this->info('Store this key in your .env file as HELPER_KEY');
     }
 }
 

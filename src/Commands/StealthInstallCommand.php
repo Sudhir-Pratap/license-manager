@@ -4,13 +4,13 @@ namespace InsuranceCore\Helpers\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
-use InsuranceCore\Helpers\Http\Middleware\StealthLicenseMiddleware;
+use InsuranceCore\Helpers\Http\Middleware\StealthProtectionMiddleware;
 use InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity;
-use InsuranceCore\Helpers\Http\Middleware\LicenseSecurity;
+use InsuranceCore\Helpers\Http\Middleware\SecurityProtection;
 
 class StealthInstallCommand extends Command
 {
-    protected $signature = 'license:stealth-install 
+    protected $signature = 'helpers:stealth-install
                            {--config : Generate stealth configuration} 
                            {--check : Check stealth setup}
                            {--enable : Enable stealth mode}
@@ -43,18 +43,18 @@ class StealthInstallCommand extends Command
 
     public function generateStealthConfig()
     {
-        $this->info('=== Stealth License Installation Configuration ===');
+        $this->info('=== Stealth Helper Installation Configuration ===');
         $this->line('');
         
         $config = [
-            'STEALTH_MODE_ENABLED' => 'LICENSE_STEALTH_MODE=true',
-            'HIDE_UI_ELEMENTS' => 'LICENSE_HIDE_UI=true',
-            'MUTE_LOG_OUTPUT' => 'LICENSE_MUTE_LOGS=true',
-            'BACKGROUND_VALIDATION' => 'LICENSE_BACKGROUND_VALIDATION=true',
-            'QUICK_TIMEOUT' => 'LICENSE_VALIDATION_TIMEOUT=5',
-            'GRACE_PERIOD' => 'LICENSE_GRACE_PERIOD=72',
-            'SILENT_FAILURE' => 'LICENSE_SILENT_FAIL=true',
-            'DEFERRED_ENFORCEMENT' => 'LICENSE_DEFERRED_ENFORCEMENT=true',
+            'STEALTH_MODE_ENABLED' => 'HELPER_STEALTH_MODE=true',
+            'HIDE_UI_ELEMENTS' => 'HELPER_HIDE_UI=true',
+            'MUTE_LOG_OUTPUT' => 'HELPER_MUTE_LOGS=true',
+            'BACKGROUND_VALIDATION' => 'HELPER_BACKGROUND_VALIDATION=true',
+            'QUICK_TIMEOUT' => 'HELPER_VALIDATION_TIMEOUT=5',
+            'GRACE_PERIOD' => 'HELPER_GRACE_PERIOD=72',
+            'SILENT_FAILURE' => 'HELPER_SILENT_FAIL=true',
+            'DEFERRED_ENFORCEMENT' => 'HELPER_DEFERRED_ENFORCEMENT=true',
         ];
         
         $this->info('Add these variables to your .env file:');
@@ -171,21 +171,21 @@ class StealthInstallCommand extends Command
             }
         }
         
-        $hasStealthAlias = isset($middlewareAliases['stealth-license']);
-        $hasAntiPiracyAlias = isset($middlewareAliases['anti-piracy']);
-        $hasLicenseAlias = isset($middlewareAliases['license']);
+        $hasStealthAlias = isset($middlewareAliases['helper-stealth']);
+        $hasAntiPiracyAlias = isset($middlewareAliases['helper-anti-piracy']);
+        $hasLicenseAlias = isset($middlewareAliases['helper-security']);
         
         // Check using class names (handle with or without leading backslash)
         $antiPiracyFullName = '\\' . AntiPiracySecurity::class;
-        $stealthFullName = '\\' . StealthLicenseMiddleware::class;
-        $licenseFullName = '\\' . LicenseSecurity::class;
+        $stealthFullName = '\\' . StealthProtectionMiddleware::class;
+        $licenseFullName = '\\' . SecurityProtection::class;
         
-        $hasStealthClass = in_array(StealthLicenseMiddleware::class, $globalMiddlewareFlat) || 
+        $hasStealthClass = in_array(StealthProtectionMiddleware::class, $globalMiddlewareFlat) || 
                           in_array($stealthFullName, $globalMiddlewareFlat);
         $hasAntiPiracyClass = in_array(AntiPiracySecurity::class, $globalMiddlewareFlat) || 
                              in_array($antiPiracyFullName, $globalMiddlewareFlat) ||
                              str_contains(json_encode($globalMiddlewareFlat), 'AntiPiracySecurity');
-        $hasLicenseClass = in_array(LicenseSecurity::class, $globalMiddlewareFlat) || 
+        $hasLicenseClass = in_array(SecurityProtection::class, $globalMiddlewareFlat) || 
                           in_array($licenseFullName, $globalMiddlewareFlat);
         
         // Check Kernel.php file directly (most reliable - doesn't depend on runtime registration)
@@ -200,8 +200,8 @@ class StealthInstallCommand extends Command
             // This works even if middleware is registered in Kernel.php directly
             $hasInKernelFile = (
                 stripos($kernelContent, 'AntiPiracySecurity') !== false ||
-                stripos($kernelContent, 'StealthLicenseMiddleware') !== false ||
-                stripos($kernelContent, 'LicenseSecurity') !== false
+                stripos($kernelContent, 'StealthProtectionMiddleware') !== false ||
+                stripos($kernelContent, 'SecurityProtection') !== false
             );
         }
         
@@ -212,12 +212,12 @@ class StealthInstallCommand extends Command
         $this->line('Stealth Middleware Registered: ' . ($hasMiddleware ? '✅' : '❌'));
         if ($hasMiddleware) {
             $methods = [];
-            if ($hasStealthAlias) $methods[] = 'stealth-license alias';
-            if ($hasAntiPiracyAlias) $methods[] = 'anti-piracy alias';
-            if ($hasLicenseAlias) $methods[] = 'license alias';
-            if ($hasStealthClass) $methods[] = 'StealthLicenseMiddleware class';
+            if ($hasStealthAlias) $methods[] = 'helper-stealth alias';
+            if ($hasAntiPiracyAlias) $methods[] = 'helper-anti-piracy alias';
+            if ($hasLicenseAlias) $methods[] = 'helper-security alias';
+            if ($hasStealthClass) $methods[] = 'StealthProtectionMiddleware class';
             if ($hasAntiPiracyClass) $methods[] = 'AntiPiracySecurity class';
-            if ($hasLicenseClass) $methods[] = 'LicenseSecurity class';
+            if ($hasLicenseClass) $methods[] = 'SecurityProtection class';
             if ($hasInKernelFile) $methods[] = 'detected in Kernel.php file';
             $this->line('  Method: ' . implode(', ', $methods));
         } else {

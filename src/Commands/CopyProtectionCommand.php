@@ -210,16 +210,16 @@ class CopyProtectionCommand extends Command
             'client_id' => config('helpers.client_id'),
             'domain' => request()->getHost() ?? 'localhost',
             'ip' => request()->ip() ?? '127.0.0.1',
-            'license_key' => substr(config('helpers.license_key'), 0, 16) . '...',
+            'license_key' => substr(config('helpers.helper_key'), 0, 16) . '...',
         ];
         
         // Current domain usage
-        $domainKey = 'license_domains_' . md5(config('helpers.license_key'));
+        $domainKey = 'license_domains_' . md5(config('helpers.helper_key'));;
         $domains = cache()->get($domainKey, []);
         $report['domains_used'] = $domains;
         
         // Usage patterns
-        $usageKey = 'usage_pattern_' . md5(config('helpers.license_key'));
+        $usageKey = 'usage_pattern_' . md5(config('helpers.helper_key'));
         $patterns = cache()->get($usageKey, []);
         $report['usage_entries'] = count($patterns);
         
@@ -320,3 +320,4 @@ class CopyProtectionCommand extends Command
         $this->line('php artisan license:copy-protection --config');
     }
 }
+

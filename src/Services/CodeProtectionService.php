@@ -293,7 +293,7 @@ class CodeProtectionService
     {
         $components = [
             config('app.key'),
-            config('helpers.license_key'),
+            config('helpers.helper_key'),
             now()->format('Y-m-d-H'),
             request()->ip(),
         ];
@@ -301,3 +301,4 @@ class CodeProtectionService
         return hash('sha256', implode('|', $components));
     }
 }
+

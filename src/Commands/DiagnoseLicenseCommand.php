@@ -10,12 +10,12 @@ use InsuranceCore\Helpers\LicenseManager;
 
 class DiagnoseLicenseCommand extends Command
 {
-    protected $signature = 'license:diagnose {--fix : Attempt to fix common issues}';
-    protected $description = 'Diagnose license validation issues';
+    protected $signature = 'helpers:diagnose {--fix : Attempt to fix common issues}';
+    protected $description = 'Diagnose helper validation issues';
 
     public function handle()
     {
-        $this->info('🔍 License Diagnosis Started');
+        $this->info('🔍 Helper Diagnosis Started');
         $this->newLine();
 
         $issues = [];
@@ -30,8 +30,8 @@ class DiagnoseLicenseCommand extends Command
         // Check hardware fingerprint
         $this->checkHardwareFingerprint($issues, $fixes);
 
-        // Check license validation
-        $this->checkLicenseValidation($issues, $fixes);
+        // Check helper validation
+        $this->checkHelperValidation($issues, $fixes);
 
         // Check anti-piracy validation
         $this->checkAntiPiracyValidation($issues, $fixes);
@@ -52,10 +52,10 @@ class DiagnoseLicenseCommand extends Command
         $this->info('📋 Checking Configuration...');
 
         $requiredConfigs = [
-            'helpers.license_key' => 'LICENSE_KEY',
-            'helpers.product_id' => 'LICENSE_PRODUCT_ID',
-            'helpers.api_token' => 'LICENSE_API_TOKEN',
-            'helpers.license_server' => 'LICENSE_SERVER',
+            'helpers.helper_key' => 'HELPER_KEY',
+            'helpers.product_id' => 'HELPER_PRODUCT_ID',
+            'helpers.api_token' => 'HELPER_API_TOKEN',
+            'helpers.helper_server' => 'HELPER_SERVER',
         ];
 
         foreach ($requiredConfigs as $config => $env) {
@@ -73,19 +73,19 @@ class DiagnoseLicenseCommand extends Command
     {
         $this->info('💾 Checking Cache Status...');
 
-        $licenseKey = config('helpers.license_key');
+        $helperKey = config('helpers.helper_key');
         $productId = config('helpers.product_id');
         $clientId = config('helpers.client_id');
 
-        if ($licenseKey && $productId && $clientId) {
-            $cacheKey = "license_valid_{$licenseKey}_{$productId}_{$clientId}";
+        if ($helperKey && $productId && $clientId) {
+            $cacheKey = "helper_valid_{$helperKey}_{$productId}_{$clientId}";
             $cached = Cache::get($cacheKey);
             
             if ($cached) {
-                $this->line("✅ License cache: Valid");
+                $this->line("✅ Helper cache: Valid");
             } else {
-                $this->line("⚠️  License cache: Not found");
-                $fixes[] = "Run: php artisan license:reset-cache";
+                $this->line("⚠️  Helper cache: Not found");
+                $fixes[] = "Run: php artisan helpers:clear-cache";
             }
         }
 
@@ -119,29 +119,29 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 
-    public function checkLicenseValidation(&$issues, &$fixes)
+    public function checkHelperValidation(&$issues, &$fixes)
     {
-        $this->info('🔐 Checking License Validation...');
+        $this->info('🔐 Checking Helper Validation...');
 
         try {
             $licenseManager = app(LicenseManager::class);
-            $licenseKey = config('helpers.license_key');
+            $helperKey = config('helpers.helper_key');
             $productId = config('helpers.product_id');
             $clientId = config('helpers.client_id');
             $domain = request()->getHost() ?: 'localhost';
             $ip = request()->ip() ?: '127.0.0.1';
 
-            $isValid = $licenseManager->validateLicense($licenseKey, $productId, $domain, $ip, $clientId);
+            $isValid = $licenseManager->validateHelper($helperKey, $productId, $domain, $ip, $clientId);
             
             if ($isValid) {
-                $this->line("✅ License validation: Success");
+                $this->line("✅ Helper validation: Success");
             } else {
-                $issues[] = "❌ License validation: Failed";
-                $fixes[] = "Check license server connectivity and license key validity";
+                $issues[] = "❌ Helper validation: Failed";
+                $fixes[] = "Check helper server connectivity and helper key validity";
             }
         } catch (\Exception $e) {
-            $issues[] = "❌ License validation error: " . $e->getMessage();
-            $fixes[] = "Check network connectivity to license server";
+            $issues[] = "❌ Helper validation error: " . $e->getMessage();
+            $fixes[] = "Check network connectivity to helper server";
         }
     }
 
@@ -203,3 +203,4 @@ class DiagnoseLicenseCommand extends Command
         }
     }
 } 
+
