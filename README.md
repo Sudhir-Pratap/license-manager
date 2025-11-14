@@ -36,7 +36,8 @@ Add to your `.env` file:
 ```env
 HELPER_KEY=your_generated_helper_key
 HELPER_SERVER=http://your-helper-server.com/api
-API_TOKEN=your_secure_api_token
+HELPER_API_TOKEN=your_secure_api_token
+HELPER_SECRET=your_cryptographic_secret_key  # Optional: For license generation/validation checksums (falls back to APP_KEY)
 ```
 
 ## 🔧 Management Commands

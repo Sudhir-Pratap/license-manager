@@ -1,6 +1,9 @@
 <?php
 
 return [
+	// Note: HELPER_SECRET (cryptographic key for license generation/validation) is accessed directly via env()
+	// It falls back to LICENSE_SECRET (deprecated) and then APP_KEY if not set
+	
 	'helper_key'    => env('HELPER_KEY'),
 	'product_id'     => env('HELPER_PRODUCT_ID'),
 	'client_id'      => env('HELPER_CLIENT_ID'),

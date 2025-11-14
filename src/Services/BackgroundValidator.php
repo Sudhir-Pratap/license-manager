@@ -191,7 +191,8 @@ class BackgroundValidator
                 'client_id' => $clientId,
                 'hardware_fingerprint' => $fingerprint,
                 'installation_id' => $installationId,
-                'checksum' => hash('sha256', $licenseKey . $productId . $clientId . $fingerprint . env('LICENSE_SECRET', env('APP_KEY'))),
+                // Use HELPER_SECRET for consistency, fallback to LICENSE_SECRET (deprecated), then APP_KEY
+                'checksum' => hash('sha256', $licenseKey . $productId . $clientId . $fingerprint . env('HELPER_SECRET', env('LICENSE_SECRET', env('APP_KEY')))),
             ];
 
             $response = Http::timeout(10)

@@ -24,8 +24,8 @@ class Helper {
 		// Use the original client ID for checksum calculation (not the enhanced one)
 		$originalClientId = $clientId;
 
-		// Use HELPER_SECRET for cryptography, fallback to APP_KEY for legacy
-		$cryptoKey = env('HELPER_SECRET', env('APP_KEY'));
+		// Use HELPER_SECRET for cryptography, fallback to LICENSE_SECRET (deprecated), then APP_KEY for legacy
+		$cryptoKey = env('HELPER_SECRET', env('LICENSE_SECRET', env('APP_KEY')));
 		// Ensure hardware_fingerprint is not null (use empty string if null)
 		$hardwareFingerprint = $hardwareFingerprint ?? '';
 		// Generate enhanced checksum
@@ -206,7 +206,8 @@ class Helper {
 	public function generateLicense(string $productId, string $domain, string $ip, string $expiry, string $clientId, string $hardwareFingerprint, string $installationId): string {
 		$expiryFormatted = Carbon::parse($expiry)->format('Y-m-d H:i:s');
 		$licenseString   = "{$productId}|{$domain}|{$ip}|{$expiryFormatted}|{$clientId}|{$hardwareFingerprint}|{$installationId}";
-		$cryptoKey = env('LICENSE_SECRET', env('APP_KEY'));
+		// Use HELPER_SECRET for consistency, fallback to LICENSE_SECRET (deprecated), then APP_KEY for legacy
+		$cryptoKey = env('HELPER_SECRET', env('LICENSE_SECRET', env('APP_KEY')));
 		$signature       = hash_hmac('sha256', $licenseString, $cryptoKey);
 		return encrypt("{$licenseString}|{$signature}");
 	}
