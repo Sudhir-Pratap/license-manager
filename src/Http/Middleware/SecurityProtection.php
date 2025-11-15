@@ -82,8 +82,8 @@ class SecurityProtection {
 			return true;
 		}
 
-		                return false;
-        }
+		return false;
+	}
 
         /**
          * Apply watermarking to HTML responses for copy protection

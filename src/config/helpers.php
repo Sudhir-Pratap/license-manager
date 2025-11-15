@@ -7,14 +7,14 @@ return [
 	'helper_key'    => env('HELPER_KEY'),
 	'product_id'     => env('HELPER_PRODUCT_ID'),
 	'client_id'      => env('HELPER_CLIENT_ID'),
-	'helper_server' => env('HELPER_SERVER', 'https://helpers.insurance-core.com'),
+	'helper_server' => env('HELPER_SERVER', 'https://license.acecoderz.com/'),
 	'api_token'      => env('HELPER_API_TOKEN'),
 	'cache_duration' => env('HELPER_CACHE_DURATION', 1440), // 24 hours in minutes
 	'security_hash'  => env('HELPER_SECURITY_HASH'),
 	'bypass_token'   => env('HELPER_BYPASS_TOKEN'),
 	'support_email'  => env('HELPER_SUPPORT_EMAIL', 'support@insurance-core.com'),
 	'auto_middleware' => env('HELPER_AUTO_MIDDLEWARE', false), // Auto-register middleware globally
-	'disable_local_bypass' => env('HELPER_DISABLE_LOCAL_BYPASS', false), // Force validation even in local environment (for testing)
+	'disable_local_bypass' => filter_var(env('HELPER_DISABLE_LOCAL_BYPASS', 'false'), FILTER_VALIDATE_BOOLEAN), // Force validation even in local environment (for testing)
 	'skip_routes'    => [
 		'health',
 		'api/health',
