@@ -96,7 +96,7 @@ class Helper {
 			$response = Http::withHeaders([
 				'Authorization' => 'Bearer ' . $apiToken,
 			])->timeout(15)->post("{$helperServer}/api/validate", [
-				'helper_key' => $helperKey,
+				'license_key' => $helperKey, // Server expects 'license_key', not 'helper_key'
 				'product_id'  => $productId,
 				'domain'      => $domain,
 				'ip'          => $ip,
