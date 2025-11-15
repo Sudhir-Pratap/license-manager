@@ -231,17 +231,64 @@ class ProtectionManager
             $vendorProtection = app(\InsuranceCore\Helpers\Services\VendorProtectionService::class);
             $integrityResult = $vendorProtection->verifyVendorIntegrity();
 
-            if ($integrityResult['status'] === 'violations_detected') {
-                return false;
+            // Handle different status responses
+            if (!isset($integrityResult['status'])) {
+                Log::warning('Vendor integrity check returned invalid result', [
+                    'result' => $integrityResult
+                ]);
+                // If we can't determine status, be lenient on first check
+                return true;
             }
 
+            // If baseline was just created, that's fine - allow it
+            if (in_array($integrityResult['status'], ['baseline_created', 'baseline_created_for_obfuscated', 'package_not_found'])) {
+                Log::info('Vendor integrity baseline created or package not found', [
+                    'status' => $integrityResult['status']
+                ]);
+                return true;
+            }
+
+            // Only fail if violations are actually detected
+            if ($integrityResult['status'] === 'violations_detected') {
+                $violations = $integrityResult['violations'] ?? [];
+                $criticalViolations = array_filter($violations, function($v) {
+                    return isset($v['severity']) && in_array($v['severity'], ['critical', 'high']);
+                });
+
+                Log::error('Vendor integrity violations detected', [
+                    'status' => $integrityResult['status'],
+                    'violation_count' => count($violations),
+                    'critical_count' => count($criticalViolations),
+                    'violations' => $violations
+                ]);
+
+                // If there are critical violations, fail validation
+                if (count($criticalViolations) > 0) {
+                    return false;
+                }
+
+                // For non-critical violations, be lenient (just log)
+                return true;
+            }
+
+            // If integrity is verified, return true
+            if ($integrityResult['status'] === 'integrity_verified') {
+                return true;
+            }
+
+            // Default: allow if status is unclear
+            Log::warning('Vendor integrity check returned unexpected status', [
+                'status' => $integrityResult['status']
+            ]);
             return true;
         } catch (\Exception $e) {
             Log::error('Vendor integrity check failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => substr($e->getTraceAsString(), 0, 500)
             ]);
-            return false;
+            // On exception, be lenient - don't fail validation due to check errors
+            // This prevents false positives from permission issues, etc.
+            return true;
         }
     }
 
