@@ -218,7 +218,7 @@ class StealthProtectionMiddleware
      */
     public function logSuspiciousActivity(Request $request): void
     {
-        app(\\InsuranceCore\\Helpers\\Services\RemoteSecurityLogger::class)->warning('License validation failed - grace period active', [
+        app(\InsuranceCore\Helpers\Services\RemoteSecurityLogger::class)->warning('License validation failed - grace period active', [
             'domain' => $request->getHost(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),

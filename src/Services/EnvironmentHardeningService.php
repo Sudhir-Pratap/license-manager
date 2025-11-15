@@ -76,15 +76,9 @@ class EnvironmentHardeningService
         if (!request()->secure() && !app()->environment('local')) {
             // Force HTTPS URLs
             URL::forceScheme('https');
-
-            // Redirect HTTP to HTTPS
-            if (!app()->runningInConsole()) {
-                $host = request()->getHost();
-                $path = request()->getRequestUri();
-                $httpsUrl = "https://{$host}{$path}";
-
-                return redirect($httpsUrl, 301);
-            }
+            
+            // Note: Actual redirect is handled by Laravel's middleware/redirector
+            // This method only configures URL generation to use HTTPS
         }
     }
 

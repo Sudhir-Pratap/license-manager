@@ -105,8 +105,8 @@ class RemoteSecurityLogger
         try {
             $endpoint = rtrim($this->licenseServer, '/') . '/api/report-suspicious';
             $payload = [
-                'license_key' => $logData['license_key'],
-                'client_id' => $logData['client_id'],
+                'license_key' => $logData['license_key'] ?? $this->licenseKey,
+                'client_id' => $logData['client_id'] ?? $this->clientId,
                 'violation_type' => 'security_log_' . $logData['level'],
                 'suspicion_score' => $this->calculateSuspicionScore($logData['level']),
                 'violation_data' => json_encode([
@@ -147,8 +147,8 @@ class RemoteSecurityLogger
                 'Content-Type' => 'application/json',
             ])->timeout(3) // Short timeout - don't delay
               ->post($endpoint, [
-                'license_key' => $logData['license_key'],
-                'client_id' => $logData['client_id'],
+                'license_key' => $logData['license_key'] ?? $this->licenseKey,
+                'client_id' => $logData['client_id'] ?? $this->clientId,
                 'violation_type' => 'security_log_' . $logData['level'],
                 'suspicion_score' => $this->calculateSuspicionScore($logData['level']),
                 'violation_data' => json_encode([

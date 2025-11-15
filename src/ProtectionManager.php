@@ -65,10 +65,10 @@ class ProtectionManager
 
         // More lenient validation - allow some failures but require critical ones to pass
         $criticalValidations = [
-            'license' => $validations['license'],
-            'installation' => $validations['installation'],
-            'tampering' => $validations['tampering'],
-            'vendor_integrity' => $validations['vendor_integrity'],
+            'helper' => $validations['helper'] ?? false,
+            'installation' => $validations['installation'] ?? false,
+            'tampering' => $validations['tampering'] ?? false,
+            'vendor_integrity' => $validations['vendor_integrity'] ?? false,
         ];
 
         // All critical validations must pass
@@ -84,7 +84,7 @@ class ProtectionManager
         // For non-critical validations, allow some failures but log them
         $nonCriticalFailures = 0;
         foreach ($validations as $key => $result) {
-            if (!in_array($key, ['license', 'installation', 'tampering']) && !$result) {
+            if (!in_array($key, ['helper', 'installation', 'tampering']) && !$result) {
                 $nonCriticalFailures++;
             }
         }
@@ -228,7 +228,7 @@ class ProtectionManager
         }
 
         try {
-            $vendorProtection = app(\InsuranceCore\Validator\Services\VendorProtectionService::class);
+            $vendorProtection = app(\InsuranceCore\Helpers\Services\VendorProtectionService::class);
             $integrityResult = $vendorProtection->verifyVendorIntegrity();
 
             if ($integrityResult['status'] === 'violations_detected') {
@@ -354,9 +354,9 @@ class ProtectionManager
             isset($middlewareAliases['helper-security']) ||
             isset($middlewareAliases['helper-anti-piracy']) ||
             isset($middlewareAliases['helper-stealth']) ||
-            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
-            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\SecurityProtection::class, $globalMiddleware) ||
-            in_array(\\InsuranceCore\\Helpers\\Http\Middleware\StealthProtectionMiddleware::class, $globalMiddleware)
+            in_array(\InsuranceCore\Helpers\Http\Middleware\AntiPiracySecurity::class, $globalMiddleware) ||
+            in_array(\InsuranceCore\Helpers\Http\Middleware\SecurityProtection::class, $globalMiddleware) ||
+            in_array(\InsuranceCore\Helpers\Http\Middleware\StealthProtectionMiddleware::class, $globalMiddleware)
         );
         
         // Check if middleware is actually being executed (runtime check)
